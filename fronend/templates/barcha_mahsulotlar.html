@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Barcha mahsulotlar - Tez Sot</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: #f8f9fc;
+        }
+        
+        /* Product card */
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Products grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        @media (min-width: 640px) {
+            .products-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        }
+        @media (min-width: 768px) {
+            .products-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        }
+        @media (min-width: 1024px) {
+            .products-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; }
+        }
+        @media (min-width: 1280px) {
+            .products-grid { grid-template-columns: repeat(6, 1fr); gap: 20px; }
+        }
+        
+        /* Product image */
+        .product-image-container {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+        
+        /* Badges */
+        .premium-badge-small {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 700;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .sold-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 600;
+            z-index: 10;
+        }
+        
+        /* Product info */
+        .product-info {
+            padding: 10px 10px 12px;
+        }
+        
+        .product-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #1f2937;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 36px;
+            margin-bottom: 6px;
+        }
+        
+        .product-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 4px;
+        }
+        
+        .product-location {
+            font-size: 10px;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        /* Filter tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 4px;
+        }
+        
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s;
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #4b5563;
+            text-decoration: none;
+        }
+        
+        .filter-tab.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+        
+        .filter-tab i {
+            margin-right: 6px;
+            font-size: 12px;
+        }
+        
+        /* Search bar */
+        .search-bar {
+            background: white;
+            border-radius: 30px;
+            border: 1px solid #e5e7eb;
+            padding: 10px 16px;
+            transition: all 0.2s;
+        }
+        
+        .search-bar:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+        }
+        
+        /* Sort button */
+        .sort-btn {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .sort-btn:hover {
+            border-color: #2563eb;
+            background: #f0f9ff;
+        }
+        
+        /* Pagination */
+        .pagination-btn {
+            min-width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: #4b5563;
+        }
+        
+        .pagination-btn.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+        
+        .pagination-btn:hover:not(.active) {
+            border-color: #2563eb;
+            background: #f0f9ff;
+        }
+        
+        /* Loading skeleton */
+        .skeleton-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .skeleton-image {
+            aspect-ratio: 1 / 1;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Wishlist button */
+        .wishlist-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(4px);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .wishlist-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        /* Dropdown */
+        .sort-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            min-width: 180px;
+            z-index: 20;
+            display: none;
+        }
+        
+        .sort-dropdown.show {
+            display: block;
+        }
+        
+        .sort-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            text-decoration: none;
+            font-size: 13px;
+            color: #374151;
+            transition: all 0.2s;
+        }
+        
+        .sort-dropdown a:hover {
+            background: #f3f4f6;
+        }
+        
+        /* Animations */
+        .animate-fade-in {
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            .product-name { font-size: 12px; }
+            .product-price { font-size: 13px; }
+            .product-info { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+    
+    <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <!-- Header -->
+        <div class="mb-4 sm:mb-6">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Mahsulotlar</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                {% if filter_type == 'premium' %}
+                    ⭐ Premium mahsulotlar · {{ premium_count }} ta
+                {% elif filter_type == 'regular' %}
+                    📦 Oddiy mahsulotlar · {{ regular_count }} ta
+                {% elif q %}
+                    🔍 "{{ q }}" bo'yicha qidiruv · {{ page_obj.paginator.count }} ta
+                {% else %}
+                    🔍 Barcha mahsulotlar · {{ page_obj.paginator.count }} ta
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="filter-tabs mb-4">
+            <a href="?filter=all{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+               class="filter-tab {% if filter_type == 'all' %}active{% endif %}">
+                <i class="fas fa-th-large"></i> Barchasi
+            </a>
+            <a href="?filter=premium{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+               class="filter-tab {% if filter_type == 'premium' %}active{% endif %}">
+                <i class="fas fa-crown"></i> Premium
+            </a>
+            <a href="?filter=regular{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+               class="filter-tab {% if filter_type == 'regular' %}active{% endif %}">
+                <i class="fas fa-box"></i> Oddiy
+            </a>
+        </div>
+        
+        <!-- Search and Sort Bar -->
+        <div class="flex flex-col sm:flex-row gap-3 mb-5">
+            <!-- Search Form -->
+            <form method="GET" action="{% url 'barcha_mahsulotlar' %}" class="flex-1" id="searchForm">
+                <input type="hidden" name="filter" value="{{ filter_type }}">
+                <input type="hidden" name="sort" value="{{ sort }}">
+                <input type="hidden" name="category" value="{{ category }}">
+                <input type="hidden" name="viloyat" value="{{ viloyat }}">
+                
+                <div class="search-bar flex items-center gap-2">
+                    <i class="fas fa-search text-gray-400"></i>
+                    <input type="text" name="q" value="{{ q|default:'' }}" 
+                           placeholder="Mahsulot nomi, kategoriya yoki brend (masalan: kitob, mashina, telefon)..." 
+                           class="search-input"
+                           id="searchInput"
+                           autocomplete="off">
+                    <button type="submit" class="text-blue-600 font-medium text-sm px-3 py-1 hover:bg-blue-50 rounded-full transition">
+                        <i class="fas fa-search mr-1"></i> Izlash
+                    </button>
+                    {% if q %}
+                    <a href="?filter={{ filter_type }}&sort={{ sort }}" 
+                       class="text-gray-400 hover:text-gray-600 transition">
+                        <i class="fas fa-times"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+            
+            <!-- Sort Dropdown -->
+            <div class="relative">
+                <button onclick="toggleSortDropdown()" class="sort-btn w-full sm:w-auto justify-between">
+                    <span>
+                        <i class="fas fa-arrow-down-wide-short text-gray-500 mr-2"></i>
+                        {% if sort == 'newest' %}Eng yangi
+                        {% elif sort == 'oldest' %}Eng eski
+                        {% elif sort == 'price_low' %}Narxi arzon
+                        {% elif sort == 'price_high' %}Narxi qimmat
+                        {% else %}Premium birinchi
+                        {% endif %}
+                    </span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <div id="sortDropdown" class="sort-dropdown">
+                    <a href="?filter={{ filter_type }}&sort=premium{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}">
+                        <i class="fas fa-crown text-yellow-500 w-5"></i> Premium birinchi
+                    </a>
+                    <a href="?filter={{ filter_type }}&sort=newest{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}">
+                        <i class="fas fa-clock text-blue-500 w-5"></i> Eng yangi
+                    </a>
+                    <a href="?filter={{ filter_type }}&sort=oldest{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}">
+                        <i class="fas fa-history text-gray-500 w-5"></i> Eng eski
+                    </a>
+                    <a href="?filter={{ filter_type }}&sort=price_low{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}">
+                        <i class="fas fa-arrow-up text-green-500 w-5"></i> Narxi arzon
+                    </a>
+                    <a href="?filter={{ filter_type }}&sort=price_high{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}">
+                        <i class="fas fa-arrow-down text-red-500 w-5"></i> Narxi qimmat
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Products Grid -->
+        {% if mahsulotlar %}
+        <div class="products-grid">
+            {% for mahsulot in mahsulotlar %}
+            <div class="product-card">
+                <a href="{% url 'mahsulot_detail' mahsulot.id %}">
+                    <div class="product-image-container">
+                        {% if mahsulot.asosiyimg %}
+                        <img src="{{ mahsulot.asosiyimg.url }}" 
+                             alt="{{ mahsulot.name }}" 
+                             class="product-image"
+                             loading="lazy">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                            <i class="fas fa-image text-3xl text-gray-300"></i>
+                        </div>
+                        {% endif %}
+                        
+                        {% if mahsulot.is_premium %}
+                        <div class="premium-badge-small">
+                            <i class="fas fa-crown text-[10px]"></i> PREMIUM
+                        </div>
+                        {% endif %}
+                        
+                        {% if mahsulot.sotilgan %}
+                        <div class="sold-badge">
+                            <i class="fas fa-check-circle mr-1"></i> SOTILGAN
+                        </div>
+                        {% endif %}
+                    </div>
+                </a>
+                
+                <div class="product-info">
+                    <a href="{% url 'mahsulot_detail' mahsulot.id %}" class="block">
+                        <h3 class="product-name">{{ mahsulot.name }}</h3>
+                    </a>
+                    <div class="product-price">{{ mahsulot.narx_formatted }}</div>
+                    <div class="product-location">
+                        <i class="fas fa-map-marker-alt text-[9px]"></i>
+                        <span>{{ mahsulot.get_viloyat_display|truncatechars:15 }}</span>
+                    </div>
+                </div>
+                
+                {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'sevimliga_qoshish' mahsulot.id %}" class="wishlist-form">
+                    {% csrf_token %}
+                    <button type="submit" class="wishlist-btn" title="Sevimlilarga qo'shish">
+                        <i class="far fa-heart text-gray-500 text-sm"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="flex justify-center mt-8">
+            <div class="flex flex-wrap gap-2 justify-center">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&filter={{ filter_type }}&sort={{ sort }}{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}" 
+                   class="pagination-btn">
+                    <i class="fas fa-chevron-left text-xs"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num == page_obj.number %}
+                    <span class="pagination-btn active">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}&filter={{ filter_type }}&sort={{ sort }}{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}" 
+                       class="pagination-btn">
+                        {{ num }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&filter={{ filter_type }}&sort={{ sort }}{% if q %}&q={{ q }}{% endif %}{% if category %}&category={{ category }}{% endif %}{% if viloyat %}&viloyat={{ viloyat }}{% endif %}" 
+                   class="pagination-btn">
+                    <i class="fas fa-chevron-right text-xs"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state bg-white rounded-2xl shadow-sm">
+            <div class="empty-icon">
+                <i class="fas fa-box-open text-3xl text-gray-400"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Mahsulotlar topilmadi</h3>
+            <p class="text-gray-500 text-sm mb-5 max-w-sm mx-auto">
+                {% if q %}
+                    "{{ q }}" bo'yicha hech qanday mahsulot topilmadi.
+                {% else %}
+                    Hozircha hech qanday mahsulot mavjud emas.
+                {% endif %}
+            </p>
+            <div class="flex flex-wrap gap-3 justify-center">
+                <a href="{% url 'barcha_mahsulotlar' %}" 
+                   class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-blue-700 transition">
+                    <i class="fas fa-sync-alt"></i>
+                    Barcha mahsulotlar
+                </a>
+                {% if q %}
+                <button onclick="document.getElementById('searchInput').value=''; document.getElementById('searchForm').submit();"
+                   class="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-5 py-2.5 rounded-full text-sm font-medium hover:bg-gray-200 transition">
+                    <i class="fas fa-arrow-left"></i>
+                    Tozalash
+                </button>
+                {% endif %}
+            </div>
+            
+            <!-- Mashhur qidiruvlar -->
+            <div class="mt-6">
+                <p class="text-sm text-gray-500 mb-3">Mashhur qidiruvlar:</p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <a href="?q=telefon" class="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition">📱 Telefon</a>
+                    <a href="?q=noutbuk" class="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition">💻 Noutbuk</a>
+                    <a href="?q=avtomobil" class="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition">🚗 Avtomobil</a>
+                    <a href="?q=kiyim" class="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition">👕 Kiyim</a>
+                    <a href="?q=mebel" class="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition">🛋️ Mebel</a>
+                    <a href="?q=kitob" class="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 transition">📚 Kitob</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+    
+    {% include 'footer.html' %}
+    
+    <script>
+        // Toggle sort dropdown
+        function toggleSortDropdown() {
+            const dropdown = document.getElementById("sortDropdown");
+            dropdown.classList.toggle("show");
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById("sortDropdown");
+            const sortBtn = document.querySelector('.sort-btn');
+            if (dropdown && dropdown.classList.contains('show')) {
+                if (!sortBtn?.contains(event.target)) {
+                    dropdown.classList.remove("show");
+                }
+            }
+        });
+        
+        // ========== QIDIRUV FUNKSIYASI - MUHIM! ==========
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+        
+        if (searchInput && searchForm) {
+            // Enter bosilganda formani submit qilish
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchForm.submit();
+                }
+            });
+        }
+        
+        // Wishlist button animation (AJAX bilan)
+        document.querySelectorAll('.wishlist-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button');
+                const icon = btn.querySelector('i');
+                const formData = new FormData(this);
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'text-red-500');
+                        showToast(data.message, 'success');
+                        setTimeout(() => {
+                            icon.classList.remove('fas', 'text-red-500');
+                            icon.classList.add('far');
+                        }, 1000);
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Xatolik yuz berdi', 'error');
+                });
+            });
+        });
+        
+        // Toast message
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-20 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded-full text-sm z-50 animate-fade-in ${
+                type === 'success' ? 'bg-green-600' : 'bg-red-600'
+            }`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        // URL parametrlaridan xabarni o'qish
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        if (msg) {
+            showToast(decodeURIComponent(msg), 'success');
+        }
+        
+        console.log('Barcha mahsulotlar sahifasi yuklandi');
+        console.log('Qidiruv so\'rovi:', '{{ q|default:"hech qanday" }}');
+    </script>
+</body>
+</html>

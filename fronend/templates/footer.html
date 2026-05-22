@@ -1,0 +1,88 @@
+{% load static %}
+
+<footer class="bg-gray-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+
+            <!-- LOGO -->
+            <div>
+                <img class=" h-[100px]" src="{% static 'img/logo-1.png' %}" alt="logo">
+
+                <p class="text-gray-400 mt-6 leading-relaxed">
+                    Eng sifatli mahsulotlar va tez yetkazib berish xizmati.
+                </p>
+            </div>
+
+            <!-- LINKS -->
+            <div>
+                <h4 class="text-lg font-semibold mb-6">Foydali Havolalar</h4>
+
+                <ul class="space-y-3">
+                    <li><a href="#" class="text-gray-400 hover:text-white">Biz haqimizda</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white">To'lov usullari</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white">Qaytarish siyosati</a></li>
+                </ul>
+            </div>
+
+            <!-- CONTACT -->
+            <div>
+                <h4 class="text-lg font-semibold mb-6">Aloqa</h4>
+
+                {% if admin_contact %}
+
+                <p class="text-gray-400">{{ admin_contact.manzil }}</p>
+                <p class="text-gray-400 mt-2">{{ admin_contact.telefon }}</p>
+
+                {% if admin_contact.telegram %}
+                <a href="{{ admin_contact.telegram }}" target="_blank" class="block mt-3 text-gray-400 hover:text-white">
+                    Telegram
+                </a>
+                {% endif %}
+
+                {% if admin_contact.instagram %}
+                <a href="{{ admin_contact.instagram }}" target="_blank" class="block mt-2 text-gray-400 hover:text-white">
+                    Instagram
+                </a>
+                {% endif %}
+
+                {% endif %}
+            </div>
+
+            <!-- SOCIAL -->
+            <div>
+                <h4 class="text-lg font-semibold mb-6">Yangiliklar</h4>
+
+                <div class="flex space-x-4">
+
+                    <a href="https://www.instagram.com/tezsot.market/"
+                       class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-pink-500">
+                        <i class="ri-instagram-line"></i>
+                    </a>
+
+                    <a href="https://t.me/tezsotmarket"
+                       class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-500">
+                        <i class="ri-telegram-line"></i>
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- BOTTOM -->
+        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between">
+
+            <p class="text-gray-400 text-sm">
+                © 2026 Tez Sotiq Market
+            </p>
+
+            <div class="flex space-x-6 mt-4 md:mt-0">
+                <a href="{% url 'maxfiyliksiyosati' %}" class="text-gray-400 hover:text-white text-sm">Maxfiylik</a>
+                <a href="{% url 'qoidalar' %}" class="text-gray-400 hover:text-white text-sm">Shartlar</a>
+            </div>
+
+        </div>
+
+    </div>
+</footer>

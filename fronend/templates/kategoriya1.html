@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="uz">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahsulotlar katalogi</title>
+
+     <!-- Favicon -->
+     <link rel="icon" type="image/png" href="{% static 'img/sklatlogo.png' %}">
+
+     <!-- Home Screen Icon (MUHIM) -->
+     <link rel="apple-touch-icon" sizes="512x512" href="{% static 'img/sklatlogo.png' %}">
+ 
+     <!-- Manifest (MUHIM) -->
+     <link rel="manifest" href="{% static 'manifest.json' %}">
+
+    <style>
+        /* RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: sans-serif;
+            background: #fff;
+            color: black;
+       
+        }
+        
+        /* ==== DESKTOP (NO SCROLL) ==== */
+        .features {
+            max-width: 1410px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 0 15px;
+            overflow: hidden;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .feature-item {
+            width: 230px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 10px 15px 10px 65px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        /* Icon */
+        .icon {
+            width: 50px;
+            height: 50px;
+            background: url("{% static 'img/media.png' %}") center/90% no-repeat;
+            border-radius: 10px;
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* ==== MOBILE (UZUM 5 GRID) ==== */
+        
+        .mebel {
+            background-image: url({% static 'img/mebel.png' %});
+        }
+        .kitob {
+            background-image: url({% static 'img/kitoblar.png' %});
+        }
+        .elek {
+            background-image: url({% static 'img/elektronika.png' %});
+        }
+        .premiumss {
+            background-image: url({% static 'img/preim.png' %});
+        }        .car {
+            background-image: url({% static 'img/car.png' %});
+        }
+        .uy {
+            background-image: url({% static 'img/uy.png' %});
+        }
+        .jihoz {
+            background-image: url({% static 'img/uyjihoz.png' %});
+        }
+        .bola {
+            background-image: url({% static 'img/onabola.png' %});
+        }
+        .kiyim {
+            background-image: url({% static 'img/kiyim.png' %});
+            background-size: 90%;
+        }
+        .boshqa {
+            background-image: url({% static 'img/preim.png.png' %});
+            background-size: 80%;
+        }
+        .chet {
+            background-image: url({% static 'img/media.png' %});
+            background-size: 80%;
+        }
+        .avto_elon {
+            background-image: url({% static 'img/car.png' %});
+            background-size: 90%;
+        }
+        .avto_qism {
+            background-image: url({% static 'img/car2.png' %});
+            background-size: 90%;
+        }
+        .yoq {
+            display: none;
+        }
+
+        @media (max-width: 390px) {
+            .yoq {
+                display: block;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .features {
+                display: grid;
+                justify-content: start;
+                margin-top: 0;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 18px;
+                max-width: 420px;
+                margin: 0 auto;
+            }
+
+            .feature-item {
+                width: auto;
+                height: auto;
+                padding: 0;
+                flex-direction: column;
+                align-items: center;
+                gap: 7px;
+                text-align: center;
+                background: transparent;
+                box-shadow: none;
+                display: block;
+            }
+
+            .feature-item:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            .feature-item .icon {
+                position: static;
+                transform: none;
+                width: 60px;
+                height: 60px;
+                border-radius: 20px;
+                margin-bottom: 5px;
+            }
+
+            .feature-item p {
+                font-size: 12px;
+                line-height: 1.3;
+                margin: 0;
+            }
+            
+            .feature-item a {
+                text-decoration: none;
+                color: inherit;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .text-small {
+                font-size: 11px !important;
+            }
+        }
+
+        @media (min-width: 601px) and (max-width: 900px) {
+            .features {
+                grid-template-columns: repeat(4, 1fr);
+                justify-content: center;
+            }
+            
+            .feature-item {
+                width: 180px;
+                padding: 10px 15px 10px 60px;
+            }
+            
+            .icon {
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        /* Link styles */
+        .category-link {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+        }
+
+        @media (max-width: 600px) {
+            .category-link {
+                flex-direction: column;
+            }
+        }
+
+        @media (min-width: 601px) {
+            .category-link {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+    </style>
+
+</head>
+<body>
+    
+    <!-- HTML template ichida -->
+    <div class="features">
+      
+        <div class="feature-item">
+        <a href="{% url 'kategoriya' 'elektronika' %}" class="category-link">
+            <div class="icon elek"></div>
+            <p>Elektronika</p>
+        </a>
+    </div>
+    
+ 
+    
+    <div class="feature-item">
+        <a href="{% url 'kategoriya' 'mebel' %}" class="category-link">
+            <div class="icon mebel"></div>
+            <p>Mebellar</p>
+        </a>
+    </div>
+       <div class="feature-item">
+        <a href="{% url 'kategoriya' 'kiyim' %}" class="category-link">
+            <div class="icon kiyim"></div>
+            <p>Kiyim-kechak</p>
+        </a>
+    </div>
+    
+    <div class="feature-item">
+        <a href="{% url 'kategoriya' 'cheteltovarlar' %}" class="category-link">
+            <div class="icon chet"></div>
+            <p class="text-small">Chet el tovarlari</p>
+        </a>
+    </div>
+    
+    
+    <div class="feature-item">
+        <a href="{% url 'kategoriya' 'onavabollar' %}" class="category-link">
+            <div class="icon bola"></div>
+            <p class="text-small">Kids & Toys</p>
+        </a>
+    </div>
+    <div class="feature-item">
+        <a href="{% url 'kategoriya' 'uyjoyelonlari' %}" class="category-link">
+            <div class="icon uy"></div>
+            <p>Uy joy elonlari</p>
+        </a>
+    </div>
+    
+    <div class="feature-item">
+        <a href="{% url 'kategoriya' 'avto_elonlari' %}" class="category-link">
+            <div class="icon avto_elon"></div>
+            <p>Auto elonlar</p>
+        </a>
+    </div>
+    
+
+    
+ 
+    <div class="feature-item">
+        <a href="{% url 'kategoriya' 'avto' %}" class="category-link">
+            <div class="icon avto_qism"></div>
+            <p class="text-small">Avto ehtiyot qismlar</p>
+        </a>
+    </div>
+
+      <div class="feature-item">
+            <a href="/premium-products/" class="category-link">
+                <div class="icon premiumss"></div>
+                <p>Premium mahsulotlar</p>
+            </a>
+        </div>
+   
+</div>
+
+<script>
+    // Agar URL tag xato bersa, to'g'ridan-to'g'ri URL yaratish
+    document.addEventListener('DOMContentLoaded', function() {
+        // Kategoriyalar ro'yxati - MODELDAGI KATEGORIYALARGA MOS
+        const categories = [
+            {name: 'elektronika', display: 'Elektronika'},
+            {name: 'mebel', display: 'Mebellar'},
+            {name: 'kiyim', display: 'Kiyim-kechak'},
+            {name: 'cheteltovarlar', display: 'Chet el tovarlari'},
+            {name: 'onavabollar', display: 'O\'na va bollar'},
+            {name: 'uyjoyelonlari', display: 'Uy joy elonlari'},
+            {name: 'avto_elonlari', display: 'Auto elonlar'},
+            {name: 'avto', display: 'Avto ehtiyot qismlar'},
+          
+        ];
+        
+        // Har bir linkni tekshirish va URL berish
+        const featureItems = document.querySelectorAll('.feature-item');
+        
+        featureItems.forEach((item, index) => {
+            const link = item.querySelector('a');
+            const href = link.getAttribute('href');
+            
+            // Agar url tag ishlamagan bo'lsa (template render qilishda xato bo'lsa)
+            if (href.includes("{% url") || !href || href === '#' || href.includes('kategoriya/')) {
+                if (index < categories.length) {
+                    const category = categories[index];
+                    link.href = `/kategoriya/${category.name}/`;
+                    console.log(`Link ${index+1} yangilandi: /kategoriya/${category.name}/`);
+                }
+            }
+        });
+        
+        // Linklarni konsolga chiqarish (debug uchun)
+        console.log('Barcha kategoriya linklari:');
+        document.querySelectorAll('.feature-item a').forEach((link, index) => {
+            if (index < categories.length) {
+                const category = categories[index];
+                console.log(`${index+1}. ${category.display}: ${link.href}`);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!-- templates/admin/base_site.html -->
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}Tez Sot Admin Panel{% endblock %}
+
+{% block extrahead %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-color: #4f46e5;
+        --secondary-color: #10b981;
+        --premium-color: #f59e0b;
+        --danger-color: #ef4444;
+        --success-color: #10b981;
+    }
+
+    #header {
+        background: linear-gradient(135deg, var(--primary-color), #3730a3);
+        color: white;
+    }
+
+    #branding h1 {
+        color: white;
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    .module h2, .module caption, .inline-group h2 {
+        background: linear-gradient(135deg, var(--primary-color), #3730a3);
+        color: white;
+    }
+
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 20px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+        background: #3730a3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    /* Premium mahsulotlar uchun maxsus stil */
+    .premium-row {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+        border-left: 4px solid var(--premium-color);
+    }
+
+    .premium-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .premium-badge i {
+        font-size: 10px;
+    }
+
+    .active-badge {
+        background: var(--success-color);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+    .inactive-badge {
+        background: var(--danger-color);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+    /* Dashboard cards */
+    .dashboard-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-title {
+        font-size: 14px;
+        color: #6b7280;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    .card-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    .card-icon {
+        font-size: 24px;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+
+    /* Custom table styles */
+    #changelist table {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #changelist table thead th {
+        background: linear-gradient(135deg, var(--primary-color), #3730a3);
+        color: white;
+        border: none;
+        padding: 15px;
+        font-weight: bold;
+    }
+
+    #changelist table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    /* Premium user highlight */
+    .premium-user {
+        position: relative;
+    }
+
+    .premium-user::before {
+        content: "👑";
+        position: absolute;
+        left: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+        
+        .card-value {
+            font-size: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}" style="display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-crown"></i>
+        Tez Sot Admin Panel
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<div style="display: flex; gap: 15px; margin-left: 20px;">
+    <a href="/admin/fronend/premiumuser/" style="color: white; display: flex; align-items: center; gap: 5px;">
+        <i class="fas fa-users"></i>
+        Premium Users
+    </a>
+    <a href="/admin/fronend/premiumproduct/" style="color: white; display: flex; align-items: center; gap: 5px;">
+        <i class="fas fa-star"></i>
+        Premium Products
+    </a>
+    <a href="/admin/fronend/mahsulot/" style="color: white; display: flex; align-items: center; gap: 5px;">
+        <i class="fas fa-box"></i>
+        Barcha Mahsulotlar
+    </a>
+</div>
+{% endblock %}
+
+{% block content_title %}
+{% if title %}
+<h1 style="color: var(--primary-color); font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+    {% if 'premium' in title|lower %}
+    <i class="fas fa-crown" style="color: var(--premium-color);"></i>
+    {% endif %}
+    {{ title }}
+</h1>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+<div id="footer" style="text-align: center; padding: 20px; color: #6b7280; font-size: 14px;">
+    <p>© 2024 Tez Sot Platformasi. Barcha huquqlar himoyalangan.</p>
+    <p style="margin-top: 5px;">
+        <i class="fas fa-shield-alt"></i> 
+        Premium Tizim | 
+        <i class="fas fa-bolt"></i> 
+        Tezkor Sotuv
+    </p>
+</div>
+{% endblock %}

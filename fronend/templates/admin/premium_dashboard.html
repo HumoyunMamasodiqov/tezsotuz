@@ -1,0 +1,557 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+.premium-dashboard {
+    background: #f5f7fa;
+    min-height: 100vh;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 14px;
+}
+
+.bg-premium {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: white;
+}
+
+.bg-success {
+    background: #10B981;
+    color: white;
+}
+
+.bg-warning {
+    background: #F59E0B;
+    color: white;
+}
+
+.bg-danger {
+    background: #EF4444;
+    color: white;
+}
+
+.bg-info {
+    background: #3B82F6;
+    color: white;
+}
+
+.bg-purple {
+    background: #8B5CF6;
+    color: white;
+}
+
+.bg-pink {
+    background: #EC4899;
+    color: white;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+.action-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.search-form {
+    max-width: 500px;
+    margin: 20px 0;
+}
+
+.search-input {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 15px;
+    width: 100%;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.table th {
+    background: #f8fafc;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table tr:hover {
+    background: #f8fafc;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.status-approved {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.status-rejected {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.status-expired {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.btn-action {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    text-decoration: none;
+    margin: 0 3px;
+}
+
+.btn-approve {
+    background: #10B981;
+    color: white;
+}
+
+.btn-reject {
+    background: #EF4444;
+    color: white;
+}
+
+.btn-edit {
+    background: #3B82F6;
+    color: white;
+}
+
+.auto-renew-badge {
+    background: #8B5CF6;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="premium-dashboard">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Premium Boshqaruv Paneli</h1>
+        <p class="text-gray-600">Premium foydalanuvchilar va so'rovlarni boshqarish</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="search-form">
+        <form method="GET" action="{% url 'admin_search_users' %}" class="flex gap-3">
+            <input type="text" 
+                   name="q" 
+                   placeholder="Telefon, username yoki ism qidiring..."
+                   class="search-input"
+                   value="{{ request.GET.q|default:'' }}">
+            <button type="submit" 
+                    class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <i class="fas fa-search mr-2"></i>Qidirish
+            </button>
+        </form>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{% url 'admin_premium_requests' %}" class="action-btn bg-blue-600 text-white">
+            <i class="fas fa-envelope"></i>
+            Premium So'rovlar
+            {% if stats.pending_requests > 0 %}
+            <span class="bg-white text-blue-600 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                {{ stats.pending_requests }}
+            </span>
+            {% endif %}
+        </a>
+        
+        <a href="{% url 'admin_check_all_expired' %}" class="action-btn bg-yellow-600 text-white">
+            <i class="fas fa-clock"></i>
+            Premium Muddatini Tekshirish
+        </a>
+        
+        <a href="{% url 'admin:premium_app_premiumuser_changelist' %}" class="action-btn bg-green-600 text-white">
+            <i class="fas fa-users"></i>
+            Premium Foydalanuvchilar
+        </a>
+        
+        <a href="{% url 'admin:premium_app_premiumproduct_changelist' %}" class="action-btn bg-purple-600 text-white">
+            <i class="fas fa-box"></i>
+            Premium Mahsulotlar
+        </a>
+        
+        {% if settings.auto_renew_premium %}
+        <span class="auto-renew-badge">
+            <i class="fas fa-sync-alt"></i>
+            Auto Renew Yoqilgan
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card">
+            <div class="stat-icon bg-premium">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="stat-value">{{ stats.total_premium_users }}</div>
+            <div class="stat-label">Premium Foydalanuvchilar</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon bg-warning">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-value">{{ stats.pending_requests }}</div>
+            <div class="stat-label">Kutilayotgan So'rovlar</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon bg-success">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-value">{{ stats.total_premium_products }}</div>
+            <div class="stat-label">Premium Mahsulotlar</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon bg-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-value">{{ stats.expired_soon }}</div>
+            <div class="stat-label">Tez orada tugaydigan</div>
+        </div>
+    </div>
+
+    <!-- Premium Requests Section -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800">So'nggi Premium So'rovlar</h2>
+            <a href="{% url 'admin_premium_requests' %}" class="text-blue-600 hover:text-blue-800">
+                Barchasini ko'rish →
+            </a>
+        </div>
+        
+        {% if premium_requests %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Foydalanuvchi</th>
+                        <th>Telefon</th>
+                        <th>Kunlar/Limit</th>
+                        <th>Holat</th>
+                        <th>Sana</th>
+                        <th>Harakatlar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in premium_requests %}
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <span class="text-sm font-bold">{{ request.user.username|first|upper }}</span>
+                                </div>
+                                <div>
+                                    <div class="font-medium">{{ request.full_name }}</div>
+                                    <div class="text-sm text-gray-500">@{{ request.user.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="font-mono">{{ request.phone }}</td>
+                        <td>
+                            <span class="font-bold">{{ request.requested_days }} kun</span>
+                            <span class="text-gray-500">/ {{ request.requested_limit }} limit</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ request.status }}">
+                                {{ request.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ request.created_at|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            <div class="flex gap-2">
+                                {% if request.status == 'pending' %}
+                                <a href="#" onclick="processRequest('{{ request.id }}', 'approve')" 
+                                   class="btn-action btn-approve">
+                                    <i class="fas fa-check"></i>
+                                </a>
+                                <a href="#" onclick="processRequest('{{ request.id }}', 'reject')" 
+                                   class="btn-action btn-reject">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'admin:premium_app_premiumrequest_change' request.id %}" 
+                                   class="btn-action btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="bg-white rounded-lg p-8 text-center">
+            <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600">Hozircha premium so'rovlari yo'q</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Premium Users Section -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Faol Premium Foydalanuvchilar</h2>
+            <a href="{% url 'admin:premium_app_premiumuser_changelist' %}" class="text-blue-600 hover:text-blue-800">
+                Barchasini ko'rish →
+            </a>
+        </div>
+        
+        {% if premium_users %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Foydalanuvchi</th>
+                        <th>Premium Boshlanishi</th>
+                        <th>Premium Tugashi</th>
+                        <th>Qolgan Kunlar</th>
+                        <th>Limit</th>
+                        <th>Holat</th>
+                        <th>Harakatlar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in premium_users %}
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-crown text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">{{ user.user.get_full_name|default:user.user.username }}</div>
+                                    <div class="text-sm text-gray-500">@{{ user.user.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if user.premium_start %}
+                            {{ user.premium_start|date:"d.m.Y" }}
+                            {% else %}
+                            <span class="text-gray-400">Ko'rsatilmagan</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.premium_end %}
+                            {{ user.premium_end|date:"d.m.Y" }}
+                            {% else %}
+                            <span class="text-gray-400">Ko'rsatilmagan</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="font-bold {% if user.get_days_remaining <= 3 %}text-red-600{% elif user.get_days_remaining <= 7 %}text-yellow-600{% else %}text-green-600{% endif %}">
+                                {{ user.get_days_remaining }} kun
+                            </span>
+                        </td>
+                        <td>
+                            <span class="font-bold">{{ user.premium_used }}</span>
+                            <span class="text-gray-500">/ {{ user.premium_limit }}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ user.status }}">
+                                {{ user.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <a href="{% url 'admin:premium_app_premiumuser_change' user.id %}" 
+                                   class="btn-action btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'admin_extend_premium' user.user.id %}" 
+                                   class="btn-action bg-green-600 text-white"
+                                   title="Uzaytirish">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="bg-white rounded-lg p-8 text-center">
+            <i class="fas fa-users text-4xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600">Hozircha premium foydalanuvchilar yo'q</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Settings Info -->
+    <div class="bg-white rounded-lg p-6 shadow">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Premium Sozlamalar</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <div class="text-sm text-gray-500">Premium Davomiyligi</div>
+                <div class="font-bold text-lg">{{ settings.premium_duration_days }} kun</div>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <div class="text-sm text-gray-500">Max Premium Mahsulotlar</div>
+                <div class="font-bold text-lg">{{ settings.max_premium_products }} ta</div>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <div class="text-sm text-gray-500">Auto Renew</div>
+                <div class="font-bold text-lg {% if settings.auto_renew_premium %}text-green-600{% else %}text-red-600{% endif %}">
+                    {% if settings.auto_renew_premium %}
+                    Yoqilgan ({{ settings.auto_renew_days }} kun)
+                    {% else %}
+                    O'chirilgan
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{% url 'admin:premium_app_adminpremiumsettings_change' settings.id %}" 
+               class="text-blue-600 hover:text-blue-800 font-medium">
+                <i class="fas fa-cog mr-2"></i>Sozlamalarni tahrirlash
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function processRequest(requestId, action) {
+    if (!confirm(`${action === 'approve' ? 'Tasdiqlash' : 'Rad etish'}ni tasdiqlaysizmi?`)) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', action);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    if (action === 'approve') {
+        const days = prompt('Premium kunlar soni:', '30');
+        const limit = prompt('Premium limit:', '5');
+        
+        if (!days || !limit) return;
+        
+        formData.append('days', days);
+        formData.append('limit', limit);
+    } else if (action === 'reject') {
+        const reason = prompt('Rad etish sababi:', '');
+        if (!reason) return;
+        formData.append('reason', reason);
+    }
+    
+    fetch(`/admin/premium/process-request/${requestId}/`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            location.reload();
+        }
+    });
+}
+
+function checkExpiry() {
+    fetch(`{% url 'admin_check_all_expired %}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

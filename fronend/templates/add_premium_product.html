@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Mahsulot Qo'shish - Tez Sot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .premium-border {
+            border: 2px solid #f59e0b;
+        }
+        .premium-badge {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    {% include 'newnav.html' %}
+    {% include 'nav.html' %}
+    
+    <!-- Messages -->
+    {% if messages %}
+    <div class="max-w-4xl mx-auto mt-4 px-4">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg mb-2 {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Premium Stats -->
+    <div class="max-w-4xl mx-auto mt-6 px-4">
+        <div class="bg-white rounded-xl shadow p-6 mb-6 premium-border">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-crown text-yellow-500"></i>
+                        Premium Mahsulot Qo'shish
+                    </h2>
+                    <p class="text-gray-600 mt-1">Premium mahsulotlaringizni yuqoriga chiqaring va ko'proq sotiling!</p>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3">
+                    <div class="text-sm text-yellow-800 font-medium">Qolgan limit</div>
+                    <div class="text-2xl font-bold text-yellow-600">{{ remaining }}/{{ premium_profile.premium_limit }}</div>
+                </div>
+            </div>
+            
+            <!-- Premium advantages -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-eye text-blue-600"></i>
+                        </div>
+                        <h4 class="font-semibold">10x ko'proq ko'rish</h4>
+                    </div>
+                    <p class="text-sm text-gray-600">Premium mahsulotlar birinchi o'rinda ko'rsatiladi</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-bolt text-green-600"></i>
+                        </div>
+                        <h4 class="font-semibold">Premium belgisi</h4>
+                    </div>
+                    <p class="text-sm text-gray-600">Maxsus premium belgisi bilan ajralib turasiz</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-purple-600"></i>
+                        </div>
+                        <h4 class="font-semibold">Yuqori konvertatsiya</h4>
+                    </div>
+                    <p class="text-sm text-gray-600">Premium mahsulotlar tezroq sotiladi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Form -->
+    <div class="max-w-4xl mx-auto px-4 pb-8">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Asosiy ma'lumotlar -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-info-circle text-blue-600"></i>
+                    Asosiy Ma'lumotlar
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Mahsulot nomi -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-2">Mahsulot nomi *</label>
+                        <input type="text" name="name" required 
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                               placeholder="Masalan: iPhone 15 Pro Max 256GB">
+                    </div>
+                    
+                    <!-- Kategoriya -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Kategoriya *</label>
+                        <select name="category" required 
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                            <option value="">Kategoriyani tanlang</option>
+                            <option value="elektronika">Elektronika</option>
+                            <option value="kitob">Kitoblar</option>
+                            <option value="mebel">Mebellar</option>
+                            <option value="cheteltovarlar">Chet el tovarlari</option>
+                            <option value="uyjoyelonlari">Uy joy elonlari</option>
+                            <option value="onavabollar">O'na va bollar</option>
+                            <option value="avto_elonlari">Auto elonlar</option>
+                            <option value="uy_jihozlari">Uy jihozlari</option>
+                            <option value="kiyim">Kiyim-kechak</option>
+                            <option value="avto">Avto ehtiyot qismlar</option>
+                            <option value="boshqa">Boshqa</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Mahsulot turi -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Mahsulot turi *</label>
+                        <input type="text" name="mahsulotturi" required 
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                               placeholder="Masalan: Smartfon, Kitob, Mebel">
+                    </div>
+                    
+                    <!-- Viloyat -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Viloyat *</label>
+                        <select name="viloyat" required 
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                            <option value="">Viloyatni tanlang</option>
+                            <option value="toshkent">Toshkent</option>
+                            <option value="samarqand">Samarqand</option>
+                            <option value="fargona">Farg'ona</option>
+                            <option value="andijon">Andijon</option>
+                            <option value="namangan">Namangan</option>
+                            <option value="buxoro">Buxoro</option>
+                            <option value="navoiy">Navoiy</option>
+                            <option value="xorazm">Xorazm</option>
+                            <option value="qashqadaryo">Qashqadaryo</option>
+                            <option value="surxondaryo">Surxondaryo</option>
+                            <option value="jizzax">Jizzax</option>
+                            <option value="sirdaryo">Sirdaryo</option>
+                            <option value="qoraqalpogiston">Qoraqalpog'iston</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Tuman -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Tuman/Shahar *</label>
+                        <input type="text" name="tuman" required 
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                               placeholder="Masalan: Toshkent shahri, Chilonzor tumani">
+                    </div>
+                    
+                    <!-- Manzil -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-2">To'liq manzil</label>
+                        <textarea name="manzil" rows="2"
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                               placeholder="Ko'cha nomi, uy raqami, kvartira"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Narx va tavsif -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-tag text-green-600"></i>
+                    Narx va Tavsif
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Narx -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Narxi (so'm) *</label>
+                        <input type="text" name="narx" required 
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                               placeholder="Masalan: 15000000">
+                        <p class="text-sm text-gray-500 mt-1">Faqat raqam kiriting (masalan: 15000000)</p>
+                    </div>
+                    
+                    <!-- Tavsif -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-2">Batafsil tavsif *</label>
+                        <textarea name="tavsif" rows="6" required 
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                               placeholder="Mahsulotingiz haqida batafsil ma'lumot bering..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rasmlar -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-images text-purple-600"></i>
+                    Rasmlar
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Asosiy rasm -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Asosiy rasm *</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg h-64 flex flex-col items-center justify-center relative overflow-hidden hover:border-yellow-500 transition cursor-pointer">
+                            <input type="file" name="asosiyimg" accept="image/*" required 
+                                   class="absolute inset-0 opacity-0 cursor-pointer" id="mainImageInput">
+                            <div class="text-center p-4">
+                                <i class="fas fa-camera text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">Asosiy rasm yuklang</p>
+                                <p class="text-xs text-gray-500">Birinchida ko'rinadigan rasm</p>
+                            </div>
+                        </div>
+                        <div id="mainImagePreview" class="mt-2 hidden">
+                            <img src="" alt="Preview" class="max-h-40 rounded-lg">
+                        </div>
+                    </div>
+                    
+                    <!-- Qo'shimcha rasmlar -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {% for i in "123" %}
+                        <div>
+                            <label class="block text-sm font-medium mb-2">{{ i }}-rasm (ixtiyoriy)</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg h-40 flex items-center justify-center relative overflow-hidden hover:border-blue-500 transition cursor-pointer">
+                                <input type="file" name="{% if i == '1' %}birimg{% elif i == '2' %}ikkiimg{% else %}uchuimg{% endif %}" accept="image/*" 
+                                       class="absolute inset-0 opacity-0 cursor-pointer" 
+                                       id="image{{ i }}Input">
+                                <div class="text-center">
+                                    <i class="fas fa-plus text-2xl text-gray-400 mb-1"></i>
+                                    <p class="text-xs text-gray-500">Rasm {{ i }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aloqa ma'lumotlari -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-phone text-red-600"></i>
+                    Aloqa Ma'lumotlari
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Telefon -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Telefon raqami *</label>
+                        <div class="relative">
+                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">+998</div>
+                            <input type="tel" name="telefon" required 
+                                   class="w-full pl-16 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                                   placeholder="90 123 45 67">
+                        </div>
+                    </div>
+                    
+                    <!-- Telegram -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Telegram username</label>
+                        <div class="relative">
+                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">@</div>
+                            <input type="text" name="telegram_username"
+                                   class="w-full pl-8 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                                   placeholder="username">
+                        </div>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email (ixtiyoriy)</label>
+                        <input type="email" name="email"
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                               placeholder="siz@email.com">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submit buttons -->
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-4 rounded-xl font-bold hover:from-yellow-600 hover:to-yellow-700 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-crown mr-2"></i>
+                    Premium Mahsulotni Saqlash
+                </button>
+                
+                <a href="{% url 'mening_elonlarim' %}"
+                   class="flex-1 bg-gray-200 text-gray-700 py-4 rounded-xl font-bold hover:bg-gray-300 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-times"></i>
+                    BEKOR QILISH
+                </a>
+            </div>
+            
+            <div class="text-center text-sm text-gray-500">
+                <p>Premium mahsulot qo'shgandan so'ng, admin tasdigini kuting. Premium mahsulotlar ro'yxatda birinchi o'rinda chiqadi.</p>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        // Image preview
+        document.getElementById('mainImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('mainImagePreview');
+                    preview.querySelector('img').src = e.target.result;
+                    preview.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const priceInput = document.querySelector('input[name="narx"]');
+            const priceValue = priceInput.value.trim();
+            
+            // Faqat raqam va vergul/ nuqta qoldirish
+            const cleanPrice = priceValue.replace(/[^\d.,]/g, '');
+            priceInput.value = cleanPrice;
+            
+            if (!cleanPrice || cleanPrice === '0') {
+                e.preventDefault();
+                alert('Iltimos, narxni to\'g\'ri kiriting!');
+                priceInput.focus();
+            }
+        });
+        
+        // Format phone number
+        document.querySelector('input[name="telefon"]').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 9) {
+                value = value.substring(0, 9);
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>

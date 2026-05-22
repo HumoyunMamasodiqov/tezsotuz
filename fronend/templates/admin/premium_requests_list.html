@@ -1,0 +1,564 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .request-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .request-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .request-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .info-item {
+        padding: 10px 15px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        font-size: 14px;
+        border-left: 4px solid #4CAF50;
+    }
+    .info-item strong {
+        color: #333;
+        margin-right: 5px;
+        display: inline-block;
+        min-width: 120px;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    .btn-approve {
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        min-width: 150px;
+        justify-content: center;
+    }
+    .btn-approve:hover {
+        background: linear-gradient(135deg, #45a049, #1B5E20);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+    }
+    .btn-reject {
+        background: linear-gradient(135deg, #f44336, #c62828);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        min-width: 150px;
+        justify-content: center;
+    }
+    .btn-reject:hover {
+        background: linear-gradient(135deg, #e53935, #b71c1c);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+    }
+    .btn-view {
+        background: linear-gradient(135deg, #2196F3, #1565C0);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        min-width: 150px;
+        justify-content: center;
+    }
+    .btn-view:hover {
+        background: linear-gradient(135deg, #1976D2, #0d47a1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+    }
+    .status-badge {
+        font-weight: bold;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .status-pending {
+        color: #ff9800;
+        background: #fff3e0;
+        border: 2px solid #ffb74d;
+    }
+    .status-approved {
+        color: #4CAF50;
+        background: #e8f5e9;
+        border: 2px solid #81c784;
+    }
+    .status-rejected {
+        color: #f44336;
+        background: #ffebee;
+        border: 2px solid #e57373;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 40px;
+        color: #666;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        margin-top: 40px;
+        border: 2px dashed #dee2e6;
+    }
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        display: block;
+        color: #6c757d;
+        opacity: 0.7;
+    }
+    .payment-info {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        border-left: 4px solid #2196F3;
+    }
+    .payment-info strong {
+        color: #1565C0;
+    }
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 15px 0;
+    }
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+    .alert {
+        padding: 15px;
+        border-radius: 6px;
+        margin: 15px 0;
+        border-left: 4px solid;
+    }
+    .alert-info {
+        background: #e3f2fd;
+        border-color: #2196F3;
+        color: #1565C0;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module" style="background: white; padding: 25px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h1 style="margin-bottom: 10px; color: #333;">
+            <i class="fas fa-crown" style="color: #FFD700; margin-right: 10px;"></i>
+            Premium So'rovlari
+        </h1>
+        <p style="color: #666; font-size: 16px; margin-bottom: 0;">
+            Kutilayotgan so'rovlar: <strong style="color: #4CAF50;">{{ pending_requests.count }}</strong> ta
+        </p>
+    </div>
+    
+    {% if pending_requests %}
+        {% for request in pending_requests %}
+        <div class="request-card" id="request-{{ request.id }}">
+            <div class="request-header">
+                <div>
+                    <h2 style="margin: 0; color: #333; font-size: 22px;">
+                        <i class="fas fa-user" style="color: #4CAF50; margin-right: 10px;"></i>
+                        {{ request.full_name }}
+                    </h2>
+                    <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">
+                        <i class="fas fa-user-circle" style="color: #2196F3; margin-right: 5px;"></i>
+                        Foydalanuvchi: <strong>{{ request.user.username }}</strong> | 
+                        ID: <code>{{ request.id }}</code>
+                    </p>
+                </div>
+                <div>
+                    <span class="status-badge status-pending">
+                        <i class="fas fa-clock"></i> {{ request.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="request-info">
+                <div class="info-item">
+                    <strong><i class="fas fa-phone"></i> Telefon:</strong> {{ request.phone }}
+                </div>
+                <div class="info-item">
+                    <strong><i class="fas fa-envelope"></i> Email:</strong> {{ request.email|default:"Ko'rsatilmagan" }}
+                </div>
+                <div class="info-item">
+                    <strong><i class="fab fa-telegram"></i> Telegram:</strong> 
+                    {% if request.telegram_username %}
+                        @{{ request.telegram_username }}
+                    {% else %}
+                        Ko'rsatilmagan
+                    {% endif %}
+                </div>
+                <div class="info-item">
+                    <strong><i class="fas fa-calendar-alt"></i> So'ralgan kunlar:</strong> {{ request.requested_days }} kun
+                </div>
+                <div class="info-item">
+                    <strong><i class="fas fa-box"></i> So'ralgan limit:</strong> {{ request.requested_limit }} ta
+                </div>
+                <div class="info-item">
+                    <strong><i class="fas fa-money-bill-wave"></i> Jami summa:</strong> 
+                    {{ request.calculated_total|floatformat:0 }} so'm
+                </div>
+                <div class="info-item">
+                    <strong><i class="fas fa-calendar"></i> Yuborilgan sana:</strong> {{ request.created_at|date:"d.m.Y H:i" }}
+                </div>
+                <div class="info-item">
+                    <strong><i class="fas fa-history"></i> Kunlar o'tdi:</strong> {{ request.get_days_since_request }} kun
+                </div>
+            </div>
+            
+            {% if request.notes %}
+            <div style="margin-bottom: 15px; padding: 15px; background: #f0f8ff; border-radius: 6px; border-left: 4px solid #2196F3;">
+                <strong style="color: #2196F3; display: block; margin-bottom: 8px;">
+                    <i class="fas fa-sticky-note"></i> Qo'shimcha eslatmalar:
+                </strong>
+                <p style="margin: 0; color: #555; line-height: 1.5;">{{ request.notes|linebreaks }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="action-buttons">
+                <button class="btn-approve" onclick="showApproveModal({{ request.id }}, '{{ request.user.username }}', '{{ request.full_name }}', {{ request.requested_days }}, {{ request.requested_limit }})">
+                    <i class="fas fa-check-circle"></i> Premium Tasdiqlash
+                </button>
+                
+                <button class="btn-reject" onclick="showRejectModal({{ request.id }}, '{{ request.user.username }}')">
+                    <i class="fas fa-times-circle"></i> Rad Etish
+                </button>
+                
+                <a href="{% url 'admin:premium_premiumrequest_change' request.id %}" class="btn-view">
+                    <i class="fas fa-external-link-alt"></i> Admin Panelda Ochish
+                </a>
+                
+                <button class="btn-view" onclick="viewRequestDetails({{ request.id }})">
+                    <i class="fas fa-eye"></i> Tafsilotlarni Ko'rish
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-check-double"></i>
+            <h3 style="color: #495057; margin-bottom: 15px;">Barcha premium so'rovlari qayta ishlangan</h3>
+            <p style="color: #6c757d; font-size: 16px; max-width: 500px; margin: 0 auto;">
+                Hozircha yangi premium so'rovlari kelmagan yoki barcha so'rovlar tasdiqlangan/rad etilgan.
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Tasdiqlash Modali -->
+<div id="approveModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top: 0; color: #333;">
+            <i class="fas fa-check-circle" style="color: #4CAF50; margin-right: 10px;"></i>
+            Premium So'rovni Tasdiqlash
+        </h3>
+        
+        <form id="approveForm" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="request_id" id="approveRequestId">
+            
+            <div class="alert alert-info">
+                <strong><i class="fas fa-info-circle"></i> Foydalanuvchi:</strong>
+                <span id="approveUserName"></span>
+                <br>
+                <strong><i class="fas fa-user-tag"></i> Ism:</strong>
+                <span id="approveFullName"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="approveDays"><i class="fas fa-calendar"></i> Premium kunlari:</label>
+                <input type="number" id="approveDays" name="days" class="form-control" 
+                       min="1" max="365" required value="30">
+            </div>
+            
+            <div class="form-group">
+                <label for="approveLimit"><i class="fas fa-box"></i> Mahsulot limiti:</label>
+                <input type="number" id="approveLimit" name="limit" class="form-control" 
+                       min="1" max="50" required value="5">
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="upgradeOldProducts" name="upgrade_old_products" value="true">
+                <label for="upgradeOldProducts">
+                    <strong>Foydalanuvchining barcha oddiy mahsulotlarini premium qilish</strong>
+                    <small style="display: block; color: #666; margin-top: 5px;">
+                        Agar belgilansa, foydalanuvchining barcha oddiy mahsulotlari avtomatik premiumga aylantiriladi
+                    </small>
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label for="approveNotes"><i class="fas fa-sticky-note"></i> Admin izohlari (ixtiyoriy):</label>
+                <textarea id="approveNotes" name="notes" class="form-control" rows="3" 
+                          placeholder="Tasdiqlash sababi yoki qo'shimcha ma'lumot..."></textarea>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-reject" onclick="closeModal('approveModal')">
+                    <i class="fas fa-times"></i> Bekor qilish
+                </button>
+                <button type="submit" class="btn-approve">
+                    <i class="fas fa-check"></i> Premium Tasdiqlash
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Rad etish Modali -->
+<div id="rejectModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top: 0; color: #333;">
+            <i class="fas fa-times-circle" style="color: #f44336; margin-right: 10px;"></i>
+            Premium So'rovni Rad Etish
+        </h3>
+        
+        <form id="rejectForm" method="POST" action="{% url 'admin_reject_premium_request' 0 %}">
+            {% csrf_token %}
+            <input type="hidden" name="request_id" id="rejectRequestId">
+            
+            <div class="alert alert-info">
+                <strong><i class="fas fa-info-circle"></i> Foydalanuvchi:</strong>
+                <span id="rejectUserName"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="rejectReason"><i class="fas fa-comment-exclamation"></i> Rad etish sababi:</label>
+                <textarea id="rejectReason" name="reason" class="form-control" rows="4" 
+                          placeholder="Iltimos, rad etish sababini kiriting..." required></textarea>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-view" onclick="closeModal('rejectModal')">
+                    <i class="fas fa-times"></i> Bekor qilish
+                </button>
+                <button type="submit" class="btn-reject">
+                    <i class="fas fa-ban"></i> Rad Etish
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+// Modal funksiyalari
+function showApproveModal(requestId, username, fullName, days, limit) {
+    document.getElementById('approveRequestId').value = requestId;
+    document.getElementById('approveUserName').textContent = username;
+    document.getElementById('approveFullName').textContent = fullName;
+    document.getElementById('approveDays').value = days || 30;
+    document.getElementById('approveLimit').value = limit || 5;
+    
+    // Form action'ni o'rnatish
+    document.getElementById('approveForm').action = `/admin/approve-premium-request/${requestId}/`;
+    
+    document.getElementById('approveModal').style.display = 'flex';
+}
+
+function showRejectModal(requestId, username) {
+    document.getElementById('rejectRequestId').value = requestId;
+    document.getElementById('rejectUserName').textContent = username;
+    
+    // Form action'ni o'rnatish
+    const form = document.getElementById('rejectForm');
+    form.action = form.action.replace('/0/', `/${requestId}/`);
+    
+    document.getElementById('rejectModal').style.display = 'flex';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Tafsilotlarni ko'rish
+function viewRequestDetails(requestId) {
+    fetch(`/admin/premium-request-details/${requestId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.style.display = 'flex';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 700px;">
+                        <h3 style="margin-top: 0; color: #333;">
+                            <i class="fas fa-info-circle" style="color: #2196F3;"></i>
+                            So'rov Tafsilotlari
+                        </h3>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            ${data.html}
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn-view" onclick="this.closest('.modal').style.display='none'">
+                                <i class="fas fa-times"></i> Yopish
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            } else {
+                alert('Xatolik: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('So\'rov tafsilotlarini yuklashda xatolik yuz berdi');
+        });
+}
+
+// Modal tashqarisini bosganda yopish
+window.onclick = function(event) {
+    if (event.target.className === 'modal') {
+        event.target.style.display = 'none';
+    }
+}
+
+// Form yuborish
+document.getElementById('approveForm').onsubmit = function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const requestId = formData.get('request_id');
+    
+    if (!confirm(`Ushbu premium so'rovni tasdiqlaysizmi?\n\nFoydalanuvchi: ${document.getElementById('approveUserName').textContent}\nKunlar: ${formData.get('days')}\nLimit: ${formData.get('limit')}`)) {
+        return false;
+    }
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            closeModal('approveModal');
+            
+            // So'rovni ro'yxatdan olib tashlash
+            const requestElement = document.getElementById(`request-${requestId}`);
+            if (requestElement) {
+                requestElement.style.opacity = '0.5';
+                setTimeout(() => {
+                    requestElement.remove();
+                    location.reload(); // Yangilash
+                }, 500);
+            }
+        } else {
+            alert('Xatolik: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('So\'rovni tasdiqlashda xatolik yuz berdi');
+    });
+};
+</script>
+{% endblock %}

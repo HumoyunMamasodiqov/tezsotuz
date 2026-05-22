@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes" />
+  <title>Barcha mahsulotlar - Tez Sot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #3b82f6;
+      --primary-dark: #2563eb;
+      --secondary-color: #64748b;
+      --accent-color: #f59e0b;
+      --text-dark: #0f172a;
+      --text-light: #475569;
+      --bg-light: #f8fafc;
+      --border-radius: 16px;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --transition: all 0.25s ease;
+      --premium-gradient: linear-gradient(135deg, #fbbf24, #f59e0b);
+      --regular-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Inter', 'Segoe UI', sans-serif;
+      background: var(--bg-light);
+      color: var(--text-dark);
+      line-height: 1.5;
+    }
+
+    /* Container */
+    .products-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    @media (min-width: 768px) {
+      .products-container {
+        padding: 24px 24px 48px;
+      }
+    }
+
+    /* Page Title */
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .page-title span {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .total-badge {
+      background: #eef2ff;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    /* Filter Section - Mobil uchun optimallashtirilgan */
+    .filter-section {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid #eef2ff;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .filter-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 8px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f1f5f9;
+      color: var(--text-light);
+      border: 1px solid #e2e8f0;
+    }
+
+    .filter-btn i {
+      font-size: 0.8rem;
+    }
+
+    .filter-btn.all.active {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border-color: transparent;
+    }
+
+    .filter-btn.premium.active {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #78350f;
+      border-color: #fde68a;
+    }
+
+    .filter-btn.regular.active {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white;
+      border-color: transparent;
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Products Grid - Mobil uchun 2 ustun */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .products-grid {
+        gap: 16px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .products-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .products-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    /* Product Card */
+    .product-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: var(--transition);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #eef2ff;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: #dbeafe;
+    }
+
+    /* Premium Card Highlight */
+    .product-card.premium {
+      border-top: 3px solid #fbbf24;
+    }
+
+    .product-card.regular {
+      border-top: 3px solid var(--primary-color);
+    }
+
+    /* Badges */
+    .premium-badge-corner {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #78350f;
+      padding: 4px 10px;
+      border-radius: 30px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      z-index: 15;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .regular-badge-corner {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 30px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      z-index: 15;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Heart Button on Image */
+    .heart-btn {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: var(--transition);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border: none;
+      backdrop-filter: blur(2px);
+    }
+
+    .heart-btn i {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      transition: var(--transition);
+    }
+
+    .heart-btn.active i {
+      color: #ef4444;
+    }
+
+    .heart-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .heart-btn:hover i {
+      color: #ef4444;
+    }
+
+    /* Image Container */
+    .product-image {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: #f1f5f9;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image img {
+      transform: scale(1.03);
+    }
+
+    /* Status Badge */
+    .status-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      z-index: 15;
+      backdrop-filter: blur(4px);
+    }
+
+    .status-badge.sold {
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+    }
+
+    .status-badge.new {
+      background: rgba(16, 185, 129, 0.9);
+      color: white;
+    }
+
+    /* Content */
+    .product-content {
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Narx - uzun raqamlar uchun word-break */
+    .product-price {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      margin-bottom: 4px;
+      word-break: break-word;
+      line-height: 1.3;
+    }
+
+    .product-card.premium .product-price {
+      color: #d97706;
+    }
+
+    .product-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      line-height: 1.35;
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 2.2em;
+    }
+
+    .product-category {
+      font-size: 0.65rem;
+      color: var(--secondary-color);
+      background: #f1f5f9;
+      padding: 3px 10px;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      width: fit-content;
+      margin-bottom: 8px;
+    }
+
+    /* Details row */
+    .product-details {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid #f0f2f5;
+      font-size: 0.65rem;
+      color: var(--text-light);
+    }
+
+    .product-location, .product-date {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: white;
+      border-radius: 24px;
+      grid-column: 1 / -1;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+    }
+
+    /* Toast notification */
+    .toast-notification {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      z-index: 1100;
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      white-space: nowrap;
+    }
+
+    .toast-notification.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Floating Call Button */
+    .floating-call {
+      position: fixed;
+      right: 16px;
+      bottom: 20px;
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-radius: 50%;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3);
+      transition: var(--transition);
+    }
+
+    .floating-call:hover {
+      transform: scale(1.05);
+    }
+
+    .floating-call img {
+      width: 28px;
+      height: 28px;
+      filter: brightness(0) invert(1);
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 480px) {
+      .products-container {
+        padding: 12px 12px 32px;
+      }
+
+      .page-title {
+        font-size: 1.4rem;
+        margin-bottom: 14px;
+      }
+
+      .filter-section {
+        padding: 12px;
+      }
+
+      .filter-buttons {
+        gap: 8px;
+      }
+
+      .filter-btn {
+        padding: 6px 14px;
+        font-size: 0.75rem;
+      }
+
+      .product-content {
+        padding: 10px;
+      }
+
+      .product-price {
+        font-size: 0.9rem;
+      }
+
+      .product-name {
+        font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+      }
+
+      .product-category {
+        font-size: 0.6rem;
+        padding: 2px 8px;
+      }
+
+      .product-details {
+        font-size: 0.6rem;
+      }
+
+      .premium-badge-corner, .regular-badge-corner {
+        padding: 3px 8px;
+        font-size: 0.6rem;
+        top: 8px;
+        right: 8px;
+      }
+
+      .heart-btn {
+        width: 32px;
+        height: 32px;
+        top: 8px;
+        left: 8px;
+      }
+
+      .heart-btn i {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .products-grid {
+        gap: 10px;
+      }
+
+      .product-content {
+        padding: 8px;
+      }
+
+      .product-price {
+        font-size: 0.85rem;
+      }
+
+      .product-name {
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  {% include 'nav.html' %}
+  {% include 'baner.html' %}
+  {% include 'kategoriya1.html' %}
+  {% include 'yaxshi-mahsulotlar.html' %}
+
+  <div class="products-container">
+    <!-- Page Header -->
+    <div class="page-title">
+      <div>
+        <i class="fas fa-store text-primary mr-2"></i>
+        Barcha <span>e'lonlar</span>
+      </div>
+      <div class="total-badge">
+        <i class="fas fa-box"></i> {{ total_products }} ta
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    {% if filter_section %}
+    <div class="filter-section">
+      <div class="filter-header">
+        <div class="filter-title">
+          <i class="fas fa-sliders-h"></i> Filtr
+        </div>
+      </div>
+      <div class="filter-buttons">
+        <a href="?filter=all" class="filter-btn all {% if filter_type == 'all' or not filter_type %}active{% endif %}">
+          <i class="fas fa-th-large"></i> Barchasi
+        </a>
+        <a href="?filter=premium" class="filter-btn premium {% if filter_type == 'premium' %}active{% endif %}">
+          <i class="fas fa-crown"></i> Premium
+        </a>
+        <a href="?filter=regular" class="filter-btn regular {% if filter_type == 'regular' %}active{% endif %}">
+          <i class="fas fa-star"></i> Oddiy
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Products Grid -->
+    <div class="products-grid">
+      {% if mahsulotlar %}
+        {% for product in mahsulotlar %}
+        <div class="product-card {% if product.is_premium %}premium{% else %}regular{% endif %}" data-product-id="{{ product.id }}">
+          
+          <!-- Badge -->
+          {% if product.is_premium %}
+          <div class="premium-badge-corner">
+            <i class="fas fa-crown"></i> PREMIUM
+          </div>
+          {% else %}
+          <div class="regular-badge-corner">
+            <i class="fas fa-box"></i> ODDIY
+          </div>
+          {% endif %}
+
+          <!-- Image -->
+          <a href="{% url 'mahsulot_detail' product.id %}" class="product-image" style="display: block;">
+            {% if product.asosiyimg %}
+            <img src="{{ product.asosiyimg.url }}" alt="{{ product.name }}" loading="lazy">
+            {% else %}
+            <div class="flex items-center justify-center h-full bg-gray-100 text-gray-400">
+              <i class="fas fa-image fa-3x"></i>
+            </div>
+            {% endif %}
+
+            <!-- Status Badge -->
+            {% if product.sotilgan %}
+            <div class="status-badge sold">
+              <i class="fas fa-check-circle"></i> SOTILGAN
+            </div>
+            {% else %}
+            <div class="status-badge new">
+              <i class="fas fa-clock"></i> YANGI
+            </div>
+            {% endif %}
+          </a>
+
+          <!-- Heart Button on Image -->
+          {% if user.is_authenticated %}
+          <button class="heart-btn" onclick="addToFavorites(event, {{ product.id }})">
+            <i class="far fa-heart"></i>
+          </button>
+          {% else %}
+          <a href="{% url 'kirish' %}" class="heart-btn" style="text-decoration: none;" onclick="event.stopPropagation();">
+            <i class="far fa-heart"></i>
+          </a>
+          {% endif %}
+
+          <!-- Content -->
+          <a href="{% url 'mahsulot_detail' product.id %}" class="product-content" style="text-decoration: none; color: inherit;">
+            <div class="product-price">
+              {{ product.narx_formatted|default:product.narx }}
+              {% if product.is_premium %}
+              <i class="fas fa-gem text-[9px] text-amber-500"></i>
+              {% endif %}
+            </div>
+            
+            <h3 class="product-name">{{ product.name|truncatechars:45 }}</h3>
+            
+            <div class="product-category">
+              <i class="fas fa-tag text-[9px]"></i>
+              {{ product.mahsulotturi|default:"Mahsulot"|truncatechars:18 }}
+            </div>
+
+            <div class="product-details">
+              <div class="product-location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ product.get_viloyat_display|default:"Manzil"|truncatechars:12 }}
+              </div>
+              <div class="product-date">
+                <i class="fas fa-calendar-alt"></i>
+                {{ product.sana|date:"d.m.Y" }}
+              </div>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <i class="fas fa-box-open"></i>
+          <p class="text-gray-500 mt-2">Hozircha mahsulotlar mavjud emas</p>
+          <p class="text-gray-400 text-sm mt-1">Birinchi bo'lib e'lon qo'shing!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-notification"></div>
+
+  {% include 'footer.html' %}
+
+  <!-- CSRF Token for AJAX -->
+  <script>
+    // Get CSRF token from cookies
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    // Show toast notification
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.background = isError ? '#dc2626' : '#1e293b';
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    // Add to favorites function
+    function addToFavorites(event, productId) {
+      event.stopPropagation();
+      event.preventDefault();
+      
+      const heartBtn = event.currentTarget;
+      const icon = heartBtn.querySelector('i');
+      
+      // Send POST request to add/remove from favorites
+      fetch(`/sevimliga-qoshish/${productId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'added') {
+          icon.classList.remove('far');
+          icon.classList.add('fas');
+          showToast('✅ Sevimlilarga qo\'shildi');
+        } else if (data.status === 'removed') {
+          icon.classList.remove('fas');
+          icon.classList.add('far');
+          showToast('❌ Sevimlilardan olib tashlandi');
+        } else if (data.status === 'error') {
+          showToast(data.message || 'Xatolik yuz berdi', true);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showToast('Xatolik yuz berdi', true);
+      });
+    }
+
+    // Check if product is in favorites on page load
+    function checkFavoriteStatus() {
+      if (!document.querySelector('.heart-btn')) return;
+      
+      fetch('/sevimlilar/status/', {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.favorites && data.favorites.length) {
+          document.querySelectorAll('.heart-btn i').forEach(icon => {
+            const card = icon.closest('.product-card');
+            if (card) {
+              const productId = card.dataset.productId;
+              if (data.favorites.includes(parseInt(productId))) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+              }
+            }
+          });
+        }
+      })
+      .catch(error => console.error('Error checking favorites:', error));
+    }
+
+    // Touch feedback for cards
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.addEventListener('touchstart', function() {
+        this.style.transform = 'scale(0.98)';
+      });
+      card.addEventListener('touchend', function() {
+        this.style.transform = '';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 100);
+      });
+    });
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      checkFavoriteStatus();
+    });
+  </script>
+</body>
+</html>

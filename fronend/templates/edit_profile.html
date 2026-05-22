@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Profilni Tahrirlash - Tez Sot</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        .primary { color: #3b82f6; }
+        .bg-primary { background-color: #3b82f6; }
+        .hover\:bg-blue-600:hover { background-color: #2563eb; }
+        .focus\:ring-primary:focus { --tw-ring-color: #3b82f6; }
+        
+        /* Loading spinner */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navbar -->
+    {% include 'nav.html' %}
+    
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="mb-6">
+            <a href="{% url 'my_profile' %}?v={{ timestamp }}" class="text-blue-500 hover:text-blue-700 flex items-center gap-2">
+                <i class="ri-arrow-left-line"></i>
+                Profilga qaytish
+            </a>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">Profilni tahrirlash</h1>
+            
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" class="space-y-6" id="profileForm">
+                {% csrf_token %}
+                <input type="hidden" name="timestamp" value="{{ timestamp }}">
+                
+                <!-- Profile Image -->
+                <div>
+                    <label class="block text-gray-700 mb-2 font-medium">Profil rasmi</label>
+                    <div class="flex items-start gap-6">
+                        <div class="relative">
+                            <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg relative" id="profile-preview-container">
+                                {% if profile.profile_image %}
+                                    <img src="{{ profile.profile_image.url }}?v={{ profile.updated_at|date:'U' }}" 
+                                         id="profile-preview" 
+                                         alt="Profil rasmi" 
+                                         class="w-full h-full object-cover">
+                                {% else %}
+                                    <div id="profile-default" 
+                                         class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                        <span class="text-xl text-gray-500" id="profile-initial">
+                                            {{ request.user.username|first|upper }}
+                                        </span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div id="profile-filename" class="text-xs text-gray-500 mt-1 text-center truncate max-w-24"></div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <input type="file" 
+                                   name="profile_image" 
+                                   id="profile_image" 
+                                   accept="image/*"
+                                   class="hidden"
+                                   onchange="handleProfileImageChange(this)">
+                            <button type="button" 
+                                    onclick="document.getElementById('profile_image').click()"
+                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-left flex items-center gap-2">
+                                <i class="ri-camera-line"></i> 
+                                <span id="profile-btn-text">
+                                    {% if profile.profile_image %}Rasm almashtirish{% else %}Rasm tanlash{% endif %}
+                                </span>
+                            </button>
+                            {% if profile.profile_image %}
+                                <button type="button" 
+                                        onclick="removeImage('profile')"
+                                        class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-left text-sm flex items-center gap-2"
+                                        id="remove-profile-btn">
+                                    <i class="ri-delete-bin-line"></i> Rasmni o'chirish
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <input type="hidden" name="remove_profile_image" id="remove_profile_image" value="false">
+                    <div id="profile-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+
+                <!-- Banner Image -->
+                <div>
+                    <label class="block text-gray-700 mb-2 font-medium">Banner rasmi</label>
+                    <div class="mb-4 relative" id="banner-preview-container">
+                        {% if profile.banner_image %}
+                            <img src="{{ profile.banner_image.url }}?v={{ profile.updated_at|date:'U' }}" 
+                                 id="banner-preview" 
+                                 alt="Banner rasm" 
+                                 class="w-full h-48 object-cover rounded-lg shadow">
+                        {% else %}
+                            <div id="banner-default" 
+                                 class="w-full h-48 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                                <span class="text-white text-lg">Banner rasmi tanlanmagan</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <input type="file" 
+                               name="banner_image" 
+                               id="banner_image" 
+                               accept="image/*"
+                               class="hidden"
+                               onchange="handleBannerImageChange(this)">
+                        <button type="button" 
+                                onclick="document.getElementById('banner_image').click()"
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2">
+                            <i class="ri-image-line"></i>
+                            <span id="banner-btn-text">
+                                {% if profile.banner_image %}Banner almashtirish{% else %}Banner tanlash{% endif %}
+                            </span>
+                        </button>
+                        {% if profile.banner_image %}
+                            <button type="button" 
+                                    onclick="removeImage('banner')"
+                                    class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2"
+                                    id="remove-banner-btn">
+                                <i class="ri-delete-bin-line"></i> O'chirish
+                            </button>
+                        {% endif %}
+                        <div id="banner-filename" class="text-sm text-gray-500 ml-2"></div>
+                    </div>
+                    <input type="hidden" name="remove_banner_image" id="remove_banner_image" value="false">
+                    <div id="banner-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+
+                <!-- Bio -->
+                <div>
+                    <label for="bio" class="block text-gray-700 mb-2 font-medium">Bio (Qisqacha ma'lumot)</label>
+                    <textarea name="bio" 
+                              id="bio" 
+                              rows="3" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                              placeholder="O'zingiz haqingizda qisqacha ma'lumot...">{{ profile.bio|default:'' }}</textarea>
+                </div>
+
+                <!-- Location -->
+                <div>
+                    <label for="location" class="block text-gray-700 mb-2 font-medium">Manzil</label>
+                    <input type="text" 
+                           name="location" 
+                           id="location" 
+                           value="{{ profile.location|default:'' }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                           placeholder="Shahar, tuman...">
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label for="phone" class="block text-gray-700 mb-2 font-medium">Telefon raqam</label>
+                    <input type="text" 
+                           name="phone" 
+                           id="phone" 
+                           value="{{ profile.phone|default:'' }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                           placeholder="+998 90 123 45 67">
+                </div>
+
+                <!-- Social Media -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="telegram" class="block text-gray-700 mb-2 font-medium">Telegram username</label>
+                        <div class="flex">
+                            <span class="inline-flex items-center px-3 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 rounded-l-lg">
+                                @
+                            </span>
+                            <input type="text" 
+                                   name="telegram" 
+                                   id="telegram" 
+                                   value="{{ profile.telegram|default:'' }}"
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                   placeholder="username">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="instagram" class="block text-gray-700 mb-2 font-medium">Instagram username</label>
+                        <div class="flex">
+                            <span class="inline-flex items-center px-3 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 rounded-l-lg">
+                                @
+                            </span>
+                            <input type="text" 
+                                   name="instagram" 
+                                   id="instagram" 
+                                   value="{{ profile.instagram|default:'' }}"
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                   placeholder="username">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Hours -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="work_hours_start" class="block text-gray-700 mb-2 font-medium">Ish vaqti boshlanishi</label>
+                        <input type="time" 
+                               name="work_hours_start" 
+                               id="work_hours_start" 
+                               value="{{ profile.work_hours_start|time:'H:i' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    </div>
+                    
+                    <div>
+                        <label for="work_hours_end" class="block text-gray-700 mb-2 font-medium">Ish vaqti tugashi</label>
+                        <input type="time" 
+                               name="work_hours_end" 
+                               id="work_hours_end" 
+                               value="{{ profile.work_hours_end|time:'H:i' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" 
+                            class="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium shadow hover:shadow-md flex items-center justify-center gap-2"
+                            id="submit-btn">
+                        <i class="ri-save-line"></i> 
+                        <span id="submit-text">Saqlash</span>
+                    </button>
+                    <a href="{% url 'my_profile' %}?v={{ timestamp }}" 
+                       class="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors text-center font-medium shadow hover:shadow-md flex items-center justify-center gap-2">
+                        <i class="ri-close-line"></i> Bekor qilish
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // User initial olish
+        const userInitial = "{{ request.user.username|first|upper }}";
+        const timestamp = Date.now();
+        
+        // Profil rasmini o'zgartirish
+        function handleProfileImageChange(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            // Fayl hajmini tekshirish (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showError('profile-error', 'Rasm hajmi 5MB dan oshmasligi kerak');
+                input.value = '';
+                return;
+            }
+            
+            // Fayl turini tekshirish
+            if (!file.type.match('image.*')) {
+                showError('profile-error', 'Faqat rasm fayllari qabul qilinadi');
+                input.value = '';
+                return;
+            }
+            
+            // Xatoliklarni tozalash
+            hideError('profile-error');
+            
+            // Remove inputni false qilish
+            document.getElementById('remove_profile_image').value = 'false';
+            
+            // Fayl nomini ko'rsatish
+            document.getElementById('profile-filename').textContent = file.name;
+            
+            // Tugma matnini yangilash
+            document.getElementById('profile-btn-text').textContent = 'Rasm almashtirish';
+            
+            // O'chirish tugmasini ko'rsatish
+            showRemoveButton('profile');
+            
+            // Preview ko'rsatish
+            showImagePreview(file, 'profile');
+        }
+        
+        // Banner rasmini o'zgartirish
+        function handleBannerImageChange(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            // Fayl hajmini tekshirish (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('banner-error', 'Banner hajmi 10MB dan oshmasligi kerak');
+                input.value = '';
+                return;
+            }
+            
+            // Fayl turini tekshirish
+            if (!file.type.match('image.*')) {
+                showError('banner-error', 'Faqat rasm fayllari qabul qilinadi');
+                input.value = '';
+                return;
+            }
+            
+            // Xatoliklarni tozalash
+            hideError('banner-error');
+            
+            // Remove inputni false qilish
+            document.getElementById('remove_banner_image').value = 'false';
+            
+            // Fayl nomini ko'rsatish
+            document.getElementById('banner-filename').textContent = file.name;
+            
+            // Tugma matnini yangilash
+            document.getElementById('banner-btn-text').textContent = 'Banner almashtirish';
+            
+            // O'chirish tugmasini ko'rsatish
+            showRemoveButton('banner');
+            
+            // Preview ko'rsatish
+            showImagePreview(file, 'banner');
+        }
+        
+        // Xato ko'rsatish
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+        
+        // Xatoni yashirish
+        function hideError(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.add('hidden');
+        }
+        
+        // O'chirish tugmasini ko'rsatish
+        function showRemoveButton(type) {
+            const removeBtn = document.getElementById(`remove-${type}-btn`);
+            if (!removeBtn) {
+                const buttonContainer = type === 'profile' 
+                    ? document.querySelector('.flex.flex-col.gap-2')
+                    : document.querySelector('.flex.gap-2.items-center');
+                
+                const newRemoveBtn = document.createElement('button');
+                newRemoveBtn.type = 'button';
+                newRemoveBtn.onclick = () => removeImage(type);
+                newRemoveBtn.className = type === 'profile'
+                    ? 'px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-left text-sm flex items-center gap-2'
+                    : 'px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2';
+                newRemoveBtn.id = `remove-${type}-btn`;
+                newRemoveBtn.innerHTML = '<i class="ri-delete-bin-line"></i> ' + (type === 'profile' ? 'Rasmni o\'chirish' : 'O\'chirish');
+                buttonContainer.appendChild(newRemoveBtn);
+            }
+        }
+        
+        // Rasm preview ko'rsatish - MUHIM O'ZGARTIRISH
+        function showImagePreview(file, type) {
+            const reader = new FileReader();
+            const containerId = `${type}-preview-container`;
+            const container = document.getElementById(containerId);
+            
+            reader.onload = function(e) {
+                // Container ichidagi barcha elementlarni tozalash
+                container.innerHTML = '';
+                
+                // Yangi img element yaratish
+                const img = document.createElement('img');
+                img.id = `${type}-preview`;
+                img.src = e.target.result;
+                img.alt = type === 'profile' ? 'Profil rasmi' : 'Banner rasm';
+                
+                if (type === 'profile') {
+                    img.className = 'w-full h-full object-cover';
+                } else {
+                    img.className = 'w-full h-48 object-cover rounded-lg shadow';
+                }
+                
+                // Container ga qo'shish
+                container.appendChild(img);
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // Rasmni o'chirish - Soddalashtirilgan
+        function removeImage(type) {
+            // Remove inputni true qilish
+            document.getElementById(`remove_${type}_image`).value = 'true';
+            
+            // File inputni tozalash
+            const fileInput = document.getElementById(`${type}_image`);
+            if (fileInput) fileInput.value = '';
+            
+            // Fayl nomini tozalash
+            const filename = document.getElementById(`${type}-filename`);
+            if (filename) filename.textContent = '';
+            
+            // Tugma matnini yangilash
+            const btnText = document.getElementById(`${type}-btn-text`);
+            if (btnText) btnText.textContent = type === 'profile' ? 'Rasm tanlash' : 'Banner tanlash';
+            
+            // O'chirish tugmasini olib tashlash
+            const removeBtn = document.getElementById(`remove-${type}-btn`);
+            if (removeBtn) removeBtn.remove();
+            
+            // Preview'ni default holatga qaytarish
+            resetPreview(type);
+        }
+        
+        // Preview'ni reset qilish
+        function resetPreview(type) {
+            const containerId = `${type}-preview-container`;
+            const container = document.getElementById(containerId);
+            
+            if (type === 'profile') {
+                // Profil uchun default ko'rinish
+                container.innerHTML = `
+                    <div id="profile-default" class="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span class="text-xl text-gray-500">${userInitial}</span>
+                    </div>
+                `;
+                // Container class'larini to'g'rilash
+                container.className = 'w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg relative';
+            } else {
+                // Banner uchun default ko'rinish
+                container.innerHTML = `
+                    <div id="banner-default" class="w-full h-48 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center shadow">
+                        <span class="text-white text-lg">Banner rasmi tanlanmagan</span>
+                    </div>
+                `;
+                // Container class'larini to'g'rilash
+                container.className = 'mb-4 relative';
+            }
+        }
+        
+        // Form yuborilganda
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            // Saqlash tugmasini bloklash
+            const submitBtn = document.getElementById('submit-btn');
+            const submitText = document.getElementById('submit-text');
+            const submitIcon = submitBtn.querySelector('i');
+            
+            submitBtn.disabled = true;
+            submitText.textContent = 'Saqlanmoqda...';
+            submitIcon.className = 'ri-loader-4-line spinner';
+            
+            // Telefon raqamni formatlash
+            formatPhoneNumber();
+            
+            return true;
+        });
+        
+        // Telefon raqamni formatlash
+        function formatPhoneNumber() {
+            const phoneInput = document.getElementById('phone');
+            let phoneValue = phoneInput.value.replace(/\D/g, '');
+            
+            if (phoneValue && phoneValue.length >= 9) {
+                if (phoneValue.startsWith('998')) {
+                    phoneValue = '+' + phoneValue;
+                } else if (phoneValue.length === 9) {
+                    phoneValue = '+998' + phoneValue;
+                }
+                
+                // Format: +998 XX XXX XX XX
+                let formatted = '+';
+                for (let i = 0; i < phoneValue.length; i++) {
+                    if (i === 3) formatted += ' ';
+                    if (i === 5) formatted += ' ';
+                    if (i === 8) formatted += ' ';
+                    formatted += phoneValue[i];
+                }
+                phoneInput.value = formatted;
+            }
+        }
+        
+        // Telefon raqam formati
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length > 0) {
+                if (!value.startsWith('998')) {
+                    value = '998' + value;
+                }
+                
+                if (value.length >= 12) {
+                    value = value.substring(0, 12);
+                }
+                
+                let formatted = '+';
+                for (let i = 0; i < value.length; i++) {
+                    if (i === 3) formatted += ' ';
+                    if (i === 5) formatted += ' ';
+                    if (i === 8) formatted += ' ';
+                    formatted += value[i];
+                }
+                
+                e.target.value = formatted;
+            }
+        });
+        
+        // Sahifa yuklanganda
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ish vaqtini formatlash
+            const startTime = document.getElementById('work_hours_start');
+            const endTime = document.getElementById('work_hours_end');
+            
+            if (startTime && !startTime.value) {
+                startTime.value = '09:00';
+            }
+            if (endTime && !endTime.value) {
+                endTime.value = '21:00';
+            }
+            
+            // Xabarlarni avtomatik yopish
+            const messages = document.querySelectorAll('.p-4.rounded-lg');
+            if (messages.length > 0) {
+                setTimeout(() => {
+                    messages.forEach(msg => {
+                        msg.style.transition = 'opacity 0.5s';
+                        msg.style.opacity = '0';
+                        setTimeout(() => msg.remove(), 500);
+                    });
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>

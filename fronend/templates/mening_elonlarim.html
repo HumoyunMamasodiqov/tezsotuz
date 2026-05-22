@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Mening e'lonlarim - Tez Sot</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="icon" type="image/png" href="{% static 'img/iconlogo.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* Premium mahsulot uchun maxsus stil */
+        .premium-product {
+            border: 2px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+                      linear-gradient(135deg, #FFD700, #FFA500) border-box;
+            position: relative;
+        }
+        
+        .premium-corner-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 4px 12px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .regular-product {
+            border: 1px solid #e2e8f0;
+        }
+        
+        .premium-price {
+            color: #d4af37 !important;
+        }
+        
+        .sotilgan_badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #ef4444;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .sold-product {
+            opacity: 0.85;
+        }
+        
+        .sold-product .elon_img {
+            filter: grayscale(0.2);
+        }
+
+        .wrapper_oa {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 20px 20px 80px;
+        }
+
+        .main-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            gap: 16px;
+            background: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .bars {
+            display: none;
+            cursor: pointer;
+            background: #f1f5f9;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .bars:active {
+            transform: scale(0.95);
+            background: #e2e8f0;
+        }
+
+        .bars i {
+            font-size: 20px;
+            color: #0f172a;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            gap: 8px;
+        }
+
+        .nav-links li a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #475569;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 40px;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-links li a:hover {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .qoyish_ao {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            padding: 10px 24px;
+            gap: 8px;
+            border-radius: 40px;
+            color: #fff;
+            background-color: #0f172a;
+            transition: all 0.2s;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .qoyish_ao:hover {
+            background-color: #1e293b;
+            transform: translateY(-2px);
+        }
+        
+        .qoyish_ao:active {
+            transform: translateY(0);
+        }
+
+        .gul_ao {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #f1f5f9;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .intro_ao {
+            display: flex;
+            gap: 24px;
+        }
+
+        .sidebar_ao {
+            width: 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 28px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            border: 1px solid #f0f2f5;
+        }
+
+        .profile_ao {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 12px;
+            border-radius: 20px;
+            transition: all 0.2s;
+            background: #fafcff;
+            border: 1px solid #f0f2f5;
+        }
+
+        .avatar_ao {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+
+        .profile-info_ao {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .name_ao {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .phone_ao {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .menu_ao {
+            list-style: none;
+            margin: 0 0 16px 0;
+        }
+
+        .menu_ao hr {
+            border: none;
+            height: 1px;
+            background-color: #eef2f6;
+            margin: 12px 0;
+        }
+
+        .menu_item_ao {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: transparent;
+            color: #475569;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .menu_item_ao:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .active_ao {
+            background: #eef2ff !important;
+            color: #2563eb !important;
+        }
+
+        .menu_item_ao span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 12px;
+            background: #f1f5f9;
+        }
+
+        .active_ao span {
+            background: #2563eb;
+        }
+
+        .active_ao span svg path,
+        .active_ao span i {
+            color: white !important;
+        }
+
+        .logout_ao {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: #fef2f2;
+            border-radius: 14px;
+            color: #dc2626;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-top: auto;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .logout_ao:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .right_ao {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* ========== CUSTOM CAROUSEL STYLES ========== */
+        .carousel-container {
+            background-color: #fff;
+            border-radius: 28px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #f0f2f5;
+            position: relative;
+        }
+
+        .carousel-slide {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-slide:hover img {
+            transform: scale(1.03);
+        }
+
+        .carousel-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+            padding: 20px;
+            color: white;
+        }
+
+        .carousel-overlay h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .carousel-overlay p {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .carousel-btn:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .carousel-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .carousel-btn.prev {
+            left: 16px;
+        }
+
+        .carousel-btn.next {
+            right: 16px;
+        }
+
+        .carousel-btn i {
+            font-size: 18px;
+            color: #0f172a;
+        }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: 12px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .carousel-dot.active {
+            width: 24px;
+            border-radius: 12px;
+            background: white;
+        }
+
+        /* ========== BOTTOM NAVIGATION - FULLY FIXED (lg:hidden REPLACED) ========== */
+        /* Desktop (1024px va undan katta) da yashirin */
+        @media screen and (min-width: 1024px) {
+            .bottom-nav-mobile {
+                display: none !important;
+            }
+        }
+        
+        /* Mobile va tablet (1024px dan kichik) da ko'rsatish */
+        @media screen and (max-width: 1023px) {
+            .bottom-nav-mobile {
+                display: block !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.96);
+                backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(226, 232, 240, 0.8);
+                z-index: 50;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+                transition: transform 0.2s ease;
+            }
+        }
+
+        .bottom-nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-decoration: none;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            padding: 6px 16px;
+            border-radius: 10px;
+            position: relative;
+            background: transparent;
+            min-width: 64px;
+        }
+
+        .bottom-nav-item i {
+            font-size: 22px;
+            transition: transform 0.2s ease;
+        }
+
+        .bottom-nav-item span {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* Active state */
+        .bottom-nav-item.active {
+            color: #0f172a;
+            background: #f1f5f9;
+        }
+
+        .bottom-nav-item.active i {
+            transform: translateY(-2px);
+        }
+
+        /* Hover va tap effect */
+        .bottom-nav-item:active {
+            transform: scale(0.94);
+            background: #e2e8f0;
+        }
+
+        /* Add button special style */
+        .bottom-nav-add {
+            background: #0f172a;
+            color: white !important;
+            padding: 6px 20px;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+
+        .bottom-nav-add i {
+            font-size: 18px;
+        }
+
+        .bottom-nav-add:active {
+            transform: scale(0.94);
+            background: #1e293b;
+        }
+
+        /* Badge for wishlist count */
+        .nav-badge {
+            position: absolute;
+            top: -2px;
+            right: 8px;
+            background: #ef4444;
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        @media only screen and (max-width: 480px) {
+            .bottom-nav-item {
+                padding: 6px 10px;
+                min-width: 56px;
+            }
+            .bottom-nav-item i {
+                font-size: 20px;
+            }
+            .bottom-nav-add {
+                padding: 6px 14px;
+            }
+            .nav-badge {
+                right: 4px;
+                top: -4px;
+                font-size: 8px;
+                min-width: 14px;
+                height: 14px;
+            }
+        }
+
+        .right_center_ao {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .right_center_ao h3 {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .filter_tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter_btn {
+            padding: 8px 18px;
+            border-radius: 40px;
+            background-color: #fff;
+            text-decoration: none;
+            color: #475569;
+            transition: all 0.2s;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter_btn:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+        .filter_btn.active {
+            color: #fff !important;
+            background-color: #0f172a !important;
+            border-color: #0f172a !important;
+        }
+        
+        .filter_btn.premium.active {
+            background-color: #f59e0b !important;
+            border-color: #f59e0b !important;
+        }
+        
+        .filter_btn.regular.active {
+            background-color: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+        .alert-warning {
+            background-color: #fed7aa;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .elonlar_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .elon_card {
+            background: #fff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .elon_card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        }
+
+        .elon_img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.4s;
+        }
+
+        .elon_img:hover {
+            transform: scale(1.02);
+        }
+
+        .elon_content {
+            padding: 16px;
+        }
+
+        .elon_narx {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .elon_nomi {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            color: #0f172a;
+            text-decoration: none;
+            display: block;
+            transition: color 0.2s;
+        }
+
+        .elon_nomi:hover {
+            color: #2563eb;
+        }
+
+        .elon_info {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .product-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-right: 6px;
+            margin-top: 4px;
+        }
+
+        .elon_actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .elon_btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn_sotilgan {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn_sotilgan:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+        }
+        .btn_yangi {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn_yangi:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+        .btn_ochirish {
+            background-color: #ef4444;
+            color: white;
+        }
+        .btn_ochirish:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .elon_btn:active {
+            transform: translateY(0);
+        }
+
+        .right_bottom_ao {
+            text-align: center;
+            background-color: #fff;
+            padding: 50px 20px;
+            border-radius: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #f0f2f5;
+        }
+
+        .right_div_ao {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .right_div_ao i {
+            font-size: 44px;
+            color: #94a3b8;
+        }
+        .right_bottom_ao p {
+            color: #64748b;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .right_bottom_qoyish_ao {
+            color: #fff;
+            background-color: #0f172a;
+            padding: 10px 24px;
+            border-radius: 40px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .right_bottom_qoyish_ao:hover {
+            background-color: #1e293b;
+            transform: translateY(-2px);
+        }
+        .right_bottom_premium_ao {
+            color: #000;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            padding: 10px 24px;
+            border-radius: 40px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .right_bottom_premium_ao:hover {
+            background: linear-gradient(135deg, #FFC107, #FF8F00);
+            transform: translateY(-2px);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pagination a, .pagination span {
+            padding: 8px 16px;
+            border-radius: 40px;
+            text-decoration: none;
+            color: #0f172a;
+            background-color: #fff;
+            font-weight: 500;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .pagination a:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .pagination .current {
+            background-color: #0f172a;
+            color: #fff;
+            border-color: #0f172a;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+        }
+
+        .stats_container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat_card {
+            background: white;
+            padding: 14px 8px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.2s;
+            border: 1px solid #f0f2f5;
+        }
+        .stat_card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+        .stat_card h4 {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .stat_card .count {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .stat_card .count.premium { color: #d4af37; }
+        .stat_card .count.yangi { color: #10b981; }
+        .stat_card .count.sotilgan { color: #ef4444; }
+        .premium-stat-card {
+            background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+            border-color: #FDE68A;
+        }
+        .premium-seller-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 9px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .logo {
+            width: 130px;
+            height: auto;
+        }
+
+        /* ========== MOBILE RESPONSIVE ========== */
+        @media only screen and (max-width: 768px) {
+            .wrapper_oa {
+                padding: 12px 12px 80px;
+            }
+            .main-nav {
+                padding: 10px 16px;
+                border-radius: 40px;
+            }
+            .bars {
+                display: flex;
+            }
+            .nav-links,
+            .qoyish_ao {
+                display: none;
+            }
+            .gul_ao {
+                display: flex;
+            }
+            .intro_ao {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .sidebar_ao {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 85%;
+                max-width: 300px;
+                z-index: 999;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border-radius: 0;
+                padding-top: 60px;
+                overflow-y: auto;
+                background: white;
+            }
+            .sidebar-open {
+                transform: translateX(0) !important;
+                display: flex !important;
+            }
+            
+            .elonlar_grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+            }
+            .elon_img {
+                height: 140px;
+            }
+            .elon_content {
+                padding: 10px;
+            }
+            .elon_narx {
+                font-size: 15px;
+            }
+            .elon_nomi {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            .elon_info {
+                font-size: 9px;
+                margin-bottom: 8px;
+            }
+            .elon_actions {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .elon_btn {
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+            .product-status {
+                font-size: 8px;
+                padding: 2px 8px;
+            }
+            .premium-corner-badge {
+                font-size: 8px;
+                padding: 3px 10px;
+                top: 8px;
+                right: 8px;
+            }
+            .sotilgan_badge {
+                font-size: 8px;
+                padding: 3px 10px;
+                top: 8px;
+                left: 8px;
+            }
+            .stats_container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .stat_card {
+                padding: 10px;
+            }
+            .stat_card .count {
+                font-size: 18px;
+            }
+            .filter_tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding-bottom: 6px;
+                width: 100%;
+                -webkit-overflow-scrolling: touch;
+            }
+            .filter_btn {
+                white-space: nowrap;
+                font-size: 11px;
+                padding: 6px 14px;
+            }
+            .right_center_ao {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .carousel-slide {
+                height: 160px;
+            }
+            .carousel-overlay h3 {
+                font-size: 14px;
+            }
+            .carousel-overlay p {
+                font-size: 10px;
+            }
+            .carousel-btn {
+                width: 30px;
+                height: 30px;
+            }
+            .carousel-btn i {
+                font-size: 14px;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            .elonlar_grid {
+                gap: 10px !important;
+            }
+            .elon_img {
+                height: 120px;
+            }
+            .elon_narx {
+                font-size: 14px;
+            }
+            .elon_nomi {
+                font-size: 11px;
+            }
+            .carousel-slide {
+                height: 140px;
+            }
+        }
+
+        @media only screen and (min-width: 1024px) {
+            .elonlar_grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media only screen and (min-width: 1280px) {
+            .elonlar_grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        .default-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper_oa">
+        <!-- Navigation -->
+        <nav class="main-nav">
+            <a class="bars" href="#">
+                <i class="fas fa-bars"></i>
+            </a>
+            <a href="/">
+                <img class="logo" src="{% static 'img/logo.png' %}" alt="Tez Sot logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'biz_haqimizda' %}">Biz haqimizda</a></li>
+                <li><a href="{% url 'boglanish' %}">Qo'llab-quvvatlash</a></li>
+                <li><a href="#"><i class="far fa-comment-dots"></i> Xabarlar</a></li>
+                <li>
+                    <a href="{% url 'mening_elonlarim' %}">
+                        {% if user.seller_profile and user.seller_profile.profile_image %}
+                            <img src="{{ user.seller_profile.profile_image.url }}" width="28" height="28" style="border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; font-size: 11px; color: white;">{{ user.first_name|first|upper }}</div>
+                        {% endif %}
+                        Mening profilim
+                        {% if premium_profile and premium_profile.is_premium %}
+                        <span class="premium-seller-badge"><i class="fas fa-crown"></i> Premium</span>
+                        {% endif %}
+                    </a>
+                </li>
+            </ul>
+            {% if user.is_authenticated %}
+                <a class="qoyish_ao" href="{% url 'elon_qoshish' %}">
+                    <i class="fas fa-plus"></i> Qo'yish
+                </a>
+            {% else %}
+                <a class="qoyish_ao" href="{% url 'signup' %}">
+                    <i class="fas fa-plus"></i> Qo'yish
+                </a>
+            {% endif %}
+            <a class="gul_ao" href="#">
+                {% if user.seller_profile and user.seller_profile.profile_image %}
+                    <img src="{{ user.seller_profile.profile_image.url }}" width="40" height="40" style="border-radius: 50%; object-fit: cover;">
+                {% else %}
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">{{ user.first_name|first|upper }}</div>
+                {% endif %}
+            </a>
+        </nav>
+
+        <div class="overlay"></div>
+
+        <div class="intro_ao">
+            <!-- Sidebar -->
+            <aside class="sidebar_ao">
+                <div class="profile_ao">
+                    {% if user.seller_profile and user.seller_profile.profile_image %}
+                        <img src="{{ user.seller_profile.profile_image.url }}" alt="avatar" class="avatar_ao">
+                    {% else %}
+                        <div class="avatar_ao default-avatar" style="display: flex; align-items: center; justify-content: center; font-size: 22px;">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+                    {% endif %}
+                    <div class="profile-info_ao">
+                        <h3 class="name_ao">{{ user.first_name }} {{ user.last_name }}
+                            {% if premium_profile and premium_profile.is_premium %}
+                            <span class="premium-seller-badge"><i class="fas fa-crown"></i> Premium</span>
+                            {% endif %}
+                        </h3>
+                        <p class="phone_ao">{% if user.profile.phone %}{{ user.profile.phone }}{% else %}Telefon kiritilmagan{% endif %}</p>
+                    </div>
+                </div>
+                <ul class="menu_ao">
+                    <li><a class="menu_item_ao active_ao" href="{% url 'mening_elonlarim' %}"><span><i class="fas fa-box"></i></span> Mening e'lonlarim</a></li>
+                    <hr>
+                    <li><a class="menu_item_ao" href="{% url 'sevimlilarim' %}"><span><i class="fas fa-heart" style="color:#dc3545;"></i></span> Sevimlilar</a></li>
+                    <li><a class="menu_item_ao" href="{% url 'premium_product_check' %}"><span><i class="fas fa-crown" style="color:#eccc19;"></i></span> Premium qo'shish</a></li>
+                    <li><a class="menu_item_ao" href="{% url 'my_profile' %}"><span><i class="fas fa-user"></i></span> Profil</a></li>
+                    <hr>
+                    <li><a class="menu_item_ao" href="{% url 'boglanish' %}"><span><i class="fas fa-headset"></i></span> Yordam markazi</a></li>
+                    <li><a class="menu_item_ao" href="{% url 'qoidalar' %}"><span><i class="fas fa-scale-balanced"></i></span> Platforma qoidalari</a></li>
+                    <li><a class="menu_item_ao" href="{% url 'maxfiyliksiyosati' %}"><span><i class="fas fa-lock"></i></span> Maxfiylik siyosati</a></li>
+<li>
+    <a class="menu_item_ao" href="{% url 'settings' %}">
+        <span><i class="fas fa-sliders-h"></i></span> 
+        Sozlamalar
+    </a>
+</li>
+                    <hr>
+                    <li><a class="logout_ao" href="{% url 'chiqish' %}"><i class="fas fa-sign-out-alt"></i> Chiqish</a></li>
+                </ul>
+            </aside>
+
+            <!-- Right Content -->
+            <div class="right_ao">
+                <!-- Carousel -->
+                <div class="carousel-container">
+                    <div class="carousel-slide" id="carouselSlide">
+                        <img id="carouselImage" src="{% static 'img/qollanma.jpg' %}" alt="Qo'llanma">
+                        <div class="carousel-overlay">
+                            <h3 id="carouselTitle">Tez sotish bo'yicha qo'llanma</h3>
+                            <p id="carouselDesc">E'lonlaringizni tezda sotish uchun maslahatlar</p>
+                        </div>
+                    </div>
+                    <div class="carousel-btn prev" id="prevBtn">
+                        <i class="fas fa-chevron-left"></i>
+                    </div>
+                    <div class="carousel-btn next" id="nextBtn">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="carousel-dots" id="carouselDots"></div>
+                </div>
+
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% elif message.tags == 'info' %}info{% else %}success{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Filter Section -->
+                <div class="right_center_ao">
+                    <h3>Mening e'lonlarim</h3>
+                    <div class="filter_tabs">
+                        <a href="?status=all&filter=all" class="filter_btn {% if not status or status == 'all' and not filter_type or filter_type == 'all' %}active{% endif %}"><i class="fas fa-boxes"></i> Barchasi ({{ total_count }})</a>
+                        <a href="?status=yangi&filter=all" class="filter_btn {% if status == 'yangi' %}active{% endif %}"><i class="fas fa-bolt"></i> Yangi ({{ active_count }})</a>
+                        <a href="?status=sotilgan&filter=all" class="filter_btn {% if status == 'sotilgan' %}active{% endif %}"><i class="fas fa-check-circle"></i> Sotilgan ({{ sold_count }})</a>
+                        <a href="?status={{ status|default:'all' }}&filter=premium" class="filter_btn premium {% if filter_type == 'premium' %}active{% endif %}"><i class="fas fa-crown"></i> Premium ({{ premium_count }})</a>
+                        <a href="?status={{ status|default:'all' }}&filter=regular" class="filter_btn regular {% if filter_type == 'regular' %}active{% endif %}"><i class="fas fa-box"></i> Oddiy ({{ regular_count }})</a>
+                    </div>
+                </div>
+
+                <!-- Statistikalar -->
+                <div class="stats_container">
+                    <div class="stat_card"><h4><i class="fas fa-box"></i> Jami</h4><div class="count">{{ total_count }}</div></div>
+                    <div class="stat_card"><h4><i class="fas fa-bolt"></i> Yangi</h4><div class="count yangi">{{ active_count }}</div></div>
+                    <div class="stat_card"><h4><i class="fas fa-check-circle"></i> Sotilgan</h4><div class="count sotilgan">{{ sold_count }}</div></div>
+                    <div class="stat_card premium-stat-card"><h4><i class="fas fa-crown"></i> Premium</h4><div class="count premium">{{ premium_count }}</div></div>
+                    <div class="stat_card"><h4><i class="fas fa-box"></i> Oddiy</h4><div class="count">{{ regular_count }}</div></div>
+                </div>
+
+                <!-- E'lonlar ro'yxati -->
+                {% if mahsulotlar %}
+                <div class="elonlar_grid">
+                    {% for mahsulot in mahsulotlar %}
+                    <div class="elon_card {% if mahsulot.is_premium %}premium-product{% else %}regular-product{% endif %} {% if mahsulot.sotilgan %}sold-product{% endif %}">
+                        
+                        {% if mahsulot.sotilgan %}
+                        <div class="sotilgan_badge"><i class="fas fa-check-circle"></i> Sotilgan</div>
+                        {% endif %}
+                        
+                        {% if mahsulot.is_premium %}
+                        <div class="premium-corner-badge"><i class="fas fa-crown"></i> PREMIUM</div>
+                        {% endif %}
+                        
+                        <a href="{% url 'mahsulot_detail' mahsulot.id %}">
+                            {% if mahsulot.asosiyimg %}
+                                <img src="{{ mahsulot.asosiyimg.url }}" alt="{{ mahsulot.name }}" class="elon_img">
+                            {% else %}
+                                <div class="elon_img" style="background-color: #f1f5f9; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image" style="font-size: 42px; color: #94a3b8;"></i></div>
+                            {% endif %}
+                        </a>
+                        
+                        <div class="elon_content">
+                            <div class="elon_narx {% if mahsulot.is_premium %}premium-price{% endif %}">{{ mahsulot.narx_formatted }}</div>
+                            <a href="{% url 'mahsulot_detail' mahsulot.id %}" class="elon_nomi">{{ mahsulot.name }}</a>
+                            <div class="elon_info">
+                                <i class="fas fa-map-marker-alt"></i> {{ mahsulot.get_viloyat_display|default:"Noma'lum" }} • 
+                                <i class="fas fa-calendar"></i> {{ mahsulot.sana|date:"d.m.Y" }}<br>
+                                <span class="product-status" style="background: {% if mahsulot.is_premium %}#FFFBEB{% else %}#EFF6FF{% endif %}; color: {% if mahsulot.is_premium %}#b8860b{% else %}#1D4ED8{% endif %};">
+                                    {% if mahsulot.is_premium %}<i class="fas fa-crown"></i> Premium{% else %}<i class="fas fa-box"></i> Oddiy{% endif %}
+                                </span>
+                                {% if mahsulot.sotilgan %}
+                                <span class="product-status" style="background:#FEE2E2; color:#DC2626;"><i class="fas fa-check"></i> Sotilgan</span>
+                                {% else %}
+                                <span class="product-status" style="background:#D1FAE5; color:#059669;"><i class="fas fa-bolt"></i> Yangi</span>
+                                {% endif %}
+                            </div>
+                            {% if mahsulot.is_premium %}
+                            <div class="elon_info" style="margin-bottom: 4px;"><i class="fas fa-eye" style="color:#d4af37;"></i> {{ mahsulot.korishlar_soni|default:"0" }} ko'rish</div>
+                            {% endif %}
+                            <div class="elon_actions">
+                                {% if not mahsulot.sotilgan %}
+                                <form method="POST" action="{% url 'sotilgan_qilish' mahsulot.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="{{ status|default:'all' }}">
+                                    <input type="hidden" name="filter" value="{{ filter_type|default:'all' }}">
+                                    <button type="submit" class="elon_btn btn_sotilgan" onclick="return confirm('{{ mahsulot.name }} sotilgan deb belgilansinmi?')"><i class="fas fa-check"></i> Sotilgan</button>
+                                </form>
+                                {% else %}
+                                <form method="POST" action="{% url 'yangi_qilish' mahsulot.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="{{ status|default:'all' }}">
+                                    <input type="hidden" name="filter" value="{{ filter_type|default:'all' }}">
+                                    <button type="submit" class="elon_btn btn_yangi" onclick="return confirm('{{ mahsulot.name }} yangi deb belgilansinmi?')"><i class="fas fa-redo"></i> Yangi</button>
+                                </form>
+                                {% endif %}
+                                <form method="POST" action="{% url 'elon_ochirish' mahsulot.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="{{ status|default:'all' }}">
+                                    <input type="hidden" name="filter" value="{{ filter_type|default:'all' }}">
+                                    <button type="submit" class="elon_btn btn_ochirish" onclick="return confirm('Haqiqatan ham "{{ mahsulot.name }}" e\'lonini o\'chirmoqchimisiz?')"><i class="fas fa-trash"></i> O'chirish</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.paginator.num_pages > 1 %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1&status={{ status|default:'all' }}&filter={{ filter_type|default:'all' }}">&laquo; Boshiga</a>
+                        <a href="?page={{ page_obj.previous_page_number }}&status={{ status|default:'all' }}&filter={{ filter_type|default:'all' }}">Oldingi</a>
+                    {% endif %}
+                    <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&status={{ status|default:'all' }}&filter={{ filter_type|default:'all' }}">Keyingi</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}&status={{ status|default:'all' }}&filter={{ filter_type|default:'all' }}">Oxiriga &raquo;</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="right_bottom_ao">
+                    <div class="right_div_ao"><i class="fas fa-box-open"></i></div>
+                    <p>
+                        {% if status == 'yangi' %}Hozircha yangi e'lonlaringiz yo'q.<br>Birinchisini qo'shing!
+                        {% elif status == 'sotilgan' %}Hozircha sotilgan e'lonlaringiz yo'q.
+                        {% elif filter_type == 'premium' %}Hozircha premium e'lonlaringiz yo'q.<br>Premium mahsulot qo'shing!
+                        {% elif filter_type == 'regular' %}Hozircha oddiy e'lonlaringiz yo'q.
+                        {% else %}Hozircha hech qanday e'lon yo'q.<br>Birinchisini qo'shing!{% endif %}
+                    </p>
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <a class="right_bottom_qoyish_ao" href="{% url 'elon_qoshish' %}"><i class="fas fa-plus"></i> Oddiy e'lon</a>
+                        {% if premium_profile and premium_profile.is_premium %}
+                        <a class="right_bottom_premium_ao" href="{% url 'add_premium_product' %}"><i class="fas fa-crown"></i> Premium e'lon</a>
+                        {% else %}
+                        <a class="right_bottom_premium_ao" href="{% url 'admin_contact' %}"><i class="fas fa-crown"></i> Premium huquq</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== BOTTOM NAVIGATION - FIXED (Desktopda yashirin, mobilda ko'rinadi) ========== -->
+    <div class="bottom-nav-mobile">
+        <div class="bottom-nav-inner">
+            <a href="/" class="bottom-nav-item" data-nav="home">
+                <i class="ri-home-line"></i>
+                <span>Bosh</span>
+            </a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'sevimlilarim' %}" class="bottom-nav-item position-relative" data-nav="wishlist">
+                <i class="ri-heart-line"></i>
+                <span>Sevimli</span>
+                {% if request.user.sevimli_set.count > 0 %}
+                <span class="nav-badge">{{ request.user.sevimli_set.count }}</span>
+                {% endif %}
+            </a>
+            {% else %}
+            <a href="{% url 'kirish' %}" class="bottom-nav-item" data-nav="wishlist">
+                <i class="ri-heart-line"></i>
+                <span>Sevimli</span>
+            </a>
+            {% endif %}
+            <a href="{% url 'elon_qoshish' %}" class="bottom-nav-item bottom-nav-add" data-nav="add">
+                <i class="ri-add-line"></i>
+                <span>E'lon</span>
+            </a>
+            <a href="{% url 'mening_elonlarim' %}" class="bottom-nav-item active" data-nav="profile">
+                <i class="ri-user-line"></i>
+                <span>Profil</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // SIDEBAR TOGGLE
+            const sidebar = document.querySelector('.sidebar_ao');
+            const barsIcon = document.querySelector('.bars');
+            const overlay = document.querySelector('.overlay');
+            const messages = document.querySelector('.messages');
+            
+            if (barsIcon) {
+                barsIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    sidebar.classList.add('sidebar-open');
+                    overlay.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('sidebar-open');
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                });
+            }
+            if (messages) {
+                setTimeout(() => {
+                    messages.style.opacity = '0';
+                    setTimeout(() => { messages.style.display = 'none'; }, 400);
+                }, 4000);
+            }
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('sidebar-open');
+                    if (overlay) overlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            });
+            const sidebarLinks = document.querySelectorAll('.sidebar_ao a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        setTimeout(() => {
+                            sidebar.classList.remove('sidebar-open');
+                            overlay.style.display = 'none';
+                            document.body.style.overflow = '';
+                        }, 150);
+                    }
+                });
+            });
+
+            // ========== CAROUSEL ==========
+            const carouselImages = [
+                {
+                    src: "{% static 'img/qollanma.jpg' %}",
+                    title: "Tez sotish bo'yicha qo'llanma",
+                    desc: "E'lonlaringizni tezda sotish uchun maslahatlar"
+                },
+                {
+                    src: "{% static 'img/qollanma2.png' %}",
+                    title: "Premium imkoniyatlar",
+                    desc: "Premium e'lon bilan ko'proq xaridor toping"
+                }
+            ];
+            
+            let currentIndex = 0;
+            const carouselImage = document.getElementById('carouselImage');
+            const carouselTitle = document.getElementById('carouselTitle');
+            const carouselDesc = document.getElementById('carouselDesc');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const dotsContainer = document.getElementById('carouselDots');
+            let autoSlideInterval;
+            
+            function createDots() {
+                dotsContainer.innerHTML = '';
+                carouselImages.forEach((_, index) => {
+                    const dot = document.createElement('div');
+                    dot.classList.add('carousel-dot');
+                    if (index === currentIndex) dot.classList.add('active');
+                    dot.addEventListener('click', () => goToSlide(index));
+                    dotsContainer.appendChild(dot);
+                });
+            }
+            
+            function updateSlide() {
+                if (!carouselImage) return;
+                carouselImage.style.opacity = '0';
+                setTimeout(() => {
+                    carouselImage.src = carouselImages[currentIndex].src;
+                    carouselTitle.textContent = carouselImages[currentIndex].title;
+                    carouselDesc.textContent = carouselImages[currentIndex].desc;
+                    carouselImage.style.opacity = '1';
+                    const dots = document.querySelectorAll('.carousel-dot');
+                    dots.forEach((dot, idx) => {
+                        if (idx === currentIndex) dot.classList.add('active');
+                        else dot.classList.remove('active');
+                    });
+                }, 150);
+            }
+            
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % carouselImages.length;
+                updateSlide();
+                resetAutoSlide();
+            }
+            
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + carouselImages.length) % carouselImages.length;
+                updateSlide();
+                resetAutoSlide();
+            }
+            
+            function goToSlide(index) {
+                currentIndex = index;
+                updateSlide();
+                resetAutoSlide();
+            }
+            
+            function startAutoSlide() {
+                autoSlideInterval = setInterval(() => {
+                    nextSlide();
+                }, 5000);
+            }
+            
+            function resetAutoSlide() {
+                clearInterval(autoSlideInterval);
+                startAutoSlide();
+            }
+            
+            if (prevBtn && nextBtn) {
+                prevBtn.addEventListener('click', prevSlide);
+                nextBtn.addEventListener('click', nextSlide);
+            }
+            
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const carouselContainer = document.querySelector('.carousel-container');
+            if (carouselContainer) {
+                carouselContainer.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                });
+                carouselContainer.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    if (touchEndX < touchStartX - 50) nextSlide();
+                    if (touchEndX > touchStartX + 50) prevSlide();
+                });
+            }
+            
+            createDots();
+            carouselImage.style.transition = 'opacity 0.3s ease';
+            carouselImage.style.opacity = '1';
+            startAutoSlide();
+
+            // ========== BOTTOM NAV ACTIVE STATE MANAGEMENT ==========
+            const navItems = document.querySelectorAll('.bottom-nav-item');
+            const currentPath = window.location.pathname;
+            
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href && currentPath === href) {
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+                }
+                
+                // Touch feedback for better UX
+                item.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.96)';
+                });
+                item.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+                item.addEventListener('touchcancel', function() {
+                    this.style.transform = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

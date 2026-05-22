@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atelelectronics - Elektronika va maishiy texnika</title>
+    <style>
+        /* Umumiy stillar */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header qismi */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        
+        .logo span {
+            color: #ff6600;
+        }
+        
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .user-actions a {
+            margin-left: 15px;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .user-actions a:hover {
+            color: #0066cc;
+        }
+        
+        nav {
+            background-color: #0066cc;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            position: relative;
+        }
+        
+        nav ul li a {
+            display: block;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            background-color: #0055aa;
+        }
+        
+        /* Banner qismi */
+        .banner {
+            background: linear-gradient(135deg, #0066cc, #0099ff);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .banner h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        .banner p {
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #ff6600;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #e55a00;
+        }
+        
+        /* Mahsulotlar qismi */
+        .products-section {
+            padding: 40px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #333;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .product-image {
+            height: 200px;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .product-info {
+            padding: 15px;
+        }
+        
+        .product-title {
+            font-size: 16px;
+            margin-bottom: 10px;
+            height: 40px;
+            overflow: hidden;
+        }
+        
+        .product-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+        
+        .product-old-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        
+        .add-to-cart {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .add-to-cart:hover {
+            background-color: #0055aa;
+        }
+        
+    
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .social-icons a {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            background-color: #444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .social-icons a:hover {
+            background-color: #ff6600;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* Responsive dizayn */
+        @media (max-width: 768px) {
+            .header-top {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-bar {
+                margin: 10px 0;
+                max-width: 100%;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+            }
+            
+            .banner h1 {
+                font-size: 28px;
+            }
+            
+            .banner p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header qismi -->
+    <header>
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">Atelec<span>tronics</span></div>
+                <div class="search-bar">
+                    <input type="text" placeholder="Mahsulotlarni qidirish...">
+                </div>
+                <div class="user-actions">
+                    <a href="#">Kirish</a>
+                    <a href="#">Ro'yxatdan o'tish</a>
+                    <a href="#">Savatcha</a>
+                </div>
+            </div>
+        </div>
+        <nav>
+            <div class="container">
+                <ul>
+                    <li><a href="#">Bosh sahifa</a></li>
+                    <li><a href="#">Smartfonlar</a></li>
+                    <li><a href="#">Noutbuklar</a></li>
+                    <li><a href="#">Televizorlar</a></li>
+                    <li><a href="#">Maishiy texnika</a></li>
+                    <li><a href="#">Aksessuarlar</a></li>
+                    <li><a href="#">Aksiya</a></li>
+                    <li><a href="#">Yangi mahsulotlar</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Banner qismi -->
+    <section class="banner">
+        <div class="container">
+            <h1>Eng yaxshi elektronika va maishiy texnika</h1>
+            <p>Keng assortiment, sifatli mahsulotlar va qulay narxlar faqat bizda</p>
+            <a href="#" class="btn">Hozir sotib oling</a>
+        </div>
+    </section>
+
+    <!-- Mahsulotlar qismi -->
+    <section class="products-section">
+        <div class="container">
+            <h2 class="section-title">Yangi mahsulotlar</h2>
+            <div class="products-grid">
+                <!-- Mahsulot 1 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/200" alt="Smartfon">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Samsung Galaxy S23 Ultra 256GB</h3>
+                        <div class="product-price">12 499 000 so'm</div>
+                        <button class="add-to-cart">Savatchaga qo'shish</button>
+                    </div>
+                </div>
+                
+                <!-- Mahsulot 2 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/200" alt="Noutbuk">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">MacBook Air M2 13" 256GB</h3>
+                        <div class="product-price">15 999 000 so'm</div>
+                        <button class="add-to-cart">Savatchaga qo'shish</button>
+                    </div>
+                </div>
+                
+                <!-- Mahsulot 3 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/200" alt="Televizor">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Samsung 55" QLED 4K Smart TV</h3>
+                        <div class="product-price">8 799 000 so'm</div>
+                        <button class="add-to-cart">Savatchaga qo'shish</button>
+                    </div>
+                </div>
+                
+                <!-- Mahsulot 4 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/200" alt="Kir yuvish mashinasi">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">LG 8kg Inverter Kir Yuvish Mashinasi</h3>
+                        <div class="product-price">5 499 000 so'm</div>
+                        <button class="add-to-cart">Savatchaga qo'shish</button>
+                    </div>
+                </div>
+                
+                <!-- Mahsulot 5 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/200" alt="AirPods">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Apple AirPods Pro 2-nchi avlod</h3>
+                        <div class="product-price">2 499 000 so'm</div>
+                        <button class="add-to-cart">Savatchaga qo'shish</button>
+                    </div>
+                </div>
+                
+                <!-- Mahsulot 6 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/200" alt="Konditsioner">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Artel 12000 BTU Inverter Konditsioner</h3>
+                        <div class="product-price">4 999 000 so'm</div>
+                        <button class="add-to-cart">Savatchaga qo'shish</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer qismi -->
+   
+
+    <script>
+        // JavaScript kodlari
+        document.addEventListener('DOMContentLoaded', function() {
+            // Savatchaga qo'shish tugmasi bosilganda
+            const addToCartButtons = document.querySelectorAll('.add-to-cart');
+            
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productTitle = this.parentElement.querySelector('.product-title').textContent;
+                    alert(productTitle + ' savatchaga qo\'shildi!');
+                    
+                    // Tugma matnini o'zgartirish
+                    const originalText = this.textContent;
+                    this.textContent = 'Qo\'shildi!';
+                    this.style.backgroundColor = '#28a745';
+                    
+                    // 2 soniyadan so'ng asl holatiga qaytarish
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.style.backgroundColor = '#0066cc';
+                    }, 2000);
+                });
+            });
+            
+            // Qidiruv maydoni
+            const searchInput = document.querySelector('.search-bar input');
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const searchTerm = this.value.trim();
+                    if (searchTerm) {
+                        alert('Qidiruv: ' + searchTerm);
+                        this.value = '';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

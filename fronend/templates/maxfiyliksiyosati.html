@@ -1,0 +1,701 @@
+<!-- templates/maxfiyliksiyosati.html -->
+<!DOCTYPE html>
+<html lang="uz">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tez Sot Market - Maxfiylik Siyosati</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Asosiy sozlamalar */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+        .logo {
+            width: 162px;
+            height: 51px;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        /* Konteyner */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: clamp(20px, 4vw, 40px);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        header h1 {
+            background: linear-gradient(90deg, #1e40af, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: clamp(24px, 5vw, 36px);
+            font-weight: 700;
+            margin: 15px 0 10px;
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #64748b;
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .update-date {
+            display: inline-block;
+            background: #f1f5f9;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #475569;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        /* Maxfiylik bo'limi */
+        .privacy-content {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 15px;
+            margin-bottom: 30px;
+            scroll-behavior: smooth;
+        }
+
+        /* Chiroyli scrollbar */
+        .privacy-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .privacy-content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .privacy-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .privacy-content::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 20px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .section:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+        }
+
+        .section-number {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #3b82f6;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .section h2 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 18px;
+            padding-top: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section h2 i {
+            color: #3b82f6;
+            font-size: 20px;
+        }
+
+        .section p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #475569;
+            margin-bottom: 15px;
+        }
+
+        .section ul {
+            padding-left: 25px;
+            margin: 15px 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+            position: relative;
+            padding-left: 5px;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        li:before {
+            content: "•";
+            color: #3b82f6;
+            font-weight: bold;
+            font-size: 18px;
+            position: absolute;
+            left: -15px;
+        }
+
+        .highlight-box {
+            background: #e0f2fe;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #bae6fd;
+        }
+
+        .highlight-box h3 {
+            color: #0369a1;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Bog'lanish bo'limi */
+        .contact-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid #0ea5e9;
+            padding: 25px;
+            border-radius: 16px;
+            margin-top: 30px;
+        }
+
+        .contact-section h2 {
+            color: #0369a1;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: white;
+            border-radius: 12px;
+            flex: 1;
+            min-width: 200px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .contact-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .contact-text h4 {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .contact-text p {
+            font-size: 16px;
+            color: #1e293b;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Telegram button */
+        .telegram-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .telegram-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Admin info */
+        .admin-info {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .admin-info h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 25px;
+            margin-top: 30px;
+            border-top: 2px solid #f1f5f9;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .back-btn {
+            padding: 14px 28px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #e2e8f0;
+            color: #334155;
+            transform: translateX(-5px);
+        }
+
+        .copyright {
+            font-size: 14px;
+            color: #64748b;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        /* Responsive dizayn */
+        @media (min-width: 768px) {
+            .privacy-content {
+                max-height: 550px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 25px;
+                border-radius: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .contact-info {
+                flex-direction: column;
+            }
+            
+            .contact-item {
+                min-width: 100%;
+            }
+            
+            .footer {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            
+            .container {
+                padding: 20px;
+            }
+            
+            header h1 {
+                font-size: 26px;
+            }
+            
+            .section h2 {
+                font-size: 18px;
+            }
+            
+            .section p {
+                font-size: 14px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo-container">
+          
+                <img class="logo" src="{% static 'img/logo.png' %}" alt="">
+         
+        </div>
+        <h1>TEZ SOT MARKET MAXFIYLIK SIYOSATI</h1>
+        <p class="subtitle">Shaxsiy ma'lumotlaringizni qanday qo'llashimiz va himoya qilishimiz haqida to'liq ma'lumot</p>
+        <div class="update-date">
+            <i class="fas fa-calendar-alt"></i> So'nggi yangilanish: {% now "Y" %}-yil
+        </div>
+    </header>
+
+    <div class="privacy-content">
+        <div class="section fade-in" style="animation-delay: 0.1s">
+            <div class="section-number">1</div>
+            <h2><i class="fas fa-info-circle"></i> Umumiy ma'lumotlar</h2>
+            <p><strong>1.1.</strong> Ushbu Maxfiylik Siyosati ("Siyosat") "Tez Sot Market" platformasi foydalanuvchilarining shaxsiy ma'lumotlarini yig'ish, saqlash, ishlatish va himoya qilish tartibini belgilaydi.</p>
+            <p><strong>1.2.</strong> Platformadan foydalangan har bir shaxs ushbu Siyosatni qabul qilgan hisoblanadi.</p>
+            <p><strong>1.3.</strong> Platforma ma'muriyati Siyosatni istalgan vaqtda o'zgartirish huquqiga ega. Yangilangan Siyosat platformada e'lon qilingan kundan boshlab kuchga kiradi.</p>
+        </div>
+
+        <div class="section fade-in" style="animation-delay: 0.2s">
+            <div class="section-number">2</div>
+            <h2><i class="fas fa-database"></i> Yig'iladigan ma'lumotlar</h2>
+            <p>Platforma quyidagi ma'lumotlarni to'playdi:</p>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-user-plus"></i> Ro'yxatdan o'tish paytida:</h3>
+                <ul>
+                    <li>Ism va familiya</li>
+                    <li>Telefon raqami</li>
+                    <li>Email manzil</li>
+                    <li>Parol (shifrlangan holda)</li>
+                </ul>
+            </div>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-shopping-cart"></i> Savdo va muloqot faoliyati:</h3>
+                <ul>
+                    <li>E'lonlar va mahsulot ma'lumotlari</li>
+                    <li>Buyurtmalar tarixi</li>
+                    <li>To'lov ma'lumotlari</li>
+                    <li>Yetkazib berish manzili</li>
+                </ul>
+            </div>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-laptop-code"></i> Texnik ma'lumotlar:</h3>
+                <ul>
+                    <li>IP-manzil</li>
+                    <li>Qurilma turi va modeli</li>
+                    <li>Brauzer turi va versiyasi</li>
+                    <li>Cookies ma'lumotlari</li>
+                    <li>Platforma bilan o'zaro aloqaga oid ma'lumotlar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section fade-in" style="animation-delay: 0.3s">
+            <div class="section-number">3</div>
+            <h2><i class="fas fa-cogs"></i> Ma'lumotlardan foydalanish</h2>
+            <p>Platforma foydalanuvchi ma'lumotlarini quyidagi maqsadlarda ishlatadi:</p>
+            <ul>
+                <li><strong>3.1.</strong> Platforma xizmatlarini taqdim etish, buyurtmalarni boshqarish va tranzaksiyalarni amalga oshirish.</li>
+                <li><strong>3.2.</strong> Foydalanuvchilar bilan bog'lanish, bildirishnomalar yuborish va xizmatlarni yangilash.</li>
+                <li><strong>3.3.</strong> Platforma xavfsizligi, firibgarlikni oldini olish va qonuniy talablarni bajarish.</li>
+                <li><strong>3.4.</strong> Statistika, tahlil va xizmat sifatini yaxshilash maqsadida anonim ma'lumotlarni ishlatish.</li>
+            </ul>
+        </div>
+
+        <div class="section fade-in" style="animation-delay: 0.4s">
+            <div class="section-number">4</div>
+            <h2><i class="fas fa-share-alt"></i> Ma'lumotlarni uchinchi shaxslarga berish</h2>
+            <p><strong>4.1.</strong> Platforma foydalanuvchi ma'lumotlarini uchinchi shaxslarga faqat quyidagi hollarda beradi:</p>
+            <ul>
+                <li>Foydalanuvchi rozilik bergan taqdirda</li>
+                <li>Qonuniy talablar yoki sud qarori mavjud bo'lganda</li>
+                <li>Platforma xizmatlari bilan bog'liq uchinchi tomon xizmat ko'rsatuvchilarga (masalan, yetkazib berish kompaniyalari) kerak bo'lganda</li>
+            </ul>
+        </div>
+
+        <div class="section fade-in" style="animation-delay: 0.5s">
+            <div class="section-number">5</div>
+            <h2><i class="fas fa-lock"></i> Ma'lumotlarni saqlash va himoya qilish</h2>
+            <p><strong>5.1.</strong> Foydalanuvchi ma'lumotlari xavfsiz serverlarda saqlanadi.</p>
+            <p><strong>5.2.</strong> Platforma ma'lumotlarni ruxsatsiz kirish, yo'qotish, o'zgartirish va oshkor qilishdan himoya qiladi.</p>
+            <p><strong>5.3.</strong> Foydalanuvchi paroli shifrlangan holda saqlanadi va platformaga faqat foydalanuvchi tomonidan ma'lum bo'ladi.</p>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-shield-alt"></i> Xavfsizlik choralari:</h3>
+                <ul>
+                    <li>SSL shifrlash texnologiyasi</li>
+                    <li>Muntazam xavfsizlik auditlari</li>
+                    <li>Kirish nazorati tizimlari</li>
+                    <li>Zararli hujumlardan himoya</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section fade-in" style="animation-delay: 0.6s">
+            <div class="section-number">6</div>
+            <h2><i class="fas fa-user-check"></i> Foydalanuvchi huquqlari</h2>
+            <p>Foydalanuvchi quyidagi huquqlarga ega:</p>
+            <ul>
+                <li><strong>6.1.</strong> Shaxsiy ma'lumotlarni ko'rish va yangilash</li>
+                <li><strong>6.2.</strong> Ma'lumotlarni o'chirish yoki foydalanuvchi akkauntini bekor qilish</li>
+                <li><strong>6.3.</strong> Ma'lumotlarning ishlatilishiga cheklovlar qo'yish</li>
+                <li><strong>6.4.</strong> Agar ma'lumotlarning ishlatilishi Sizning roziligingiz asosida bo'lgan bo'lsa, uni qaytarib olish</li>
+            </ul>
+        </div>
+
+        <div class="section fade-in" style="animation-delay: 0.7s">
+            <div class="section-number">7</div>
+            <h2><i class="fas fa-cookie-bite"></i> Cookies va kuzatuv texnologiyalari</h2>
+            <p><strong>7.1.</strong> Platforma xizmatlarini yaxshilash va foydalanuvchi tajribasini optimallashtirish uchun cookies va boshqa kuzatuv texnologiyalaridan foydalanadi.</p>
+            <p><strong>7.2.</strong> Foydalanuvchi brauzer sozlamalari orqali cookiesni o'chirish yoki cheklash imkoniga ega.</p>
+            
+            <div class="highlight-box">
+                <h3><i class="fas fa-info-circle"></i> Cookies turlari:</h3>
+                <ul>
+                    <li><strong>Zarur cookies:</strong> Platformaning asosiy funksiyalari uchun</li>
+                    <li><strong>Funksional cookies:</strong> Shaxsiylashtirilgan tajriba uchun</li>
+                    <li><strong>Analitik cookies:</strong> Statistik ma'lumotlar yig'ish uchun</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Admin panel ma'lumotlari bilan aloqa bo'limi -->
+       
+    </div>
+
+    <div class="footer">
+        <a href="javascript:history.back()" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Ortga qaytish
+        </a>
+        
+        <div class="copyright">
+            <p>© {% now "Y" %} {% if footer_sozlamalari %}{{ footer_sozlamalari.kompaniya_nomi }}{% else %}Tez Sot Market{% endif %}. Barcha huquqlar himoyalangan.</p>
+            <p>Ushbu maxfiylik siyosati platformaning rasmiy hujjatidir.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animatsiya uchun
+        const sections = document.querySelectorAll('.fade-in');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+        
+        sections.forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(section);
+        });
+        
+        // Tugmani bosganda animatsiya
+        const backBtn = document.querySelector('.back-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    window.history.back();
+                }, 200);
+            });
+        }
+    });
+
+    // Aloqa funksiyalari
+    function callAdmin(phoneNumber) {
+        if (phoneNumber && phoneNumber !== 'None') {
+            const cleanNumber = phoneNumber.replace(/\s/g, '');
+            window.location.href = 'tel:' + cleanNumber;
+        } else {
+            alert('Telefon raqami mavjud emas');
+        }
+    }
+
+    function callOffice(phoneNumber) {
+        if (phoneNumber && phoneNumber !== 'None') {
+            const cleanNumber = phoneNumber.replace(/\s/g, '');
+            window.location.href = 'tel:' + cleanNumber;
+        } else {
+            alert('Telefon raqami mavjud emas');
+        }
+    }
+
+    function openTelegram(telegramLink) {
+        if (telegramLink && telegramLink !== 'None' && telegramLink !== '#') {
+            window.open(telegramLink, '_blank');
+        } else {
+            window.open('https://t.me/tezsot_support_bot', '_blank');
+        }
+    }
+
+    function openTelegramAdmin(telegramLink) {
+        if (telegramLink && telegramLink !== 'None' && telegramLink !== '#') {
+            window.open(telegramLink, '_blank');
+        }
+    }
+
+    function sendEmail(email) {
+        if (email && email !== 'None') {
+            window.location.href = 'mailto:' + email;
+        } else {
+            window.location.href = 'mailto:humboyun731uzb@gmail.com';
+        }
+    }
+
+    // Contact itemlarga hover effekti
+    const contactItems = document.querySelectorAll('.contact-item');
+    contactItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.cursor = 'pointer';
+        });
+        
+        item.addEventListener('click', function(e) {
+            // Agar ichida link bo'lsa, linkga o'tkazadi
+            const link = this.querySelector('a');
+            if (!link || e.target === link) {
+                return;
+            }
+            link.click();
+        });
+    });
+</script>
+
+</body>
+</html>

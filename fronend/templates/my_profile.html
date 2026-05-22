@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mening Profilim - Tez Sot</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .premium-gradient {
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00);
+        }
+        
+        .profile-banner {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+        }
+        
+        .phone-copy {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .phone-copy:hover {
+            transform: scale(1.05);
+            color: #3B82F6;
+        }
+        
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #10B981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .premium-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-active {
+            background-color: #10B981;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background-color: #F59E0B;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-expired {
+            background-color: #EF4444;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-rejected {
+            background-color: #6B7280;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% include 'nav.html' %}
+    
+    <!-- Banner Section -->
+    <div class="profile-banner h-64 w-full">
+        {% if profile.banner_image %}
+        <img src="{{ profile.banner_image.url }}" alt="Banner" class="w-full h-full object-cover">
+        {% else %}
+        <div class="h-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
+        {% endif %}
+        
+        <!-- Edit Profile Button -->
+        <div class="absolute top-4 right-4 z-10">
+            <a href="{% url 'edit_profile' %}" 
+               class="bg-white text-gray-800 px-6 py-2 rounded-lg shadow-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
+                <i class="fas fa-edit"></i>
+                Profilni tahrirlash
+            </a>
+        </div>
+        
+        <!-- Back Button -->
+        <div class="absolute top-4 left-4 z-10">
+            <a href="{% url 'mening_elonlarim' %}" 
+               class="bg-white text-gray-800 px-6 py-2 rounded-lg shadow-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i>
+                Orqaga
+            </a>
+        </div>
+    </div>
+    
+    <!-- Profile Info -->
+    <div class="max-w-6xl mx-auto px-4 -mt-16 relative z-20">
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div class="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+                <!-- Profile Image -->
+                <div class="flex-shrink-0">
+                    <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                        {% if profile.profile_image %}
+                        <img src="{{ profile.profile_image.url }}" 
+                             alt="{{ user.username }}" 
+                             class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <span class="text-3xl text-gray-600 font-bold">
+                                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Profile Details -->
+                <div class="flex-1 text-center lg:text-left">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                        {% if user.first_name or user.last_name %}
+                        {{ user.first_name }} {{ user.last_name }}
+                        {% else %}
+                        {{ user.username }}
+                        {% endif %}
+                    </h1>
+                    
+                    <div class="flex items-center justify-center lg:justify-start gap-2 mb-4">
+                        <span class="text-gray-600">@{{ user.username }}</span>
+                        {% if premium_profile and premium_profile.is_premium %}
+                        <span class="premium-badge">
+                            <i class="fas fa-crown"></i> Premium
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if profile.bio %}
+                    <p class="text-gray-600 mb-6 max-w-2xl">{{ profile.bio }}</p>
+                    {% endif %}
+                    
+                    <!-- Stats -->
+                    <div class="flex flex-wrap justify-center lg:justify-start gap-6 mb-8">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600">{{ total_products }}</div>
+                            <div class="text-gray-600">Jami e'lonlar</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600">{{ active_products }}</div>
+                            <div class="text-gray-600">Aktiv e'lonlar</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-orange-600">{{ sold_products }}</div>
+                            <div class="text-gray-600">Sotilganlar</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-600">{{ premium_products }}</div>
+                            <div class="text-gray-600">Premium</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        {% if profile.location %}
+                        <div class="flex items-center justify-center lg:justify-start gap-3">
+                            <div class="w-6 h-6 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <span class="text-gray-700">{{ profile.location }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if profile.phone %}
+                        <div class="flex items-center justify-center lg:justify-start gap-3">
+                            <div class="w-6 h-6 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="phone-copy text-gray-700 font-medium" 
+                                      onclick="copyPhoneNumber('{{ profile.phone }}')">
+                                    {{ profile.phone }}
+                                </span>
+                                <button onclick="copyPhoneNumber('{{ profile.phone }}')" 
+                                        class="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                                        title="Nusxa olish">
+                                    <i class="far fa-copy text-gray-600"></i>
+                                </button>
+                                <a href="tel:{{ profile.phone }}"
+                                   class="w-8 h-8 flex items-center justify-center bg-green-100 hover:bg-green-200 rounded-full transition-colors"
+                                   title="Qo'ng'iroq qilish">
+                                    <i class="fas fa-phone text-green-600"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.email %}
+                        <div class="flex items-center justify-center lg:justify-start gap-3">
+                            <div class="w-6 h-6 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <span class="text-gray-700">{{ user.email }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="flex items-center justify-center lg:justify-start gap-3">
+                            <div class="w-6 h-6 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <span class="text-gray-700">{{ profile.get_work_hours }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Social Links -->
+                    <div class="flex flex-wrap justify-center lg:justify-start gap-4">
+                        {% if profile.telegram %}
+                        <a href="{{ profile.get_telegram_url }}" target="_blank" 
+                           class="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            <i class="fab fa-telegram-plane"></i>
+                            Telegram
+                        </a>
+                        {% endif %}
+                        
+                        {% if profile.instagram %}
+                        <a href="{{ profile.get_instagram_url }}" target="_blank" 
+                           class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                            <i class="fab fa-instagram"></i>
+                            Instagram
+                        </a>
+                        {% endif %}
+                        
+                        {% if profile.phone %}
+                        <a href="tel:{{ profile.phone }}" 
+                           class="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                            <i class="fas fa-phone"></i>
+                            Qo'ng'iroq qilish
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Premium Status -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Premium Status</h2>
+                <div class="flex items-center gap-4">
+                    {% if not premium_profile.is_premium %}
+                    <a href="{% url 'submit_premium_request' %}" 
+                       class="premium-gradient text-black font-bold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+                        <i class="fas fa-crown"></i>
+                        Premium so'rov yuborish
+                    </a>
+                    {% endif %}
+                    
+                    {% if premium_requests and premium_requests.count > 0 %}
+                    <a href="{% url 'my_premium_requests' %}" 
+                       class="bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        <i class="fas fa-envelope"></i>
+                        Premium So'rovlarim
+                        <span class="bg-white text-blue-600 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                            {{ premium_requests.count }}
+                        </span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if premium_profile %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center {% if premium_profile.is_premium %}bg-green-100 text-green-600{% else %}bg-gray-100 text-gray-600{% endif %}">
+                            <i class="fas fa-{% if premium_profile.is_premium %}check-circle{% else %}times-circle{% endif %} text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Premium Status</h3>
+                            <p class="text-gray-600">
+                                {% if premium_profile.is_premium %}
+                                ✅ Faol premium foydalanuvchi
+                                {% else %}
+                                ❌ Premium emas
+                                {% endif %}
+                            </p>
+                            {% if premium_profile.is_premium %}
+                            <span class="status-active mt-2 inline-block">
+                                {{ premium_profile.get_status_display }}
+                            </span>
+                            {% elif premium_profile.status == 'expired' %}
+                            <span class="status-expired mt-2 inline-block">
+                                {{ premium_profile.get_status_display }}
+                            </span>
+                            {% elif premium_profile.status == 'pending' %}
+                            <span class="status-pending mt-2 inline-block">
+                                {{ premium_profile.get_status_display }}
+                            </span>
+                            {% elif premium_profile.status == 'rejected' %}
+                            <span class="status-rejected mt-2 inline-block">
+                                {{ premium_profile.get_status_display }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center {% if premium_profile.admin_approved %}bg-green-100 text-green-600{% else %}bg-yellow-100 text-yellow-600{% endif %}">
+                            <i class="fas fa-{% if premium_profile.admin_approved %}shield-alt{% else %}clock{% endif %} text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Admin Tasdigi</h3>
+                            <p class="text-gray-600">
+                                {% if premium_profile.admin_approved %}
+                                ✅ Tasdiqlangan
+                                {% else %}
+                                ⏳ Kutilmoqda
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center {% if premium_profile.get_remaining_premium_products > 0 %}bg-green-100 text-green-600{% else %}bg-red-100 text-red-600{% endif %}">
+                            <i class="fas fa-box text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Premium Limit</h3>
+                            <p class="text-gray-600">
+                                {{ premium_profile.premium_used }} / {{ premium_profile.premium_limit }}
+                                ({{ premium_profile.get_remaining_premium_products }} qoldi)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if premium_profile.is_premium %}
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="text-sm text-blue-700 mb-1">Premium boshlangan</div>
+                    <div class="font-bold text-blue-900">
+                        {% if premium_profile.premium_start %}
+                        {{ premium_profile.premium_start|date:"d.m.Y H:i" }}
+                        {% else %}
+                        Ko'rsatilmagan
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="text-sm text-green-700 mb-1">Premium tugashi</div>
+                    <div class="font-bold text-green-900">
+                        {% if premium_profile.premium_end %}
+                        {{ premium_profile.premium_end|date:"d.m.Y H:i" }} ({{ premium_profile.get_days_remaining }} kun qoldi)
+                        {% else %}
+                        Cheksiz
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Premium so'rovlar statusi -->
+            {% if pending_premium_requests > 0 %}
+            <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                    <div>
+                        <h4 class="font-bold text-yellow-800">Premium So'rovingiz Kutilmoqda</h4>
+                        <p class="text-yellow-700 text-sm">
+                            Sizda {{ pending_premium_requests }} ta premium so'rovingiz admin tasdigini kutyapti.
+                            <a href="{% url 'my_premium_requests' %}" class="font-bold underline hover:text-yellow-900">
+                                So'rovlarimni ko'rish
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% endif %}
+            
+            {% else %}
+            <!-- Premium profili yo'q bo'lsa -->
+            <div class="text-center py-8">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-crown text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Premium Profilingiz Yo'q</h3>
+                <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                    Premium foydalanuvchi bo'lish uchun admin bilan bog'laning yoki premium so'rov yuboring.
+                    Premium bo'lsangiz, mahsulotlaringiz birinchi o'ringa chiqadi va ko'proq mijozlarga yetib borasiz.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{% url 'submit_premium_request' %}" 
+                       class="premium-gradient text-black font-bold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 justify-center">
+                        <i class="fas fa-crown"></i>
+                        Premium So'rov Yuborish
+                    </a>
+                    <a href="{% url 'admin_contact' %}" 
+                       class="bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 justify-center">
+                        <i class="fas fa-headset"></i>
+                        Admin bilan Bog'lanish
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Premium so'rovlar qisqacha ko'rinishi -->
+            {% if premium_requests %}
+            <div class="mt-6 border-t pt-6">
+                <h4 class="font-bold text-gray-800 mb-4">So'nggi Premium So'rovlar</h4>
+                <div class="space-y-3">
+                    {% for request in premium_requests|slice:":3" %}
+                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div>
+                            <span class="font-medium text-gray-800">{{ request.full_name }}</span>
+                            <span class="text-sm text-gray-600 ml-2">{{ request.created_at|date:"d.m.Y" }}</span>
+                        </div>
+                        <span class="{% if request.status == 'pending' %}status-pending{% elif request.status == 'approved' %}status-active{% elif request.status == 'rejected' %}status-rejected{% else %}bg-gray-200 text-gray-700{% endif %}">
+                            {{ request.get_status_display }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if premium_requests.count > 3 %}
+                    <div class="text-center">
+                        <a href="{% url 'my_premium_requests' %}" class="text-blue-600 hover:text-blue-800 font-medium">
+                            Barcha {{ premium_requests.count }} ta so'rovni ko'rish <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Recent Listings -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">So'nggi e'lonlar</h2>
+                <div class="flex gap-4">
+                    <a href="{% url 'mening_elonlarim' %}" 
+                       class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2">
+                        Barchasini ko'rish
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    {% if premium_profile and premium_profile.is_premium and premium_profile.get_remaining_premium_products > 0 %}
+                    <a href="{% url 'premium_product_check' %}" 
+                       class="premium-gradient text-black font-bold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+                        <i class="fas fa-plus"></i>
+                        Premium e'lon qo'shish
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if mahsulotlar %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for mahsulot in mahsulotlar %}
+                <div class="product-card bg-gray-50 rounded-xl overflow-hidden">
+                    <a href="{% if mahsulot.is_premium %}{% url 'mahsulot_detail' mahsulot.id %}{% else %}{% url 'mahsulot_detail' mahsulot.id %}{% endif %}">
+                        <div class="h-48 overflow-hidden relative">
+                            {% if mahsulot.asosiyimg %}
+                            <img src="{{ mahsulot.asosiyimg.url }}" 
+                                 alt="{{ mahsulot.name }}" 
+                                 class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-image text-4xl text-gray-400"></i>
+                            </div>
+                            {% endif %}
+                            
+                            {% if mahsulot.is_premium %}
+                            <div class="absolute top-2 right-2">
+                                <span class="premium-badge">
+                                    <i class="fas fa-crown"></i>
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </a>
+                   
+                    <div class="p-4">
+                        <a href="{% url 'mahsulot_detail' mahsulot.id %}">
+                            <h3 class="font-bold text-gray-800 mb-2 line-clamp-2">{{ mahsulot.name }}</h3>
+                        </a>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-blue-600 font-bold">{{ mahsulot.narx_formatted }}</span>
+                            {% if mahsulot.is_premium %}
+                            <span class="text-xs text-yellow-600">
+                                <i class="fas fa-clock"></i> {{ mahsulot.get_premium_time_left }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex items-center justify-between text-sm text-gray-500">
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-calendar"></i>
+                                {{ mahsulot.sana|date:"d.m.Y" }}
+                            </span>
+                            <span class="{% if mahsulot.sotilgan %}text-red-600{% else %}text-green-600{% endif %}">
+                                {% if mahsulot.sotilgan %}Sotilgan{% else %}Faol{% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="flex gap-2 mt-4">
+                            <a href="{% url 'mahsulot_detail' mahsulot.id %}" 
+                               class="flex-1 text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Ko'rish
+                            </a>
+                            
+                            {% if mahsulot.is_premium and not mahsulot.sotilgan %}
+                            <button onclick="removePremium('{{ mahsulot.id }}')" 
+                                    class="bg-red-100 text-red-600 px-3 rounded-lg hover:bg-red-200 transition-colors"
+                                    title="Premiumdan olib tashlash">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            {% elif not mahsulot.is_premium and not mahsulot.sotilgan and premium_profile and premium_profile.is_premium %}
+                            <button onclick="makePremium('{{ mahsulot.id }}')" 
+                                    class="bg-yellow-100 text-yellow-600 px-3 rounded-lg hover:bg-yellow-200 transition-colors"
+                                    title="Premium qilish">
+                                <i class="fas fa-crown"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-box-open text-5xl text-gray-400 mb-4"></i>
+                <p class="text-gray-600 mb-4">Hozircha e'lonlaringiz yo'q</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{% url 'elon_qoshish' %}" 
+                       class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-plus"></i>
+                        Yangi e'lon qo'shish
+                    </a>
+                    
+                    {% if premium_profile and premium_profile.is_premium %}
+                    <a href="{% url 'premium_product_check' %}" 
+                       class="inline-flex items-center gap-2 premium-gradient text-black font-bold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-crown"></i>
+                        Premium e'lon qo'shish
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <a href="{% url 'elon_qoshish' %}" 
+               class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-plus text-2xl text-blue-600"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2">Yangi e'lon</h4>
+                <p class="text-gray-600 text-sm">Yangi mahsulotingizni sotish uchun e'lon qo'shing</p>
+            </a>
+            
+            <a href="{% url 'sevimlilarim' %}" 
+               class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-heart text-2xl text-pink-600"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2">Sevimlilarim</h4>
+                <p class="text-gray-600 text-sm">Saqlangan mahsulotlaringizni ko'ring</p>
+            </a>
+            
+            <a href="{% url 'settings' %}" 
+               class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-cog text-2xl text-green-600"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2">Sozlamalar</h4>
+                <p class="text-gray-600 text-sm">Hisobingiz sozlamalarini boshqaring</p>
+            </a>
+        </div>
+        
+        <!-- Premium ma'lumotlar -->
+        {% if premium_profile and premium_profile.is_premium %}
+        <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl shadow-xl p-8 mb-8 border border-yellow-200">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-crown text-white text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Premium Ma'lumotlari</h2>
+                    <p class="text-gray-600">Sizning premium obunangiz haqida to'liq ma'lumot</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="text-sm text-gray-500 mb-1">Premium Muddat</div>
+                    <div class="font-bold text-gray-800 text-lg">
+                        {% if premium_profile.premium_end %}
+                        {{ premium_profile.premium_end|date:"d.m.Y" }} gacha
+                        {% else %}
+                        Cheksiz
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-green-600 mt-1">
+                        <i class="fas fa-clock"></i> {{ premium_profile.get_days_remaining }} kun qoldi
+                    </div>
+                </div>
+                
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="text-sm text-gray-500 mb-1">Premium Limit</div>
+                    <div class="font-bold text-gray-800 text-lg">
+                        {{ premium_profile.premium_used }} / {{ premium_profile.premium_limit }}
+                    </div>
+                    <div class="text-sm text-blue-600 mt-1">
+                        <i class="fas fa-box"></i> {{ premium_profile.get_remaining_premium_products }} ta qoldi
+                    </div>
+                </div>
+                
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="text-sm text-gray-500 mb-1">Premium Status</div>
+                    <div class="font-bold text-gray-800 text-lg">
+                        {{ premium_profile.get_status_display }}
+                    </div>
+                    <div class="text-sm {% if premium_profile.admin_approved %}text-green-600{% else %}text-yellow-600{% endif %} mt-1">
+                        <i class="fas fa-shield-alt"></i> 
+                        {% if premium_profile.admin_approved %}Tasdiqlangan{% else %}Kutilmoqda{% endif %}
+                    </div>
+                </div>
+                
+                <div class="bg-white p-4 rounded-lg shadow-sm">
+                    <div class="text-sm text-gray-500 mb-1">Premium E'lonlar</div>
+                    <div class="font-bold text-gray-800 text-lg">{{ premium_products }}</div>
+                    <div class="text-sm text-purple-600 mt-1">
+                        <i class="fas fa-star"></i> Faol premium mahsulotlar
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                {% if premium_profile.get_remaining_premium_products > 0 %}
+                <a href="{% url 'premium_product_check' %}" 
+                   class="flex-1 premium-gradient text-black font-bold px-6 py-3 rounded-lg hover:opacity-90 transition-opacity text-center flex items-center justify-center gap-2">
+                    <i class="fas fa-plus"></i>
+                    Yangi Premium E'lon Qo'shish
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'mening_elonlarim' %}?status=premium" 
+                   class="flex-1 bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors text-center flex items-center justify-center gap-2">
+                    <i class="fas fa-list"></i>
+                    Premium E'lonlarimni Ko'rish
+                </a>
+                
+                <a href="{% url 'admin_contact' %}" 
+                   class="flex-1 bg-gray-100 text-gray-800 font-bold px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors text-center flex items-center justify-center gap-2">
+                    <i class="fas fa-headset"></i>
+                    Yordam
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% include 'footer.html' %}
+    
+    <script>
+        // Telefon raqamni nusxalash
+        function copyPhoneNumber(phoneNumber) {
+            navigator.clipboard.writeText(phoneNumber).then(() => {
+                showNotification('Telefon raqami nusxalandi!');
+            }).catch(err => {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = phoneNumber;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('Telefon raqami nusxalandi!');
+            });
+        }
+        
+        // Bildirishnoma ko'rsatish
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'copy-notification';
+            notification.style.backgroundColor = type === 'success' ? '#10B981' : '#EF4444';
+            
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Mahsulotni premium qilish
+        function makePremium(productId) {
+            if (!confirm('Bu mahsulotni premium qilmoqchimisiz?')) {
+                return;
+            }
+            
+            fetch(`/api/make-premium/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.', 'error');
+            });
+        }
+        
+        // Mahsulotni premiumdan olib tashlash
+        function removePremium(productId) {
+            if (!confirm('Bu mahsulotni premiumdan olib tashlamoqchimisiz?')) {
+                return;
+            }
+            
+            fetch(`/api/remove-premium/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.', 'error');
+            });
+        }
+        
+        // Premium statusini tekshirish
+        function checkPremiumStatus() {
+            fetch('/api/premium-status/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Premium status:', data.data);
+                }
+            })
+            .catch(error => {
+                console.error('Premium status tekshirishda xatolik:', error);
+            });
+        }
+        
+        // Sahifa yuklanganda premium statusini tekshirish
+        document.addEventListener('DOMContentLoaded', function() {
+            // Premium statusini avtomatik tekshirish (har 5 minutda)
+            setInterval(checkPremiumStatus, 300000);
+        });
+    </script>
+</body>
+</html>

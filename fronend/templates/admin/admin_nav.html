@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-nav {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 0 20px;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .nav-logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-link {
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom-color: white;
+        }
+        
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-bottom-color: #fbbf24;
+        }
+        
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 1000;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .dropdown-link {
+            color: #374151;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .dropdown-link:hover {
+            background: #f3f4f6;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .notification-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            height: calc(100vh - 70px);
+            position: fixed;
+            left: 0;
+            top: 70px;
+            overflow-y: auto;
+        }
+        
+        .sidebar-link {
+            padding: 15px 20px;
+            color: #374151;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-link:hover {
+            background: #f3f4f6;
+            color: #3b82f6;
+        }
+        
+        .sidebar-link.active {
+            background: #eff6ff;
+            color: #3b82f6;
+            border-left-color: #3b82f6;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            min-height: calc(100vh - 70px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Navigation -->
+    <nav class="admin-nav">
+        <div class="nav-container">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="nav-logo">
+                    <i class="fas fa-crown"></i>
+                    <span>Tez Sot Admin</span>
+                </div>
+                
+                <!-- Main Menu -->
+                <div class="nav-menu">
+                    <a href="{% url 'admin_premium_dashboard' %}" 
+                       class="nav-link {% if request.path == '/admin/premium-dashboard/' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                    
+                    <div class="dropdown">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-users-crown"></i>
+                            Premium
+                        </a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'admin_premium_requests' %}" class="dropdown-link">
+                                <i class="fas fa-inbox mr-2"></i>
+                                Premium So'rovlar
+                            </a>
+                            <a href="{% url 'admin_premium_transactions' %}" class="dropdown-link">
+                                <i class="fas fa-exchange-alt mr-2"></i>
+                                Tranzaksiyalar
+                            </a>
+                            <a href="{% url 'admin_search_users' %}" class="dropdown-link">
+                                <i class="fas fa-search mr-2"></i>
+                                Foydalanuvchi Qidirish
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'admin_payments' %}" 
+                       class="nav-link {% if 'payments' in request.path %}active{% endif %}">
+                        <i class="fas fa-credit-card"></i>
+                        To'lovlar
+                    </a>
+                    
+                    <a href="/admin/" 
+                       class="nav-link {% if 'admin/' == request.path|slice:'0:6' and 'premium' not in request.path %}active{% endif %}">
+                        <i class="fas fa-cog"></i>
+                        Django Admin
+                    </a>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="user-menu">
+                    <div class="relative">
+                        <a href="#" class="text-white">
+                            <i class="fas fa-bell text-xl"></i>
+                            {% if notifications_count %}
+                            <span class="notification-badge">{{ notifications_count }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    
+                    <div class="dropdown">
+                        <a href="#" class="text-white flex items-center gap-2">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <span>{{ request.user.username }}</span>
+                        </a>
+                        <div class="dropdown-content" style="right: 0; left: auto;">
+                            <a href="{% url 'my_profile' %}" class="dropdown-link">
+                                <i class="fas fa-user mr-2"></i>
+                                Mening Profilim
+                            </a>
+                            <a href="{% url 'home' %}" class="dropdown-link">
+                                <i class="fas fa-home mr-2"></i>
+                                Saytga Qaytish
+                            </a>
+                            <div class="border-t"></div>
+                            <a href="{% url 'logout' %}" class="dropdown-link text-red-600">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                Chiqish
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="py-4">
+            <!-- Premium Section -->
+            <div class="px-4 py-2">
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">Premium Boshqaruv</div>
+            </div>
+            
+            <a href="{% url 'admin_premium_dashboard' %}" 
+               class="sidebar-link {% if request.path == '/admin/premium-dashboard/' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            
+            <a href="{% url 'admin_premium_requests' %}" 
+               class="sidebar-link {% if 'premium-requests' in request.path %}active{% endif %}">
+                <i class="fas fa-inbox"></i>
+                Premium So'rovlar
+                {% if pending_requests %}
+                <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    {{ pending_requests }}
+                </span>
+                {% endif %}
+            </a>
+            
+            <a href="{% url 'admin_premium_transactions' %}" 
+               class="sidebar-link {% if 'premium-transactions' in request.path %}active{% endif %}">
+                <i class="fas fa-exchange-alt"></i>
+                Tranzaksiyalar
+            </a>
+            
+            <a href="{% url 'admin_search_users' %}" 
+               class="sidebar-link {% if 'search-users' in request.path %}active{% endif %}">
+                <i class="fas fa-search"></i>
+                Foydalanuvchi Qidirish
+            </a>
+            
+            <!-- Payments Section -->
+            <div class="px-4 py-2 mt-4">
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">To'lovlar</div>
+            </div>
+            
+            <a href="{% url 'admin_payments' %}" 
+               class="sidebar-link {% if 'payments' in request.path and 'detail' not in request.path %}active{% endif %}">
+                <i class="fas fa-credit-card"></i>
+                Barcha To'lovlar
+            </a>
+            
+            <a href="{% url 'admin_payments' %}?status=pending" 
+               class="sidebar-link">
+                <i class="fas fa-clock"></i>
+                Kutilayotgan To'lovlar
+                {% if pending_payments %}
+                <span class="ml-auto bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
+                    {{ pending_payments }}
+                </span>
+                {% endif %}
+            </a>
+            
+            <!-- Settings Section -->
+            <div class="px-4 py-2 mt-4">
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">Sozlamalar</div>
+            </div>
+            
+            <a href="{% url 'admin_update_premium_settings' %}" 
+               class="sidebar-link {% if 'update-premium-settings' in request.path %}active{% endif %}">
+                <i class="fas fa-cog"></i>
+                Premium Sozlamalar
+            </a>
+            
+            <!-- Tools Section -->
+            <div class="px-4 py-2 mt-4">
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">Asboblar</div>
+            </div>
+            
+            <a href="{% url 'admin_check_all_expired' %}" 
+               class="sidebar-link text-orange-600">
+                <i class="fas fa-sync-alt"></i>
+                Premiumlarni Tekshirish
+            </a>
+            
+            <!-- Quick Actions -->
+            <div class="px-4 py-2 mt-4">
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tezkor Harakatlar</div>
+            </div>
+            
+            <a href="{% url 'submit_premium_request' %}" 
+               class="sidebar-link text-green-600" target="_blank">
+                <i class="fas fa-plus-circle"></i>
+                Premium So'rov Yuborish
+            </a>
+            
+            <a href="{% url 'premium_products' %}" 
+               class="sidebar-link text-blue-600" target="_blank">
+                <i class="fas fa-crown"></i>
+                Premium Mahsulotlar
+            </a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

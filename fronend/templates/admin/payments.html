@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - To'lovlar - Tez Sot</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .filter-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .payment-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .payment-card.pending {
+            border-left-color: #F59E0B;
+        }
+        
+        .payment-card.completed {
+            border-left-color: #10B981;
+        }
+        
+        .payment-card.failed {
+            border-left-color: #EF4444;
+        }
+        
+        .payment-card.processing {
+            border-left-color: #3B82F6;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .status-completed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .status-failed {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        .status-processing {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-success {
+            background: #10B981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #DC2626;
+            transform: translateY(-2px);
+        }
+        
+        .btn-info {
+            background: #3B82F6;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    {% include 'admin/nav.html' %}
+    
+    <div class="container mx-auto px-4 py-8">
+        <!-- Sarlavha -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">To'lovlar Boshqaruvi</h1>
+            <p class="text-gray-600">Premium uchun amalga oshirilgan barcha to'lovlar</p>
+        </div>
+        
+        <!-- Statistikalar -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total }}</div>
+                <div class="stat-label">Jami To'lovlar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.pending }}</div>
+                <div class="stat-label">Kutilayotgan</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.completed }}</div>
+                <div class="stat-label">Yakunlangan</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.today }}</div>
+                <div class="stat-label">Bugungi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_amount|floatformat:0 }} so'm</div>
+                <div class="stat-label">Jami Summa</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.today_amount|floatformat:0 }} so'm</div>
+                <div class="stat-label">Bugungi Summa</div>
+            </div>
+        </div>
+        
+        <!-- Filter paneli -->
+        <div class="filter-bar">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Holat</label>
+                    <select name="status" class="w-full px-3 py-2 border rounded-lg">
+                        <option value="all" {% if status == 'all' %}selected{% endif %}>Barchasi</option>
+                        <option value="pending" {% if status == 'pending' %}selected{% endif %}>Kutilayotgan</option>
+                        <option value="processing" {% if status == 'processing' %}selected{% endif %}>Ishlovda</option>
+                        <option value="completed" {% if status == 'completed' %}selected{% endif %}>Yakunlangan</option>
+                        <option value="failed" {% if status == 'failed' %}selected{% endif %}>Amalga oshmadi</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">To'lov usuli</label>
+                    <select name="method" class="w-full px-3 py-2 border rounded-lg">
+                        <option value="all" {% if payment_method == 'all' %}selected{% endif %}>Barchasi</option>
+                        <option value="bank_transfer" {% if payment_method == 'bank_transfer' %}selected{% endif %}>Bank o'tkazmasi</option>
+                        <option value="click" {% if payment_method == 'click' %}selected{% endif %}>Click</option>
+                        <option value="payme" {% if payment_method == 'payme' %}selected{% endif %}>Payme</option>
+                        <option value="cash" {% if payment_method == 'cash' %}selected{% endif %}>Naqd pul</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sanadan</label>
+                    <input type="date" name="date_from" value="{{ date_from }}" class="w-full px-3 py-2 border rounded-lg">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sanagacha</label>
+                    <input type="date" name="date_to" value="{{ date_to }}" class="w-full px-3 py-2 border rounded-lg">
+                </div>
+                
+                <div class="md:col-span-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Qidirish</label>
+                    <input type="text" name="search" value="{{ search }}" placeholder="ID, ism yoki telefon..." 
+                           class="w-full px-3 py-2 border rounded-lg">
+                </div>
+                
+                <div class="md:col-span-4 flex gap-3">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-search mr-2"></i>Qidirish
+                    </button>
+                    <a href="{% url 'admin_payments' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                        <i class="fas fa-redo mr-2"></i>Tozalash
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- To'lovlar ro'yxati -->
+        {% if payments %}
+        <div class="space-y-4">
+            {% for payment in payments %}
+            <div class="payment-card {{ payment.status }}">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">
+                            {{ payment.user.get_full_name|default:payment.user.username }}
+                        </h3>
+                        <div class="text-sm text-gray-500 mt-1">
+                            {{ payment.created_at|date:"d.m.Y H:i" }}
+                            {% if payment.confirmed_at %}
+                            • Tasdiqlangan: {{ payment.confirmed_at|date:"d.m.Y H:i" }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <span class="status-badge status-{{ payment.status }}">
+                            {% if payment.status == 'pending' %}
+                            <i class="fas fa-clock"></i>
+                            {% elif payment.status == 'completed' %}
+                            <i class="fas fa-check"></i>
+                            {% elif payment.status == 'failed' %}
+                            <i class="fas fa-times"></i>
+                            {% elif payment.status == 'processing' %}
+                            <i class="fas fa-sync-alt"></i>
+                            {% endif %}
+                            {{ payment.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- To'lov tafsilotlari -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <div class="text-sm text-gray-500">To'lov miqdori</div>
+                        <div class="font-medium text-lg text-green-600">
+                            {{ payment.amount|floatformat:0 }} so'm
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500">To'lov usuli</div>
+                        <div class="font-medium">{{ payment.get_payment_method_display }}</div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500">Tranzaksiya ID</div>
+                        <div class="font-medium font-mono">{{ payment.transaction_id }}</div>
+                    </div>
+                </div>
+                
+                <!-- Premium so'rov haqida -->
+                {% if payment.premium_request %}
+                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <h4 class="font-bold mb-2">Premium So'rovi:</h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <span class="text-gray-500">Kunlar:</span>
+                            <span class="font-medium">{{ payment.premium_request.requested_days }} kun</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Limit:</span>
+                            <span class="font-medium">{{ payment.premium_request.requested_limit }} ta</span>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-gray-500">Telefon:</span>
+                            <span class="font-medium">{{ payment.premium_request.phone }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Chek rasmi -->
+                {% if payment.proof_image %}
+                <div class="mb-4">
+                    <div class="text-sm text-gray-500 mb-2">To'lov cheki:</div>
+                    <a href="{{ payment.proof_image.url }}" target="_blank" 
+                       class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-image mr-2"></i>
+                        Rasmni ko'rish
+                    </a>
+                </div>
+                {% endif %}
+                
+                <!-- Admin harakatlari -->
+                <div class="action-buttons">
+                    {% if payment.status == 'pending' %}
+                    <form method="POST" action="{% url 'admin_confirm_payment' payment.id %}" 
+                          onsubmit="return confirm('To\'lovni tasdiqlashni xohlaysizmi?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i>
+                            Tasdiqlash
+                        </button>
+                    </form>
+                    
+                    <button type="button" onclick="showRejectModal('{{ payment.id }}')" class="btn btn-danger">
+                        <i class="fas fa-times"></i>
+                        Rad etish
+                    </button>
+                    {% endif %}
+                    
+                    <a href="{% url 'admin_payment_detail' payment.id %}" class="btn btn-info">
+                        <i class="fas fa-eye"></i>
+                        Batafsil
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="flex justify-center mt-8">
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if status %}&status={{ status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if payment_method %}&method={{ payment_method }}{% endif %}" 
+                   class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">
+                    ← Oldingi
+                </a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                    {{ num }}
+                </span>
+                {% else %}
+                <a href="?page={{ num }}{% if status %}&status={{ status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if payment_method %}&method={{ payment_method }}{% endif %}" 
+                   class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">
+                    {{ num }}
+                </a>
+                {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if status %}&status={{ status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if search %}&search={{ search }}{% endif %}{% if payment_method %}&method={{ payment_method }}{% endif %}" 
+                   class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">
+                    Keyingi →
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Bo'sh holat -->
+        <div class="text-center py-12 bg-white rounded-lg shadow">
+            <i class="fas fa-credit-card text-gray-300 text-6xl mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">To'lovlar topilmadi</h3>
+            <p class="text-gray-600">Hozircha hech qanday to'lov amalga oshirilmagan</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Rad etish modal oynasi -->
+    <div id="rejectModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">To'lovni Rad Etish</h3>
+            <form method="POST" id="rejectForm">
+                {% csrf_token %}
+                <input type="hidden" name="payment_id" id="rejectPaymentId">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sabab</label>
+                    <textarea name="reason" rows="4" class="w-full px-3 py-2 border rounded-lg" 
+                              placeholder="To'lovni rad etish sababini yozing..." required></textarea>
+                </div>
+                
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="hideRejectModal()" 
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                        Bekor qilish
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                        <i class="fas fa-times mr-2"></i>Rad etish
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Modalni ko'rsatish/yashirish
+        function showRejectModal(paymentId) {
+            document.getElementById('rejectPaymentId').value = paymentId;
+            document.getElementById('rejectModal').style.display = 'flex';
+        }
+        
+        function hideRejectModal() {
+            document.getElementById('rejectModal').style.display = 'none';
+        }
+        
+        // Rad etish formasi
+        document.getElementById('rejectForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const formData = new FormData(form);
+            const paymentId = formData.get('payment_id');
+            const reason = formData.get('reason');
+            
+            fetch(`/admin/payments/${paymentId}/reject/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Xatolik yuz berdi: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Xatolik yuz berdi');
+            });
+        });
+        
+        // Modal tashqariga bosilganda yopish
+        document.getElementById('rejectModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideRejectModal();
+            }
+        });
+    </script>
+</body>
+</html>

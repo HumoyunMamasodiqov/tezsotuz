@@ -1,0 +1,6 @@
+Django>=5.2
+gunicorn
+whitenoise
+python-dotenv
+cloudinary
+django-cloudinary-storage

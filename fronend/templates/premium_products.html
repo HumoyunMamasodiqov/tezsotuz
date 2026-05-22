@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>Premium Mahsulotlar - Tez Sot</title>
+    <link rel="icon" type="image/png" href="{% static 'img/iconlogo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #eef2ff;
+            color: #1e293b;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 16px 12px 32px;
+            }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+        }
+
+        .logo-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e293b, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: white;
+            flex: 1;
+            padding: 14px 12px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #dbeafe;
+        }
+
+        .stat-number {
+            font-size: 26px;
+            font-weight: 800;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 480px) {
+            .stat-number {
+                font-size: 20px;
+            }
+            .stat-label {
+                font-size: 10px;
+            }
+        }
+
+        /* Products List - ro'yxat ko'rinishi */
+        .products-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Product Row */
+        .product-row {
+            background: white;
+            border-radius: 18px;
+            padding: 12px;
+            display: flex;
+            gap: 14px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            border: 1px solid #dbeafe;
+        }
+
+        .product-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.12);
+            border-color: #3b82f6;
+        }
+
+        /* Image - kichikroq */
+        .product-img {
+            width: 90px;
+            height: 90px;
+            flex-shrink: 0;
+            background: #f0f4ff;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .product-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-img .no-img {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f4ff;
+            color: #a5b4fc;
+        }
+
+        /* Content */
+        .product-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .product-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.35;
+        }
+
+        .premium-tag {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #b45309;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .product-price {
+            font-size: 18px;
+            font-weight: 800;
+            color: #3b82f6;
+            margin-bottom: 6px;
+        }
+
+        .product-category {
+            font-size: 11px;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 3px 10px;
+            border-radius: 30px;
+            display: inline-block;
+            width: fit-content;
+            margin-bottom: 8px;
+        }
+
+        .product-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: #94a3b8;
+            flex-wrap: wrap;
+        }
+
+        .product-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+
+        .status-sold {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-new {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .view-link {
+            margin-top: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background: white;
+            border-radius: 24px;
+            border: 1px solid #dbeafe;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            color: #a5b4fc;
+            margin-bottom: 16px;
+        }
+
+        /* Button */
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            margin-top: 16px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+
+        /* Footer CTA */
+        .footer-cta {
+            background: white;
+            border-radius: 20px;
+            padding: 28px 24px;
+            text-align: center;
+            margin-top: 32px;
+            border: 1px solid #dbeafe;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .page-link {
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+            text-decoration: none;
+        }
+
+        .page-link.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        /* Mobile */
+        @media (max-width: 480px) {
+            .product-row {
+                padding: 10px;
+                gap: 10px;
+            }
+            .product-img {
+                width: 75px;
+                height: 75px;
+            }
+            .product-title {
+                font-size: 13px;
+            }
+            .product-price {
+                font-size: 15px;
+            }
+            .product-category {
+                font-size: 9px;
+                padding: 2px 8px;
+            }
+            .product-meta {
+                font-size: 9px;
+                gap: 8px;
+            }
+            .premium-tag {
+                font-size: 9px;
+                padding: 3px 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'nav.html' %}
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h1>Premium Mahsulotlar</h1>
+            <p>Eng sifatli va tez sotiladigan e'lonlar</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-number">{{ total_count|default:"0" }}</div>
+                <div class="stat-label">Premium mahsulot</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">5x</div>
+                <div class="stat-label">Ko'rishlar</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">3x</div>
+                <div class="stat-label">Tez sotilish</div>
+            </div>
+        </div>
+
+        <!-- Products List - RO'YXAT KO'RINISHI -->
+        {% if mahsulotlar %}
+        <div class="products-list">
+            {% for product in mahsulotlar %}
+            <a href="{% url 'mahsulot_detail' product.id %}" class="product-row">
+                <!-- Image -->
+                <div class="product-img">
+                    {% if product.asosiyimg %}
+                    <img src="{{ product.asosiyimg.url }}" alt="{{ product.name }}" loading="lazy">
+                    {% else %}
+                    <div class="no-img">
+                        <i class="fas fa-image fa-2x"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Info -->
+                <div class="product-info">
+                    <div class="product-top">
+                        <h3 class="product-title">{{ product.name|truncatechars:55 }}</h3>
+                        <div class="premium-tag">
+                            <i class="fas fa-crown"></i> PREMIUM
+                        </div>
+                    </div>
+                    
+                    <div class="product-price">{{ product.narx_formatted }}</div>
+                    
+                    <div class="product-category">
+                        <i class="fas fa-tag"></i> {{ product.mahsulotturi|default:"Mahsulot" }}
+                    </div>
+                    
+                    <div class="product-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> {{ product.get_viloyat_display|default:"Manzil" }}</span>
+                        <span><i class="fas fa-eye"></i> {{ product.korishlar_soni|default:"0" }} ko'rish</span>
+                        <span><i class="far fa-calendar"></i> {{ product.sana|date:"d.m.Y" }}</span>
+                        <span class="status-badge {% if product.sotilgan %}status-sold{% else %}status-new{% endif %}">
+                            {% if product.sotilgan %}SOTILGAN{% else %}YANGI{% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="view-link">
+                        Batafsil ko'rish <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj and page_obj.paginator.num_pages > 1 %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="page-link"><i class="fas fa-chevron-left"></i></a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                <span class="page-link active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-link"><i class="fas fa-chevron-right"></i></a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <i class="fas fa-crown"></i>
+            <h3 style="font-size: 18px; margin-bottom: 8px;">Premium mahsulotlar yo'q</h3>
+            <p style="color: #64748b; font-size: 14px;">Hozircha hech qanday premium mahsulot mavjud emas</p>
+            {% if user.is_authenticated %}
+                {% if is_premium_user %}
+                <a href="{% url 'add_premium_product' %}" class="btn">Mahsulot qo'shish</a>
+                {% else %}
+                <a href="{% url 'submit_premium_request' %}" class="btn">Premium bo'lish</a>
+                {% endif %}
+            {% else %}
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'login' %}" class="btn">Kirish</a>
+                <a href="{% url 'register' %}" class="btn btn-outline">Ro'yxatdan o'tish</a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Footer CTA -->
+        <div class="footer-cta">
+            <h3 style="font-size: 18px; font-weight: 700;">Premium sotuvchi bo'ling</h3>
+            <p style="color: #64748b; font-size: 13px; margin-top: 6px;">Mahsulotingizni birinchi o'ringa chiqaring va tezroq soting</p>
+            {% if user.is_authenticated %}
+                {% if is_premium_user %}
+                <a href="{% url 'add_premium_product' %}" class="btn" style="margin-top: 14px;">Mahsulot qo'shish</a>
+                {% else %}
+                <a href="{% url 'submit_premium_request' %}" class="btn" style="margin-top: 14px;">Premium bo'lish</a>
+                {% endif %}
+            {% else %}
+            <a href="{% url 'register' %}" class="btn" style="margin-top: 14px;">Ro'yxatdan o'tish</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>

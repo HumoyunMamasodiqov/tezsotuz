@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="{{ category_name }} bo'limidagi eng sara mahsulotlar - Tez Sot">
+    <title>{{ category_name }} - Tez Sot | Eng arzon mahsulotlar</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'img/sklatlogo.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/sklatlogo.png' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+
+    <!-- Tailwind + Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #f5f9ff;
+            color: #0a2b3e;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+
+        /* Container */
+        .container-custom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        @media (max-width: 640px) {
+            .container-custom {
+                padding: 16px 12px;
+            }
+        }
+
+        /* Category Hero Section */
+        .category-hero {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 50%, #2563eb 100%);
+            border-radius: 28px;
+            padding: 32px 36px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 35px -12px rgba(59, 130, 246, 0.3);
+        }
+
+        .category-hero::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            right: -10%;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .category-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            left: -5%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        @media (max-width: 640px) {
+            .category-hero {
+                padding: 20px 18px;
+                border-radius: 20px;
+            }
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 14px 20px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: white;
+            border-radius: 24px;
+            padding: 18px 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #dbeafe;
+        }
+
+        @media (max-width: 640px) {
+            .filter-panel {
+                padding: 14px 16px;
+            }
+        }
+
+        /* Custom Select */
+        .custom-select {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .custom-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Filter Buttons */
+        .filter-chip {
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.25s ease;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #475569;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-chip:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .filter-chip.premium.active {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-color: #fbbf24;
+            color: #78350f;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 22px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .products-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .products-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        /* Product Card - Modern Design */
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px -12px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        /* Premium Card Special */
+        .product-card.premium {
+            background: linear-gradient(145deg, #ffffff, #fffbeb);
+            border-top: 3px solid #fbbf24;
+        }
+
+        /* Image Container */
+        .card-img {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .product-card:hover .card-img img {
+            transform: scale(1.05);
+        }
+
+        /* Badges */
+        .badge-premium {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #78350f;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 800;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .badge-status {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 700;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+
+        .badge-status.sold {
+            background: rgba(239, 68, 68, 0.95);
+            color: white;
+        }
+
+        .badge-status.new {
+            background: rgba(16, 185, 129, 0.95);
+            color: white;
+        }
+
+        /* Wishlist Button */
+        .wishlist-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 34px;
+            height: 34px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s;
+            cursor: pointer;
+            z-index: 15;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: none;
+        }
+
+        .wishlist-btn i {
+            font-size: 14px;
+            color: #ef4444;
+            transition: all 0.2s;
+        }
+
+        .wishlist-btn:hover {
+            transform: scale(1.1);
+            background: #ef4444;
+        }
+
+        .wishlist-btn:hover i {
+            color: white;
+        }
+
+        /* Card Content */
+        .card-content {
+            padding: 14px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-price {
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+
+        .product-card.premium .product-price {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .product-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            line-height: 1.35;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 38px;
+        }
+
+        .product-type {
+            font-size: 11px;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            width: fit-content;
+            margin-bottom: 10px;
+        }
+
+        /* Premium Info Row */
+        .premium-stats {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fffbeb;
+            padding: 6px 10px;
+            border-radius: 12px;
+            margin: 8px 0;
+            font-size: 10px;
+            font-weight: 600;
+            color: #b45309;
+        }
+
+        /* Meta Info */
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px solid #eef2ff;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* View Button */
+        .view-btn {
+            margin-top: 12px;
+            padding: 9px 0;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #3b82f6;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .product-card:hover .view-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .page-link {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-weight: 600;
+            color: #475569;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .page-link:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .page-link.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 30px;
+            background: white;
+            border-radius: 28px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            .products-grid {
+                gap: 12px;
+            }
+            
+            .card-content {
+                padding: 10px;
+            }
+            
+            .product-price {
+                font-size: 15px;
+            }
+            
+            .product-name {
+                font-size: 12px;
+                min-height: 32px;
+            }
+            
+            .product-type {
+                font-size: 9px;
+                padding: 3px 8px;
+            }
+            
+            .view-btn {
+                font-size: 10px;
+                padding: 7px 0;
+            }
+            
+            .product-meta {
+                font-size: 9px;
+            }
+            
+            .badge-premium {
+                padding: 3px 10px;
+                font-size: 9px;
+                top: 8px;
+                right: 8px;
+            }
+            
+            .badge-status {
+                font-size: 9px;
+                padding: 3px 10px;
+            }
+            
+            .wishlist-btn {
+                width: 30px;
+                height: 30px;
+            }
+            
+            .wishlist-btn i {
+                font-size: 12px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card {
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'newnav.html' %}
+    {% include 'nav.html' %}
+
+    <div class="container-custom">
+        <!-- Hero Section -->
+        <div class="category-hero">
+            <div class="relative z-10">
+                <div class="flex flex-wrap items-center gap-4 mb-4">
+                    <div class="bg-white/20 backdrop-blur-md rounded-2xl p-3">
+                        {% if current_category == 'elektronika' %}
+                        <i class="fas fa-laptop-code text-3xl text-white"></i>
+                        {% elif current_category == 'kitoblar' %}
+                        <i class="fas fa-book-open text-3xl text-white"></i>
+                        {% elif current_category == 'mebellar' %}
+                        <i class="fas fa-couch text-3xl text-white"></i>
+                        {% elif current_category == 'auto' %}
+                        <i class="fas fa-car text-3xl text-white"></i>
+                        {% else %}
+                        <i class="fas fa-boxes text-3xl text-white"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h1 class="text-white text-3xl sm:text-4xl font-extrabold tracking-tight">{{ category_name }}</h1>
+                        <p class="text-blue-100 text-sm sm:text-base mt-1">Eng sara mahsulotlar va eng yaxshi takliflar</p>
+                    </div>
+                </div>
+                
+           
+            </div>
+        </div>
+
+        <!-- Filter Panel -->
+        <div class="filter-panel">
+            <div class="flex flex-col sm:flex-row justify-between gap-4">
+                <div class="flex flex-wrap gap-3">
+                    <a href="?filter=all{% if status %}&status={{ status }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+                       class="filter-chip {% if filter_type == 'all' or not filter_type %}active{% endif %}">
+                        <i class="fas fa-th-large"></i> Barchasi
+                    </a>
+                    <a href="?filter=premium{% if status %}&status={{ status }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+                       class="filter-chip premium {% if filter_type == 'premium' %}active{% endif %}">
+                        <i class="fas fa-crown"></i> Premium
+                    </a>
+                    <a href="?filter=regular{% if status %}&status={{ status }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" 
+                       class="filter-chip {% if filter_type == 'regular' %}active{% endif %}">
+                        <i class="fas fa-star"></i> Oddiy
+                    </a>
+                </div>
+                
+                <div class="flex gap-3">
+                    <select class="custom-select" id="statusSelect">
+                        <option value="all" {% if not status or status == 'all' %}selected{% endif %}>📋 Barcha holatlar</option>
+                        <option value="new" {% if status == 'new' %}selected{% endif %}>🟢 Yangi</option>
+                        <option value="sold" {% if status == 'sold' %}selected{% endif %}>🔴 Sotilgan</option>
+                    </select>
+                    
+                    <select class="custom-select" id="sortSelect">
+                        <option value="premium" {% if not sort or sort == 'premium' %}selected{% endif %}> Premium birinchi</option>
+                        <option value="newest" {% if sort == 'newest' %}selected{% endif %}> Eng yangi</option>
+                        <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}> Arzon narx</option>
+                        <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}> Qimmat narx</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="products-grid">
+            {% if mahsulotlar %}
+                {% for product in mahsulotlar %}
+                <div class="product-card {% if product.is_premium %}premium{% endif %}" data-product-id="{{ product.id }}">
+                    <div class="card-img">
+                        {% if product.asosiyimg %}
+                        <img src="{{ product.asosiyimg.url }}" alt="{{ product.name }}" loading="lazy">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                            <i class="fas fa-image text-4xl text-slate-300"></i>
+                        </div>
+                        {% endif %}
+                        
+                        {% if product.is_premium %}
+                        <div class="badge-premium">
+                            <i class="fas fa-crown"></i> PREMIUM
+                        </div>
+                        {% endif %}
+                        
+                        <div class="badge-status {% if product.sotilgan %}sold{% else %}new{% endif %}">
+                            {% if product.sotilgan %}
+                            <i class="fas fa-check-circle"></i> SOTILGAN
+                            {% else %}
+                            <i class="fas fa-clock"></i> YANGI
+                            {% endif %}
+                        </div>
+                        
+                        <div class="wishlist-btn">
+                            <i class="far fa-heart"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="product-price">{{ product.narx_formatted|default:product.narx }}</div>
+                        <h3 class="product-name">{{ product.name|truncatechars:55 }}</h3>
+                        
+                        <div class="product-type">
+                            <i class="fas fa-tag text-[9px]"></i>
+                            {{ product.mahsulotturi|default:"Mahsulot"|truncatechars:20 }}
+                        </div>
+                        
+                        {% if product.is_premium %}
+                        <div class="premium-stats">
+                            <span><i class="fas fa-eye"></i> {{ product.korishlar_soni|default:"0" }} ko'rish</span>
+                
+                        </div>
+                        {% endif %}
+                        
+                        <div class="product-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ product.get_viloyat_display|default:"Manzil"|truncatechars:12 }}
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                {{ product.sana|date:"d.m.Y" }}
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'mahsulot_detail' product.id %}" class="view-btn">
+                            <i class="fas fa-eye"></i> Batafsil ko'rish
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-search text-6xl text-slate-300 mb-4"></i>
+                    <h3 class="text-xl font-bold text-slate-700 mb-2">Mahsulot topilmadi</h3>
+                    <p class="text-slate-500">Bu kategoriyada hozircha mahsulot mavjud emas</p>
+                    <a href="{% url 'home' %}" class="inline-block mt-4 px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
+                        <i class="fas fa-home"></i> Bosh sahifa
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj and page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_type %}&filter={{ filter_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="page-link active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a class="page-link" href="?page={{ num }}{% if filter_type %}&filter={{ filter_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+                        {{ num }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_type %}&filter={{ filter_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter change handlers
+            const statusSelect = document.getElementById('statusSelect');
+            const sortSelect = document.getElementById('sortSelect');
+            
+            function applyFilters() {
+                const url = new URL(window.location.href);
+                const status = statusSelect.value;
+                const sort = sortSelect.value;
+                const filter = '{{ filter_type|default:"all" }}';
+                
+                if (status === 'all') url.searchParams.delete('status');
+                else url.searchParams.set('status', status);
+                
+                if (sort === 'premium') url.searchParams.delete('sort');
+                else url.searchParams.set('sort', sort);
+                
+                if (filter !== 'all') url.searchParams.set('filter', filter);
+                else url.searchParams.delete('filter');
+                
+                url.searchParams.delete('page');
+                window.location.href = url.toString();
+            }
+            
+            if (statusSelect) statusSelect.addEventListener('change', applyFilters);
+            if (sortSelect) sortSelect.addEventListener('change', applyFilters);
+            
+            // Wishlist functionality
+            const wishlistBtns = document.querySelectorAll('.wishlist-btn');
+            wishlistBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const icon = btn.querySelector('i');
+                    if (icon.classList.contains('far')) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        btn.style.background = '#ef4444';
+                        icon.style.color = 'white';
+                        setTimeout(() => {
+                            alert('❤️ Sevimlilarga qo\'shildi');
+                        }, 100);
+                    } else {
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                        btn.style.background = 'rgba(255,255,255,0.95)';
+                        icon.style.color = '#ef4444';
+                    }
+                });
+            });
+            
+            // Touch feedback for mobile
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach(card => {
+                card.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                card.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 100);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

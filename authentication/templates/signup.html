@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ro'yxatdan o'tish - TezSot Market</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9CA3AF;
+            font-size: 1.2rem;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .strength-weak {
+            background-color: #EF4444;
+            width: 25%;
+        }
+        
+        .strength-medium {
+            background-color: #F59E0B;
+            width: 50%;
+        }
+        
+        .strength-strong {
+            background-color: #10B981;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            width: 0%;
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .error-message {
+            color: #EF4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        .success-message {
+            color: #10B981;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification.success {
+            background-color: #10B981;
+        }
+        
+        .notification.error {
+            background-color: #EF4444;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3B82F6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .phone-operator {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            font-weight: bold;
+            pointer-events: none;
+        }
+        
+        .terms-card {
+            background-color: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .terms-card h4 {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+        
+        .terms-card p {
+            font-size: 0.75rem;
+            color: #6B7280;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100">
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Notification -->
+    <div id="notification" class="hidden notification"></div>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <img src="{% static 'img/logo.png' %}" alt="Logo" class="h-16 mx-auto mb-4">
+                <h1 class="text-3xl font-bold text-gray-800">Hisob Yaratish</h1>
+                <p class="text-gray-600 mt-2">Platformamizga qo'shiling va savdoni boshlang</p>
+            </div>
+
+            <!-- Registration Card -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-3 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="{% url 'signup' %}" id="registerForm">
+                    {% csrf_token %}
+                    
+                    <!-- Username -->
+                    <div class="input-group">
+                        <i class="ri-user-smile-line"></i>
+                        <input type="text" 
+                               name="username" 
+                               id="username"
+                               placeholder="Username (Foydalanuvchi nomi)"
+                               required>
+                    </div>
+                    <div class="error-message" id="usernameError">Iltimos, foydalanuvchi nomini kiriting</div>
+                    <div class="success-message" id="usernameSuccess">✓ Mavjud emas</div>
+                    
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- First Name -->
+                        <div>
+                            <div class="input-group">
+                                <i class="ri-user-line"></i>
+                                <input type="text" 
+                                       name="firstName" 
+                                       id="firstName"
+                                       placeholder="Ism"
+                                       required>
+                            </div>
+                            <div class="error-message" id="firstNameError">Iltimos, ismingizni kiriting</div>
+                        </div>
+
+                        <!-- Last Name -->
+                        <div>
+                            <div class="input-group">
+                                <i class="ri-user-line"></i>
+                                <input type="text" 
+                                       name="lastName" 
+                                       id="lastName"
+                                       placeholder="Familiya"
+                                       required>
+                            </div>
+                            <div class="error-message" id="lastNameError">Iltimos, familiyangizni kiriting</div>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="input-group">
+                        <i class="ri-lock-line"></i>
+                        <input type="password" 
+                               name="password" 
+                               id="password"
+                               placeholder="Parol (kamida 8 belgi)"
+                               required>
+                        <i class="ri-eye-off-line password-toggle" id="togglePassword" style="left: auto; right: 1rem; cursor: pointer;"></i>
+                    </div>
+                    <div class="password-strength" id="passwordStrength"></div>
+                    <div class="error-message" id="passwordError">Parol kamida 8 ta belgidan iborat bo'lishi kerak</div>
+
+                    <!-- Birth Date -->
+                    <div class="input-group">
+                        <i class="ri-calendar-line"></i>
+                        <input type="date" 
+                               name="birthDate" 
+                               id="birthDate"
+                               required>
+                    </div>
+                    <div class="error-message" id="birthDateError">Siz kamida 13 yoshda bo'lishingiz kerak</div>
+
+                    <!-- Phone Number -->
+                    <div class="input-group">
+                        <i class="ri-phone-line"></i>
+                        <input type="tel" 
+                               name="phone" 
+                               id="phone"
+                               placeholder="Telefon raqam (masalan: 90 123 45 67)"
+                               required>
+                        <span class="phone-operator" id="operatorName"></span>
+                    </div>
+                    <div class="error-message" id="phoneError">Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting</div>
+                    <div class="success-message" id="phoneSuccess">✓ Telefon raqam to'g'ri</div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+                        <h3 class="font-semibold text-gray-800 mb-2">📋 Foydalanuvchi shartlari qisqacha:</h3>
+                        <ul class="text-xs text-gray-600 space-y-1 mb-3">
+                            <li>✓ Platformadan faqat qonuniy maqsadlarda foydalaning</li>
+                            <li>✓ Boshqa foydalanuvchilarning huquqlarini hurmat qiling</li>
+                            <li>✓ Soxta ma'lumotlar va aldovchi faoliyat taqiqlanadi</li>
+                            <li>✓ Mahsulotlar haqida to'liq va to'g'ri ma'lumot bering</li>
+                            <li>✓ Har qanday qoidabuzarlik hisobni blokirovka qilishga olib kelishi mumkin</li>
+                        </ul>
+                        <div class="text-right">
+                            <a href="#" class="text-xs text-blue-600 hover:text-blue-800">To'liq shartlarni o'qish →</a>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+                        <h3 class="font-semibold text-gray-800 mb-2">🔒 Maxfiylik siyosati qisqacha:</h3>
+                        <ul class="text-xs text-gray-600 space-y-1 mb-3">
+                            <li>✓ Sizning shaxsiy ma'lumotlaringiz himoyalangan</li>
+                            <li>✓ Ma'lumotlar uchinchi shaxslarga sotilmaydi</li>
+                            <li>✓ Faqat xizmat ko'rsatish uchun zarur ma'lumotlar yig'iladi</li>
+                            <li>✓ Istalgan vaqtda profilingizni o'chirib tashlashingiz mumkin</li>
+                        </ul>
+                        <div class="text-right">
+                            <a href="#" class="text-xs text-blue-600 hover:text-blue-800">To'liq siyosatni o'qish →</a>
+                        </div>
+                    </div>
+
+                    <!-- Terms Checkbox (MAJBURIY) -->
+                    <div class="mb-6">
+                        <label class="flex items-start cursor-pointer">
+                            <input type="checkbox" 
+                                   name="terms" 
+                                   id="terms"
+                                   class="mr-3 mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                            <span class="text-sm text-gray-700">
+                                Men <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Foydalanuvchi shartlari</a> va 
+                                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Maxfiylik siyosatini</a> o'qib chiqdim va to'liq roziman
+                            </span>
+                        </label>
+                        <div class="error-message text-sm mt-2" id="termsError">
+                            ⚠️ Iltimos, foydalanish shartlariga rozilik bildiring (checkbox belgilashingiz shart)
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            id="submitBtn"
+                            class="btn-primary w-full text-white font-semibold py-3 rounded-xl flex items-center justify-center transition-all duration-300"
+                            disabled>
+                        <span id="btnText">Ro'yxatdan o'tish</span>
+                        <div id="loader" class="hidden loader"></div>
+                    </button>
+
+                    <!-- Login Link -->
+                    <div class="text-center mt-6">
+                        <p class="text-gray-600">
+                            Hisobingiz bormi?
+                            <a href="{% url 'kirish' %}" class="text-blue-600 hover:text-blue-700 font-semibold">
+                                Kirish
+                            </a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center mt-8">
+                <p class="text-sm text-gray-500">
+                    © 2024 TezSot Market. Barcha huquqlar himoyalangan.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // O'zbekiston operatorlari
+        const operators = {
+            '90': { name: 'Beeline', color: '#FFE66D' },
+            '91': { name: 'Beeline', color: '#FFE66D' },
+            '93': { name: 'Ucell', color: '#4ECDC4' },
+            '94': { name: 'Ucell', color: '#4ECDC4' },
+            '95': { name: 'Uzmobile', color: '#45B7D1' },
+            '97': { name: 'Mobiuz', color: '#6A0572' },
+            '98': { name: 'Perfectum', color: '#AB83A1' },
+            '99': { name: 'Uzmobile', color: '#45B7D1' },
+            '33': { name: 'Humans', color: '#FF6B6B' },
+            '50': { name: 'Ucell', color: '#4ECDC4' },
+            '55': { name: 'Ucell', color: '#4ECDC4' },
+            '77': { name: 'Uzmobile', color: '#45B7D1' },
+            '88': { name: 'Uzmobile', color: '#45B7D1' }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            const termsCheckbox = document.getElementById('terms');
+            
+            // Terms checkbox holatiga qarab submit button enable/disable
+            function updateSubmitButton() {
+                const isTermsChecked = termsCheckbox.checked;
+                submitBtn.disabled = !isTermsChecked;
+                
+                if (!isTermsChecked) {
+                    submitBtn.style.opacity = '0.6';
+                    submitBtn.style.cursor = 'not-allowed';
+                } else {
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = 'pointer';
+                }
+            }
+            
+            updateSubmitButton();
+            termsCheckbox.addEventListener('change', updateSubmitButton);
+            
+            // Progress bar
+            const progressBar = document.getElementById('progressBar');
+            const formInputs = document.querySelectorAll('#registerForm input[required]');
+            
+            function updateProgress() {
+                let filled = 0;
+                formInputs.forEach(input => {
+                    if (input.value.trim() !== '') filled++;
+                });
+                const terms = termsCheckbox.checked;
+                if (terms) filled++;
+                
+                const percentage = (filled / (formInputs.length + 1)) * 100;
+                progressBar.style.width = percentage + '%';
+            }
+            
+            formInputs.forEach(input => {
+                input.addEventListener('input', updateProgress);
+            });
+            termsCheckbox.addEventListener('change', updateProgress);
+            
+            // Username uniqueness check (real-time)
+            const usernameInput = document.getElementById('username');
+            const usernameError = document.getElementById('usernameError');
+            const usernameSuccess = document.getElementById('usernameSuccess');
+            let usernameTimeout;
+            
+            usernameInput.addEventListener('input', function() {
+                clearTimeout(usernameTimeout);
+                const username = this.value.trim();
+                const currentUsername = "{{ user.username|default:'' }}";
+                
+                if (username === currentUsername) {
+                    usernameError.style.display = 'none';
+                    usernameSuccess.style.display = 'none';
+                    return;
+                }
+                
+                if (username.length < 3) {
+                    usernameError.textContent = 'Username kamida 3 ta belgidan iborat bo\'lishi kerak';
+                    usernameError.style.display = 'block';
+                    usernameSuccess.style.display = 'none';
+                    return;
+                }
+                
+                usernameTimeout = setTimeout(() => {
+                    fetch(`/check-username/?username=${encodeURIComponent(username)}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            usernameError.textContent = 'Bu username allaqachon band';
+                            usernameError.style.display = 'block';
+                            usernameSuccess.style.display = 'none';
+                        } else {
+                            usernameError.style.display = 'none';
+                            usernameSuccess.style.display = 'block';
+                            setTimeout(() => {
+                                usernameSuccess.style.display = 'none';
+                            }, 2000);
+                        }
+                    });
+                }, 500);
+            });
+            
+            // Password toggle
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.classList.toggle('ri-eye-line');
+                this.classList.toggle('ri-eye-off-line');
+            });
+            
+            // Password strength
+            passwordInput.addEventListener('input', function() {
+                const value = this.value;
+                const strengthDiv = document.getElementById('passwordStrength');
+                
+                if (value.length === 0) {
+                    strengthDiv.className = 'password-strength';
+                } else if (value.length < 6) {
+                    strengthDiv.className = 'password-strength strength-weak';
+                } else if (value.length < 8) {
+                    strengthDiv.className = 'password-strength strength-medium';
+                } else {
+                    strengthDiv.className = 'password-strength strength-strong';
+                }
+            });
+            
+            // Phone validation
+            const phoneInput = document.getElementById('phone');
+            const operatorSpan = document.getElementById('operatorName');
+            const phoneError = document.getElementById('phoneError');
+            const phoneSuccess = document.getElementById('phoneSuccess');
+            
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                
+                if (value.length > 0) {
+                    let formatted = '';
+                    if (value.length <= 2) {
+                        formatted = value;
+                    } else if (value.length <= 5) {
+                        formatted = `${value.slice(0, 2)} ${value.slice(2)}`;
+                    } else if (value.length <= 7) {
+                        formatted = `${value.slice(0, 2)} ${value.slice(2, 5)} ${value.slice(5)}`;
+                    } else {
+                        formatted = `${value.slice(0, 2)} ${value.slice(2, 5)} ${value.slice(5, 7)} ${value.slice(7, 9)}`;
+                    }
+                    e.target.value = formatted;
+                    
+                    const code = value.slice(0, 2);
+                    if (operators[code] && value.length >= 9) {
+                        operatorSpan.textContent = operators[code].name;
+                        operatorSpan.style.color = operators[code].color;
+                        phoneError.style.display = 'none';
+                        phoneSuccess.style.display = 'block';
+                        setTimeout(() => {
+                            phoneSuccess.style.display = 'none';
+                        }, 2000);
+                    } else if (value.length >= 2) {
+                        operatorSpan.textContent = '❌';
+                        phoneError.textContent = 'Noto\'g\'ri operator kodi yoki raqam to\'liq emas';
+                        phoneError.style.display = 'block';
+                        phoneSuccess.style.display = 'none';
+                    } else {
+                        operatorSpan.textContent = '';
+                    }
+                } else {
+                    operatorSpan.textContent = '';
+                }
+            });
+            
+            // Age validation
+            const birthDateInput = document.getElementById('birthDate');
+            const today = new Date();
+            const maxDate = new Date();
+            maxDate.setFullYear(today.getFullYear() - 13);
+            birthDateInput.max = maxDate.toISOString().split('T')[0];
+            
+            // Form validation
+            const form = document.getElementById('registerForm');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                // Username
+                const username = usernameInput.value.trim();
+                if (!username) {
+                    showError('usernameError', 'Iltimos, foydalanuvchi nomini kiriting');
+                    isValid = false;
+                } else if (username.length < 3) {
+                    showError('usernameError', 'Username kamida 3 ta belgidan iborat bo\'lishi kerak');
+                    isValid = false;
+                } else {
+                    hideError('usernameError');
+                }
+                
+                // First name
+                const firstName = document.getElementById('firstName').value.trim();
+                if (!firstName) {
+                    showError('firstNameError', 'Iltimos, ismingizni kiriting');
+                    isValid = false;
+                } else {
+                    hideError('firstNameError');
+                }
+                
+                // Last name
+                const lastName = document.getElementById('lastName').value.trim();
+                if (!lastName) {
+                    showError('lastNameError', 'Iltimos, familiyangizni kiriting');
+                    isValid = false;
+                } else {
+                    hideError('lastNameError');
+                }
+                
+                // Password
+                const password = passwordInput.value;
+                if (!password) {
+                    showError('passwordError', 'Iltimos, parolni kiriting');
+                    isValid = false;
+                } else if (password.length < 8) {
+                    showError('passwordError', 'Parol kamida 8 ta belgidan iborat bo\'lishi kerak');
+                    isValid = false;
+                } else {
+                    hideError('passwordError');
+                }
+                
+                // Birth date
+                const birthDate = birthDateInput.value;
+                if (!birthDate) {
+                    showError('birthDateError', 'Iltimos, tug\'ilgan sanangizni kiriting');
+                    isValid = false;
+                } else {
+                    const age = calculateAge(birthDate);
+                    if (age < 13) {
+                        showError('birthDateError', 'Siz kamida 13 yoshda bo\'lishingiz kerak');
+                        isValid = false;
+                    } else {
+                        hideError('birthDateError');
+                    }
+                }
+                
+                // Phone
+                const phone = phoneInput.value.replace(/\s/g, '');
+                if (!phone) {
+                    showError('phoneError', 'Iltimos, telefon raqamni kiriting');
+                    isValid = false;
+                } else if (phone.length !== 9) {
+                    showError('phoneError', 'Telefon raqam 9 xonali bo\'lishi kerak');
+                    isValid = false;
+                } else {
+                    const code = phone.slice(0, 2);
+                    if (!operators[code]) {
+                        showError('phoneError', 'Noto\'g\'ri operator kodi');
+                        isValid = false;
+                    } else {
+                        hideError('phoneError');
+                    }
+                }
+                
+                // Terms (MAJBURIY)
+                const terms = termsCheckbox.checked;
+                if (!terms) {
+                    showError('termsError', '⚠️ Iltimos, foydalanish shartlariga rozilik bildiring (checkbox belgilashingiz shart)');
+                    isValid = false;
+                } else {
+                    hideError('termsError');
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    showNotification('Iltimos, barcha maydonlarni to\'g\'ri to\'ldiring va shartlarga rozilik bering!', 'error');
+                } else {
+                    btnText.textContent = 'Ro\'yxatdan o\'tkazilmoqda...';
+                    loader.classList.remove('hidden');
+                    submitBtn.disabled = true;
+                }
+            });
+            
+            function calculateAge(birthDate) {
+                const today = new Date();
+                const birth = new Date(birthDate);
+                let age = today.getFullYear() - birth.getFullYear();
+                const monthDiff = today.getMonth() - birth.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                    age--;
+                }
+                return age;
+            }
+            
+            function showError(elementId, message) {
+                const errorElement = document.getElementById(elementId);
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+            
+            function hideError(elementId) {
+                const errorElement = document.getElementById(elementId);
+                errorElement.style.display = 'none';
+            }
+            
+            function showNotification(message, type) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    notification.classList.add('hidden');
+                }, 3000);
+            }
+            
+            updateProgress();
+        });
+    </script>
+</body>
+</html>

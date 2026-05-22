@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOP Mahsulot Qo'shish - Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        premium: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center space-x-2">
+                    <i class="fas fa-crown text-premium text-xl"></i>
+                    <span class="text-xl font-bold">TezSot Premium</span>
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'premium_dashboard' %}" class="text-gray-600 hover:text-premium">
+                        Dashboard
+                    </a>
+                    <a href="{% url 'top_mahsulotlarim' %}" class="text-gray-600 hover:text-premium">
+                        Mening Top Mahsulotlarim
+                    </a>
+                    <div class="px-3 py-1 bg-premium text-white rounded-full text-sm">
+                        <i class="fas fa-crown mr-1"></i> Premium
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg mb-2 {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="POST" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Rasmlar section -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-images text-premium mr-2"></i>
+                    Rasmlar va Video
+                </h2>
+                <p class="text-sm text-gray-500 mb-4">Maksimal 5 ta rasm (10MB dan oshmasin) va 1 ta video</p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- Asosiy rasm -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Asosiy rasm *</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg h-40 flex items-center justify-center cursor-pointer hover:border-premium relative overflow-hidden">
+                            <input type="file" name="rasm1" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" required>
+                            <div class="text-center">
+                                <i class="fas fa-camera text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">Rasm yuklang</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Qo'shimcha rasmlar -->
+                    {% for i in "2345" %}
+                    <div>
+                        <label class="block text-sm font-medium mb-2">{{ i }}-rasm</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg h-40 flex items-center justify-center cursor-pointer hover:border-premium relative overflow-hidden">
+                            <input type="file" name="rasm{{ i }}" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                            <div class="text-center">
+                                <i class="fas fa-plus text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">Rasm {{ i }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Video -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Video (ixtiyoriy)</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg h-40 flex items-center justify-center cursor-pointer hover:border-premium relative overflow-hidden">
+                            <input type="file" name="video" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                            <div class="text-center">
+                                <i class="fas fa-video text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">Video yuklang</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asosiy ma'lumotlar -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-info-circle text-premium mr-2"></i>
+                    Asosiy Ma'lumotlar
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Mahsulot nomi -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-2">
+                            Mahsulot nomi *
+                        </label>
+                        <input type="text" name="name" required 
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent"
+                               placeholder="Masalan: Chevrolet Malibu 2023">
+                    </div>
+                    
+                    <!-- Mahsulot turi -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Mahsulot turi *
+                        </label>
+                        <input type="text" name="mahsulot_turi" required
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent"
+                               placeholder="Masalan: Avtomobil">
+                    </div>
+                    
+                    <!-- Kategoriya -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Kategoriya *
+                        </label>
+                        <select name="kategoriya" required
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent">
+                            {% for value, label in kategoriyalar %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Viloyat -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Viloyat *
+                        </label>
+                        <select name="viloyat" required
+                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent">
+                            {% for value, label in viloyatlar %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Tuman -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Tuman/Shahar *
+                        </label>
+                        <input type="text" name="tuman" required
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent"
+                               placeholder="Masalan: Toshkent shahri">
+                    </div>
+                    
+                    <!-- Manzil -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium mb-2">
+                            To'liq manzil
+                        </label>
+                        <textarea name="manzil" rows="2"
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent"
+                               placeholder="Ko'cha, uy, kvartira..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aloqa ma'lumotlari -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-phone text-premium mr-2"></i>
+                    Aloqa Ma'lumotlari
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Telefon -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Telefon raqami *
+                        </label>
+                        <div class="relative">
+                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">+998</div>
+                            <input type="tel" name="telefon" required
+                                   class="w-full pl-16 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent"
+                                   placeholder="90 123 45 67">
+                        </div>
+                    </div>
+                    
+                    <!-- Telegram -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Telegram
+                        </label>
+                        <div class="relative">
+                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">@</div>
+                            <input type="text" name="telegram_username"
+                                   class="w-full pl-8 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent"
+                                   placeholder="username">
+                        </div>
+                    </div>
+                    
+                    <!-- Instagram -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Instagram
+                        </label>
+                        <div class="relative">
+                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">@</div>
+                            <input type="text" name="instagram_username"
+                                   class="w-full pl-8 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent"
+                                   placeholder="username">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mahsulot tafsilotlari -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-file-alt text-premium mr-2"></i>
+                    Mahsulot Tafsilotlari
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- Narx -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Narxi (so'm)
+                        </label>
+                        <input type="text" name="narx"
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent"
+                               placeholder="Masalan: 250000000">
+                    </div>
+                    
+                    <!-- Tavsif -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Batafsil tavsif
+                        </label>
+                        <textarea name="tavsif" rows="6"
+                               class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-premium focus:border-transparent"
+                               placeholder="Mahsulot haqida batafsil ma'lumot..."></textarea>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-sm font-medium mb-4">
+                            Holati
+                        </label>
+                        <div class="flex space-x-6">
+                            <label class="flex items-center">
+                                <input type="radio" name="status" value="active" checked class="mr-2">
+                                <span class="text-green-600 font-medium">Aktiv</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="status" value="sold" class="mr-2">
+                                <span class="text-red-600 font-medium">Sotilgan</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit buttons -->
+            <div class="flex space-x-4">
+                <button type="submit"
+                        class="flex-1 bg-premium text-white py-4 rounded-lg font-bold hover:bg-yellow-600 transition flex items-center justify-center">
+                    <i class="fas fa-save mr-2"></i>
+                    TOP Mahsulotni Saqlash
+                </button>
+                <a href="{% url 'top_mahsulotlarim' %}"
+                   class="flex-1 bg-gray-200 text-gray-700 py-4 rounded-lg font-bold hover:bg-gray-300 transition flex items-center justify-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Bekor Qilish
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Fayl yuklash ko'rinishi
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function(e) {
+                const container = this.parentElement;
+                const fileName = this.files[0]?.name || 'Fayl tanlanmadi';
+                
+                container.innerHTML = `
+                    <div class="text-center p-4">
+                        <i class="fas fa-check-circle text-green-500 text-3xl mb-2"></i>
+                        <p class="text-sm font-medium truncate">${fileName}</p>
+                        <p class="text-xs text-gray-500 mt-1">${(this.files[0]?.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>

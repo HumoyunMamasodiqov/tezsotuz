@@ -1,0 +1,278 @@
+<!-- admin/premium_requests.html ichida -->
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Premium So'rovlar</h1>
+    
+    <!-- Filter qismi -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-filter"></i> Filter
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <div class="form-group mr-3">
+                    <label for="status" class="mr-2">Status:</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="">Barchasi</option>
+                        <option value="pending" {% if status == 'pending' %}selected{% endif %}>Kutilmoqda</option>
+                        <option value="approved" {% if status == 'approved' %}selected{% endif %}>Tasdiqlangan</option>
+                        <option value="rejected" {% if status == 'rejected' %}selected{% endif %}>Rad etilgan</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- So'rovlar jadvali -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-list"></i> Premium So'rovlar Ro'yxati
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Foydalanuvchi</th>
+                            <th>Ism</th>
+                            <th>Telefon</th>
+                            <th>Kunlar</th>
+                            <th>Limit</th>
+                            <th>Summa</th>
+                            <th>Status</th>
+                            <th>Sana</th>
+                            <th>Harakatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in premium_requests %}
+                        <tr>
+                            <td>{{ req.id }}</td>
+                            <td>
+                                <a href="{% url 'admin:auth_user_change' req.user.id %}" target="_blank">
+                                    {{ req.user.username }}
+                                </a>
+                            </td>
+                            <td>{{ req.full_name }}</td>
+                            <td>{{ req.phone }}</td>
+                            <td>{{ req.requested_days }}</td>
+                            <td>{{ req.requested_limit }}</td>
+                            <td>{{ req.calculated_total|floatformat:0 }} so'm</td>
+                            <td>
+                                {% if req.status == 'pending' %}
+                                <span class="badge badge-warning">Kutilmoqda</span>
+                                {% elif req.status == 'approved' %}
+                                <span class="badge badge-success">Tasdiqlangan</span>
+                                {% elif req.status == 'rejected' %}
+                                <span class="badge badge-danger">Rad etilgan</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ req.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                {% if req.status == 'pending' %}
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-success" 
+                                            onclick="openApproveModal({{ req.id }}, {{ req.requested_days }}, {{ req.requested_limit }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" 
+                                            onclick="openRejectModal({{ req.id }})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-info" 
+                                            onclick="openDetailsModal({{ req.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                {% else %}
+                                <button class="btn btn-sm btn-info" 
+                                        onclick="openDetailsModal({{ req.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center">Premium so'rovlar topilmadi</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status %}&status={{ status }}{% endif %}">&laquo;</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if status %}&status={{ status }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status %}&status={{ status }}{% endif %}">&raquo;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Tasdiqlash Modali -->
+<div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Premium So'rovni Tasdiqlash</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="approveForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="request_id" id="approveRequestId">
+                
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="approveDays">Kunlar soni</label>
+                        <input type="number" class="form-control" id="approveDays" name="days" 
+                               min="1" max="365" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="approveLimit">Mahsulot limiti</label>
+                        <input type="number" class="form-control" id="approveLimit" name="limit" 
+                               min="1" max="50" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="approveNotes">Admin izohlari (ixtiyoriy)</label>
+                        <textarea class="form-control" id="approveNotes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Tasdiqlash
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Detallar Modali -->
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">So'rov Detallari</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="detailsContent">
+                <!-- Detallar bu yerda ko'rsatiladi -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Yopish</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tasdiqlash modali
+function openApproveModal(requestId, days, limit) {
+    document.getElementById('approveRequestId').value = requestId;
+    document.getElementById('approveDays').value = days;
+    document.getElementById('approveLimit').value = limit;
+    $('#approveModal').modal('show');
+}
+
+// Detallar modali
+function openDetailsModal(requestId) {
+    // AJAX orqali so'rov detallarini olish
+    fetch(`/admin/premium-request-details/${requestId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('detailsContent').innerHTML = data.html;
+                $('#detailsModal').modal('show');
+            } else {
+                alert('Xatolik: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Server xatosi');
+        });
+}
+
+// Tasdiqlash formasi
+document.getElementById('approveForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const requestId = formData.get('request_id');
+    
+    fetch(`/admin/approve-premium-request/${requestId}/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            $('#approveModal').modal('hide');
+            location.reload();
+        } else {
+            alert('Xatolik: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Server xatosi');
+    });
+});
+</script>
+
+<style>
+.badge {
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+.badge-warning { background-color: #ffc107; color: #000; }
+.badge-success { background-color: #28a745; color: #fff; }
+.badge-danger { background-color: #dc3545; color: #fff; }
+</style>
+{% endblock %}

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile_user.username }} profili - Tez Sot</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',
+                        primaryHover: '#0284c7',
+                        lightSky: '#f0f9ff',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #0ea5e9;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            font-weight: 500;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        .premium-product {
+            border: 2px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #FFD700, #fbbf24) border-box;
+            position: relative;
+        }
+
+        .regular-product {
+            border: 1px solid #e0f2fe;
+        }
+
+        .premium-badge {
+            background: linear-gradient(135deg, #FFD700, #f59e0b);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.4);
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            z-index: 30;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: #0ea5e9;
+        }
+
+        .filter-btn {
+            border-radius: 9999px;
+            padding: 6px 16px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background-color: #0ea5e9;
+            color: white;
+            border-color: #0ea5e9;
+            box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.3);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+    {% include 'nav.html' %}
+
+    <div class="w-full pb-12">
+        <div class="relative h-72 w-full overflow-hidden rounded-b-[2.5rem] shadow-sm">
+            {% if profile.banner_image %}
+            <img src="{{ profile.banner_image.url }}" alt="Banner" class="w-full h-full object-cover opacity-90">
+            <div class="absolute inset-0 bg-gradient-to-t from-sky-900/40 to-transparent"></div>
+            {% else %}
+            <div class="h-full bg-gradient-to-r from-sky-400 via-sky-300 to-primary"></div>
+            {% endif %}
+
+            <a href="javascript:history.back()" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Ortga
+            </a>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 -mt-24 relative z-20">
+            <div class="bg-white rounded-3xl shadow-xl shadow-sky-100/50 p-6 sm:p-10 mb-8 border border-sky-50">
+                <div class="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+
+                    <div class="flex-shrink-0 relative">
+                        <div class="w-36 h-36 rounded-full overflow-hidden border-4 border-white shadow-lg shadow-sky-200">
+                            {% if profile.profile_image %}
+                            <img src="{{ profile.profile_image.url }}" alt="{{ profile_user.username }}"
+                                class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-full bg-lightSky flex items-center justify-center">
+                                <span class="text-4xl text-primary font-bold">
+                                    {{ profile_user.username|first|upper }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if profile.is_premium_seller %}
+                        <div class="absolute -bottom-2 right-2 bg-gradient-to-r from-amber-400 to-amber-500 text-white p-1.5 rounded-full shadow-lg border-2 border-white"
+                            title="Premium Sotuvchi">
+                            <i class="fas fa-crown text-sm"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex-1 text-center lg:text-left w-full">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-center lg:justify-start gap-3 mb-2">
+                            <h2 class="text-3xl font-bold text-slate-800 tracking-tight">
+                                {{ profile.get_full_name|default:profile_user.username }}
+                            </h2>
+                            {% if premium_products > 0 %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-600 border border-amber-200">
+                                <i class="fas fa-crown"></i> {{ premium_products }} premium
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- BIO QISMI - Tuzatildi -->
+                        {% if profile.bio %}
+                        <p class="text-slate-500 mb-6 max-w-2xl mx-auto lg:mx-0 text-sm leading-relaxed">{{ profile.bio }}</p>
+                        {% else %}
+                        <p class="text-slate-400 mb-6 max-w-2xl mx-auto lg:mx-0 text-sm italic">Tez Sot Market platformasidagi Foydalanuvchi haqida ma'lumot yo'q</p>
+                        {% endif %}
+
+                        <div class="flex flex-wrap justify-center lg:justify-start gap-4 mb-8">
+                            <div class="text-center bg-lightSky px-6 py-3 rounded-2xl border border-sky-100 flex-1 sm:flex-none min-w-[110px]">
+                                <div class="text-2xl font-bold text-primary">{{ total_products }}</div>
+                                <div class="text-slate-500 text-xs mt-1 font-medium">Barcha e'lonlar</div>
+                            </div>
+                            <div class="text-center bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100 flex-1 sm:flex-none min-w-[110px]">
+                                <div class="text-2xl font-bold text-emerald-600">{{ active_products }}</div>
+                                <div class="text-slate-500 text-xs mt-1 font-medium">Faol e'lonlar</div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-slate-50/50 p-5 rounded-2xl border border-slate-100">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
+                                {% if profile.location %}
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 flex items-center justify-center bg-white shadow-sm text-primary rounded-xl">
+                                        <i class="ri-map-pin-line ri-lg"></i>
+                                    </div>
+                                    <span class="text-slate-600 text-sm font-medium">{{ profile.location }}</span>
+                                </div>
+                                {% endif %}
+
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 flex items-center justify-center bg-white shadow-sm text-primary rounded-xl">
+                                        <i class="ri-phone-line ri-lg"></i>
+                                    </div>
+                                    {% if profile.phone %}
+                                    <div class="flex items-center gap-2">
+                                        <span id="phone-number"
+                                            class="text-slate-700 font-semibold text-sm cursor-pointer hover:text-primary transition-colors"
+                                            data-phone="{{ profile.phone }}">
+                                            {{ profile.phone }}
+                                        </span>
+                                        <button onclick="copyPhoneNumber('{{ profile.phone }}')"
+                                            class="text-slate-400 hover:text-primary transition-colors ml-1"
+                                            title="Nusxa olish">
+                                            <i class="ri-file-copy-line"></i>
+                                        </button>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-slate-400 text-sm">Ko'rsatilmagan</span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- EMAIL QISMI - Tuzatildi -->
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 flex items-center justify-center bg-white shadow-sm text-primary rounded-xl">
+                                        <i class="ri-mail-line ri-lg"></i>
+                                    </div>
+                                    {% if profile_user.email %}
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-slate-600 text-sm font-medium truncate max-w-[200px]">{{ profile_user.email }}</span>
+                                        <button onclick="copyToClipboard('{{ profile_user.email }}')"
+                                            class="text-slate-400 hover:text-primary transition-colors"
+                                            title="Email nusxalash">
+                                            <i class="ri-file-copy-line"></i>
+                                        </button>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-slate-400 text-sm">Ko'rsatilmagan</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 flex items-center justify-center bg-white shadow-sm text-primary rounded-xl">
+                                        <i class="ri-time-line ri-lg"></i>
+                                    </div>
+                                    <span class="text-slate-600 text-sm font-medium">{{ profile.get_work_hours }}</span>
+                                </div>
+                            </div>
+
+                            {% if profile.telegram or profile.instagram %}
+                            <div class="flex gap-3 mt-4 xl:mt-0 justify-center xl:justify-end">
+                                {% if profile.telegram %}
+                                <a href="{{ profile.get_telegram_url }}" target="_blank"
+                                    class="w-10 h-10 flex items-center justify-center bg-[#0088cc] text-white rounded-xl shadow-md hover:-translate-y-1 transition-transform">
+                                    <i class="ri-telegram-fill ri-lg"></i>
+                                </a>
+                                {% endif %}
+                                {% if profile.instagram %}
+                                <a href="{{ profile.get_instagram_url }}" target="_blank"
+                                    class="w-10 h-10 flex items-center justify-center bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white rounded-xl shadow-md hover:-translate-y-1 transition-transform">
+                                    <i class="ri-instagram-fill ri-lg"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Telefon modal -->
+            <div id="phone-modal"
+                class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-all">
+                <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 transform scale-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-slate-800">Aloqa uchun</h3>
+                        <button onclick="closePhoneModal()"
+                            class="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition-colors">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-lightSky rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-md">
+                            <i class="ri-phone-fill text-4xl text-primary"></i>
+                        </div>
+                        <p class="text-slate-500 text-sm mb-1">{{ profile.get_full_name|default:profile_user.username }} raqami:</p>
+                        <div id="modal-phone-number" class="text-2xl font-extrabold text-slate-800 mb-8 tracking-wide">
+                        </div>
+
+                        <div class="flex flex-col gap-3">
+                            <a id="call-button"
+                                class="w-full bg-primary text-white py-3.5 rounded-xl font-semibold shadow-md shadow-primary/30 hover:bg-primaryHover transition-all flex items-center justify-center gap-2">
+                                <i class="ri-phone-fill"></i> Qo'ng'iroq qilish
+                            </a>
+                            <button onclick="copyPhoneNumberFromModal()"
+                                class="w-full bg-slate-100 text-slate-700 py-3.5 rounded-xl font-semibold hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
+                                <i class="ri-file-copy-line"></i> Nusxa olish
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E'lonlar bo'limi -->
+            <div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                    <h3 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="ri-store-2-line text-primary"></i> E'lonlar
+                        <span class="text-sm font-medium bg-lightSky text-primary px-3 py-1 rounded-full ml-2"
+                            id="filter-status">Barchasi</span>
+                    </h3>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="filterProducts('all')"
+                            class="bg-white border border-slate-200 text-slate-600 filter-btn active">Barchasi</button>
+                        <button onclick="filterProducts('premium')"
+                            class="bg-white border border-slate-200 text-slate-600 filter-btn"><i
+                                class="fas fa-crown text-amber-500 mr-1"></i> Premium</button>
+                        <button onclick="filterProducts('regular')"
+                            class="bg-white border border-slate-200 text-slate-600 filter-btn">Oddiy</button>
+                        <button onclick="filterProducts('active')"
+                            class="bg-white border border-slate-200 text-slate-600 filter-btn">Faol</button>
+                    </div>
+                </div>
+
+                {% if mahsulotlar %}
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5"
+                    id="products-grid">
+                    {% for mahsulot in mahsulotlar %}
+                    {% with is_premium=mahsulot.is_premium %}
+                    <a href="{% url 'mahsulot_detail' mahsulot.id %}"
+                        class="block product-card group bg-white rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 {% if is_premium %}premium-product shadow-md hover:shadow-amber-200/50{% else %}regular-product shadow-sm hover:shadow-lg hover:shadow-sky-100{% endif %}"
+                        data-type="{% if is_premium %}premium{% else %}regular{% endif %}"
+                        data-status="{% if mahsulot.sotilgan %}sold{% else %}active{% endif %}">
+
+                        <div class="h-32 sm:h-36 overflow-hidden relative bg-slate-50">
+                            {% if mahsulot.asosiyimg %}
+                            <img src="{{ mahsulot.asosiyimg.url }}" alt="{{ mahsulot.name }}"
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            {% else %}
+                            <div class="w-full h-full flex items-center justify-center">
+                                <i class="ri-image-line text-3xl text-slate-300"></i>
+                            </div>
+                            {% endif %}
+
+                            {% if is_premium %}
+                            <div class="absolute top-2 left-2 z-10">
+                                <span class="premium-badge"><i class="fas fa-crown"></i> TOP</span>
+                            </div>
+                            {% endif %}
+
+                            {% if mahsulot.sotilgan %}
+                            <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center backdrop-blur-[2px] z-20">
+                                <span class="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-bold tracking-wider uppercase transform -rotate-12 border border-white">Sotilgan</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="p-3 sm:p-4">
+                            <h4 class="font-bold text-slate-800 text-sm sm:text-base leading-tight mb-1 truncate group-hover:text-primary transition-colors">
+                                {{ mahsulot.name }}</h4>
+                            <p class="text-slate-400 text-xs mb-3 truncate">{{ mahsulot.mahsulotturi }}</p>
+
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="font-bold text-[15px] sm:text-lg {% if is_premium %}text-amber-600{% else %}text-primary{% endif %}">
+                                    {{ mahsulot.narx_formatted }}
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 pt-3 mt-auto">
+                                <div class="flex items-center gap-1 truncate max-w-[60%]">
+                                    <i class="ri-map-pin-line text-primary/70"></i>
+                                    <span class="truncate">{{ mahsulot.get_viloyat_display }}</span>
+                                </div>
+                                <span class="whitespace-nowrap">{{ mahsulot.sana|date:"d.m" }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.paginator.num_pages > 1 %}
+                <div class="mt-10 flex justify-center">
+                    <div class="inline-flex bg-white rounded-xl shadow-sm border border-slate-100 p-1">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}"
+                            class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-primary hover:bg-lightSky rounded-lg transition-colors">Orqaga</a>
+                        {% endif %}
+
+                        <div class="flex items-center px-2 gap-1">
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <span class="w-8 h-8 flex items-center justify-center bg-primary text-white text-sm font-bold rounded-lg shadow-md shadow-primary/30">{{ num }}</span>
+                            {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                            <a href="?page={{ num }}"
+                                class="w-8 h-8 flex items-center justify-center text-sm font-medium text-slate-600 hover:bg-lightSky hover:text-primary rounded-lg transition-colors">
+                                {{ num }}</a>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}"
+                            class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-primary hover:bg-lightSky rounded-lg transition-colors">Oldinga</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center py-16 bg-white rounded-3xl border border-dashed border-sky-200">
+                    <div class="w-24 h-24 bg-lightSky rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="ri-box-3-line text-5xl text-primary/50"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-700 mb-1">Hozircha e'lonlar yo'q</h4>
+                    <p class="text-slate-500 text-sm">Foydalanuvchi hali e'lon joylamagan yoki faol e'lonlari mavjud
+                        emas.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script>
+        // Email nusxalash funksiyasi
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Email nusxalandi: ' + text);
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('Email nusxalandi: ' + text);
+            });
+        }
+
+        function copyPhoneNumber(phoneNumber) {
+            const cleanNumber = phoneNumber.replace(/\D/g, '');
+            navigator.clipboard.writeText(cleanNumber).then(() => {
+                showNotification('Raqam nusxalandi: ' + phoneNumber);
+            }).catch(err => {
+                const textArea = document.createElement('textarea');
+                textArea.value = cleanNumber;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('Raqam nusxalandi: ' + phoneNumber);
+            });
+        }
+
+        function copyPhoneNumberFromModal() {
+            const phoneNumber = document.getElementById('modal-phone-number').textContent;
+            copyPhoneNumber(phoneNumber);
+            closePhoneModal();
+        }
+
+        function showPhoneModal(phoneNumber) {
+            const modal = document.getElementById('phone-modal');
+            const modalNumber = document.getElementById('modal-phone-number');
+            const callButton = document.getElementById('call-button');
+
+            modalNumber.textContent = phoneNumber;
+            callButton.href = 'tel:' + phoneNumber.replace(/\D/g, '');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            document.addEventListener('keydown', function escapeHandler(e) {
+                if (e.key === 'Escape') {
+                    closePhoneModal();
+                    document.removeEventListener('keydown', escapeHandler);
+                }
+            });
+        }
+
+        function closePhoneModal() {
+            const modal = document.getElementById('phone-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function showNotification(message) {
+            const oldNotifications = document.querySelectorAll('.copy-notification');
+            oldNotifications.forEach(notif => notif.remove());
+
+            const notification = document.createElement('div');
+            notification.className = 'copy-notification flex items-center gap-2';
+            notification.innerHTML = `<i class="ri-checkbox-circle-fill text-xl"></i><span>${message}</span>`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function filterProducts(filterType) {
+            const products = document.querySelectorAll('.product-card');
+            const filterStatus = document.getElementById('filter-status');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active', 'bg-primary', 'text-white', 'border-primary');
+                btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+
+                if ((filterType === 'all' && btn.textContent.includes('Barchasi')) ||
+                    (filterType === 'premium' && btn.textContent.includes('Premium')) ||
+                    (filterType === 'regular' && btn.textContent.includes('Oddiy')) ||
+                    (filterType === 'active' && btn.textContent.includes('Faol'))) {
+
+                    btn.classList.add('active', 'bg-primary', 'text-white', 'border-primary');
+                    btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+                }
+            });
+
+            let visibleCount = 0;
+
+            products.forEach(product => {
+                const type = product.getAttribute('data-type');
+                const status = product.getAttribute('data-status');
+                let show = false;
+
+                switch (filterType) {
+                    case 'all': show = true; break;
+                    case 'premium': show = type === 'premium'; break;
+                    case 'regular': show = type === 'regular'; break;
+                    case 'active': show = status === 'active'; break;
+                }
+
+                if (show) {
+                    product.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    product.style.display = 'none';
+                }
+            });
+
+            const filterLabels = {
+                'all': 'Barchasi',
+                'premium': 'Premium',
+                'regular': 'Oddiy',
+                'active': 'Faol'
+            };
+
+            filterStatus.textContent = `${filterLabels[filterType]} (${visibleCount})`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const phoneElement = document.getElementById('phone-number');
+            if (phoneElement) {
+                phoneElement.addEventListener('click', function () {
+                    const phoneNumber = this.getAttribute('data-phone');
+                    showPhoneModal(phoneNumber);
+                });
+            }
+
+            const modal = document.getElementById('phone-modal');
+            modal.addEventListener('click', function (e) {
+                if (e.target === this) closePhoneModal();
+            });
+
+            const formatPhoneNumber = (phone) => {
+                const numbers = phone.replace(/\D/g, '');
+                if (numbers.length === 9) return `+998 ${numbers.slice(0, 2)} ${numbers.slice(2, 5)} ${numbers.slice(5, 7)} ${numbers.slice(7)}`;
+                else if (numbers.length === 12 && numbers.startsWith('998')) return `+${numbers.slice(0, 3)} ${numbers.slice(3, 5)} ${numbers.slice(5, 8)} ${numbers.slice(8, 10)} ${numbers.slice(10)}`;
+                return phone;
+            };
+
+            if (phoneElement) {
+                const originalPhone = phoneElement.getAttribute('data-phone');
+                phoneElement.textContent = formatPhoneNumber(originalPhone);
+            }
+
+            filterProducts('all');
+        });
+    </script>
+</body>
+
+</html>

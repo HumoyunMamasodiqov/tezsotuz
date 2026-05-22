@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Status | Tez Sot</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .premium-card-main {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-gradient-bg {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+        }
+
+        .contact-method-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-method-card:hover {
+            border-color: #e2e8f0;
+            background: white;
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .btn-premium-action {
+            transition: all 0.3s ease;
+        }
+
+        .btn-premium-action:hover {
+            transform: scale(1.02);
+        }
+
+        /* Mobil uchun kichik shriftlar va joylashuv */
+        @media (max-width: 640px) {
+            .premium-card-main {
+                padding: 20px !important;
+                border-radius: 24px;
+            }
+            .contact-method-card {
+                padding: 12px !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 antialiased">
+    
+    {% include 'nav.html' %}
+    
+    <main class="max-w-4xl mx-auto px-4 py-6 sm:py-12">
+        <div class="premium-card-main p-5 sm:p-10">
+            
+            <div class="premium-gradient-bg p-6 sm:p-10 mb-8">
+                <div class="flex flex-col sm:flex-row items-center gap-5 relative z-10 text-center sm:text-left">
+                    <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner">
+                        <i class="fas fa-crown text-3xl text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-white mb-1">Premium Imkoniyatlar</h2>
+                        <p class="text-white/90 text-sm font-medium leading-relaxed max-w-sm">
+                            Savdolaringizni yangi bosqichga olib chiqing va mijozlar e'tiborini torting.
+                        </p>
+                    </div>
+                </div>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+            </div>
+            
+            {% if reason %}
+            <div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-4 mb-8">
+                <div class="flex gap-3">
+                    <i class="fas fa-info-circle text-amber-500 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-bold text-amber-900 text-sm sm:text-base">Premium So'rov Sababi:</h4>
+                        <p class="text-amber-800 text-sm leading-relaxed">{{ reason }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="mb-8">
+                <h3 class="text-lg font-extrabold text-slate-800 mb-4 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+                    Admin bilan bog'lanish
+                </h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {% if admin_contact.admin_contact_phone %}
+                    <div class="contact-method-card bg-slate-50 p-4 rounded-2xl">
+                        <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white text-lg">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Telefon</p>
+                            <h3 class="text-sm sm:text-base font-bold text-slate-700 truncate">{{ admin_contact.admin_contact_phone }}</h3>
+                        </div>
+                        <a href="tel:{{ admin_contact.admin_contact_phone }}" class="bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg font-bold shadow-sm">Tel</a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if admin_contact.admin_contact_telegram %}
+                    <div class="contact-method-card bg-slate-50 p-4 rounded-2xl">
+                        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-lg">
+                            <i class="fab fa-telegram-plane"></i>
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Telegram</p>
+                            <h3 class="text-sm sm:text-base font-bold text-slate-700 truncate">@{{ admin_contact.admin_contact_telegram|cut:'@' }}</h3>
+                        </div>
+                        <a href="https://t.me/{{ admin_contact.admin_contact_telegram|cut:'@' }}" target="_blank" class="bg-blue-500 text-white text-xs px-4 py-2 rounded-lg font-bold shadow-sm">Chat</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-1 border-t border-b border-slate-100 py-6 mb-8">
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Narxi</p>
+                    <p class="text-[13px] sm:text-lg font-black text-slate-800">{{ admin_contact.premium_fee_amount|floatformat:0 }}<span class="text-[9px] font-medium ml-0.5">so'm</span></p>
+                </div>
+                <div class="text-center border-l border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Muddati</p>
+                    <p class="text-[13px] sm:text-lg font-black text-slate-800">{{ admin_contact.premium_duration_days }}<span class="text-[9px] font-medium ml-0.5">kun</span></p>
+                </div>
+                <div class="text-center border-l border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Limit</p>
+                    <p class="text-[13px] sm:text-lg font-black text-slate-800">{{ admin_contact.max_premium_products }}<span class="text-[9px] font-medium ml-0.5">ta</span></p>
+                </div>
+                <div class="text-center border-l border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Avto</p>
+                    <p class="text-[13px] sm:text-lg font-black text-slate-800">{% if admin_contact.auto_renew_premium %}Ha{% else %}Yo'q{% endif %}</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <a href="{% url 'submit_premium_request' %}" class="w-full bg-slate-900 text-white flex items-center justify-center gap-3 py-4 rounded-2xl font-bold btn-premium-action shadow-xl shadow-slate-200">
+                    <i class="fas fa-paper-plane text-blue-400"></i>
+                    Online Premium So'rov
+                </a>
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{% url 'my_profile' %}" class="flex-1 bg-slate-100 text-slate-700 text-center py-3.5 rounded-xl font-bold hover:bg-slate-200 transition text-sm">
+                        <i class="fas fa-user-circle mr-1.5 text-slate-400"></i> Profilga qaytish
+                    </a>
+                    <a href="{% url 'home' %}" class="flex-1 bg-slate-100 text-slate-700 text-center py-3.5 rounded-xl font-bold hover:bg-slate-200 transition text-sm">
+                        <i class="fas fa-home mr-1.5 text-slate-400"></i> Bosh sahifa
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+    
+    {% include 'footer.html' %}
+
+</body>
+</html>

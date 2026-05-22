@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ mahsulot.name }} - Premium Mahsulot</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .premium-header {
+            background: linear-gradient(135deg, #f59e0b, #d97706, #b45309);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .premium-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+        
+        .premium-badge-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+        
+        .premium-price-large {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .seller-card {
+            border-left: 4px solid #f59e0b;
+            background: linear-gradient(to right, rgba(245, 158, 11, 0.1), transparent);
+        }
+        
+        .image-gallery {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .main-image {
+            transition: transform 0.5s ease;
+        }
+        
+        .main-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .thumb-image {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .thumb-image:hover, .thumb-image.active {
+            border-color: #f59e0b;
+            transform: translateY(-3px);
+        }
+        
+        .contact-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .whatsapp-btn {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+        }
+        
+        .telegram-btn {
+            background: linear-gradient(135deg, #0088cc, #005f8b);
+        }
+        
+        .phone-btn {
+            background: linear-gradient(135deg, #34d399, #10b981);
+        }
+        
+        .premium-features {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+            border-radius: 15px;
+            border: 2px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .sold-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        @keyframes shine {
+            0% { background-position: -100px; }
+            100% { background-position: 200px; }
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0) 0%, 
+                rgba(255,255,255,0.4) 50%, 
+                rgba(255,255,255,0) 100%);
+            background-size: 200px 100%;
+            animation: shine 2s infinite;
+        }
+        
+        .premium-product {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(245, 158, 11, 0.2);
+        }
+        
+        .premium-product::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(245, 158, 11, 0.1) 0%,
+                rgba(245, 158, 11, 0) 50%,
+                rgba(245, 158, 11, 0.1) 100%);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    {% include 'nav.html' %}
+
+    <!-- Premium Product Header -->
+    <div class="premium-header py-8">
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div>
+                    <div class="flex items-center gap-4 mb-4">
+                        <span class="premium-badge-large">
+                            <i class="fas fa-crown"></i>
+                            PREMIUM MAHSULOT
+                        </span>
+                        {% if mahsulot.sotilgan %}
+                        <span class="sold-badge">
+                            <i class="fas fa-tag"></i> SOTILGAN
+                        </span>
+                        {% endif %}
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">{{ mahsulot.name }}</h1>
+                    <div class="flex items-center gap-4 text-white/80">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-calendar"></i>
+                            {{ mahsulot.sana|date:"d.m.Y H:i" }}
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-eye"></i>
+                            {{ mahsulot.korishlar_soni }} ko'rish
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="text-right">
+                    <div class="premium-price-large mb-2">{{ mahsulot.narx_formatted }}</div>
+                    <p class="text-white/80">Premium narx</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Images -->
+            <div class="lg:col-span-2">
+                <div class="premium-product">
+                    <!-- Main Image -->
+                    <div class="image-gallery mb-4">
+                        <div class="h-96 overflow-hidden">
+                            {% if mahsulot.asosiyimg %}
+                            <img id="mainImage" 
+                                 src="{{ mahsulot.asosiyimg.url }}" 
+                                 alt="{{ mahsulot.name }}" 
+                                 class="w-full h-full object-cover main-image">
+                            {% else %}
+                            <div class="w-full h-full bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center">
+                                <i class="fas fa-image text-6xl text-yellow-300"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Thumbnails -->
+                    {% if mahsulot.birimg or mahsulot.ikkiimg or mahsulot.uchuimg %}
+                    <div class="flex gap-4 mb-8">
+                        {% if mahsulot.asosiyimg %}
+                        <div class="w-20 h-20 rounded-lg overflow-hidden cursor-pointer thumb-image active" 
+                             onclick="changeImage('{{ mahsulot.asosiyimg.url }}', this)">
+                            <img src="{{ mahsulot.asosiyimg.url }}" 
+                                 alt="Asosiy rasm" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                        {% endif %}
+                        
+                        {% if mahsulot.birimg %}
+                        <div class="w-20 h-20 rounded-lg overflow-hidden cursor-pointer thumb-image" 
+                             onclick="changeImage('{{ mahsulot.birimg.url }}', this)">
+                            <img src="{{ mahsulot.birimg.url }}" 
+                                 alt="1-rasm" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                        {% endif %}
+                        
+                        {% if mahsulot.ikkiimg %}
+                        <div class="w-20 h-20 rounded-lg overflow-hidden cursor-pointer thumbImage" 
+                             onclick="changeImage('{{ mahsulot.ikkiimg.url }}', this)">
+                            <img src="{{ mahsulot.ikkiimg.url }}" 
+                                 alt="2-rasm" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                        {% endif %}
+                        
+                        {% if mahsulot.uchuimg %}
+                        <div class="w-20 h-20 rounded-lg overflow-hidden cursor-pointer thumbImage" 
+                             onclick="changeImage('{{ mahsulot.uchuimg.url }}', this)">
+                            <img src="{{ mahsulot.uchuimg.url }}" 
+                                 alt="3-rasm" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Description -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+                            <i class="fas fa-info-circle text-yellow-600"></i>
+                            Mahsulot haqida
+                        </h2>
+                        <div class="prose max-w-none">
+                            <p class="text-gray-700 leading-relaxed mb-4">
+                                {{ mahsulot.tavsif|linebreaks }}
+                            </p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-tag text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Kategoriya</p>
+                                        <p class="font-semibold">{{ mahsulot.get_category_display }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-map-marker-alt text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Manzil</p>
+                                        <p class="font-semibold">{{ mahsulot.toliq_manzil }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Premium Features -->
+                    <div class="premium-features p-6 mb-8">
+                        <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                            <i class="fas fa-bolt text-yellow-600"></i>
+                            Premium Afzalliklar
+                        </h2>
+                        <div class="space-y-3">
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Birinchi o'rinda ko'rinish</h4>
+                                    <p class="text-gray-600 text-sm">Oddiy mahsulotlardan 10x yuqorida ko'rinadi</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Yuqori ko'rishlar</h4>
+                                    <p class="text-gray-600 text-sm">Kuniga 500+ potentsial xaridorga etib borish</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">Tezkor sotuv</h4>
+                                    <p class="text-gray-600 text-sm">Oddiy mahsulotlarga qaraganda 3 baravar tezroq sotilish</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Contact & Seller Info -->
+            <div class="space-y-6">
+                <!-- Contact Card -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                        <i class="fas fa-phone-alt text-green-600"></i>
+                        Bog'lanish
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        {% if mahsulot.telefon %}
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-phone text-green-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Telefon raqam</p>
+                                    <p class="font-semibold">{{ mahsulot.telefon_formatted }}</p>
+                                </div>
+                            </div>
+                            <a href="{{ mahsulot.telefon_link }}" 
+                               class="phone-btn text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                Qo'ng'iroq
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if mahsulot.telegram_username %}
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fab fa-telegram text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Telegram</p>
+                                    <p class="font-semibold">@{{ mahsulot.telegram_username }}</p>
+                                </div>
+                            </div>
+                            <a href="{{ mahsulot.telegram_link }}" target="_blank"
+                               class="telegram-btn text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                Telegram
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if mahsulot.email %}
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-envelope text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Email</p>
+                                <p class="font-semibold">{{ mahsulot.email }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if not mahsulot.sotilgan and user.is_authenticated %}
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <form method="POST" action="{% url 'sevimliga_qoshish' mahsulot.id %}" class="mb-4">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                    class="w-full flex items-center justify-center gap-2 bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition-colors font-semibold">
+                                <i class="far fa-heart"></i>
+                                Sevimlilarga qo'shish
+                            </button>
+                        </form>
+                        
+                        <a href="#" 
+                           class="block text-center contact-btn py-3 rounded-lg font-semibold">
+                            <i class="fas fa-shopping-cart mr-2"></i>
+                            Sotib olish
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Seller Card -->
+                <div class="seller-card bg-white rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+                        <i class="fas fa-user text-yellow-600"></i>
+                        Sotuvchi
+                    </h2>
+                    
+                    <div class="flex items-center gap-4 mb-6">
+                        {% if mahsulot.user.seller_profile.profile_image %}
+                        <img src="{{ mahsulot.user.seller_profile.profile_image.url }}" 
+                             alt="{{ mahsulot.user.username }}" 
+                             class="w-16 h-16 rounded-full object-cover border-2 border-yellow-400">
+                        {% else %}
+                        <div class="w-16 h-16 rounded-full bg-yellow-100 border-2 border-yellow-400 flex items-center justify-center">
+                            <span class="text-xl font-bold text-yellow-700">
+                                {{ mahsulot.user.first_name|first|upper }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <div>
+                            <h3 class="font-bold text-gray-800">{{ mahsulot.user_info }}</h3>
+                            <p class="text-gray-600 text-sm">@{{ mahsulot.user.username }}</p>
+                            {% if mahsulot.user.seller_profile.is_premium_seller %}
+                            <span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium mt-1">
+                                <i class="fas fa-crown"></i>
+                                Premium sotuvchi
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'user_profile' mahsulot.user.username %}" 
+                       class="block text-center border-2 border-yellow-400 text-yellow-600 py-2 rounded-lg hover:bg-yellow-50 transition-colors font-semibold">
+                        Boshqa e'lonlarni ko'rish
+                    </a>
+                </div>
+                
+                <!-- Premium Stats -->
+                <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl p-6">
+                    <h2 class="text-xl font-bold mb-4">Premium statistikasi</h2>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span>Premium boshlangan:</span>
+                            <span class="font-bold">{{ mahsulot.premium_since|date:"d.m.Y" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Ko'rishlar soni:</span>
+                            <span class="font-bold">{{ mahsulot.korishlar_soni }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Premium prioritet:</span>
+                            <span class="font-bold">{{ mahsulot.premium_priority }}/10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Similar Products -->
+        {% if o_xshash_mahsulotlar %}
+        <div class="mt-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <i class="fas fa-crown text-yellow-600"></i>
+                O'xshash Premium Mahsulotlar
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for product in o_xshash_mahsulotlar %}
+                <a href="{% url 'premium_product_detail' product.id %}" class="block">
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow border border-yellow-200">
+                        <div class="h-48 overflow-hidden relative">
+                            {% if product.asosiyimg %}
+                            <img src="{{ product.asosiyimg.url }}" 
+                                 alt="{{ product.name }}" 
+                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                            {% else %}
+                            <div class="w-full h-full bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center">
+                                <i class="fas fa-image text-4xl text-yellow-300"></i>
+                            </div>
+                            {% endif %}
+                            <div class="absolute top-3 right-3">
+                                <span class="premium-badge-large text-xs px-2 py-1">
+                                    <i class="fas fa-crown text-xs"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-gray-800 mb-2 line-clamp-2">{{ product.name }}</h3>
+                            <div class="flex justify-between items-center">
+                                <span class="text-orange-600 font-bold">{{ product.narx_formatted }}</span>
+                                <span class="text-gray-500 text-sm">
+                                    <i class="fas fa-eye"></i> {{ product.korishlar_soni }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    {% include 'footer.html' %}
+
+    <script>
+        // Image gallery functionality
+        function changeImage(src, element) {
+            document.getElementById('mainImage').src = src;
+            
+            // Remove active class from all thumbnails
+            document.querySelectorAll('.thumb-image').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            
+            // Add active class to clicked thumbnail
+            element.classList.add('active');
+        }
+        
+        // Auto rotate images if multiple exist
+        let imageIndex = 0;
+        const images = [
+            {% if mahsulot.asosiyimg %}'{{ mahsulot.asosiyimg.url }}',{% endif %}
+            {% if mahsulot.birimg %}'{{ mahsulot.birimg.url }}',{% endif %}
+            {% if mahsulot.ikkiimg %}'{{ mahsulot.ikkiimg.url }}',{% endif %}
+            {% if mahsulot.uchuimg %}'{{ mahsulot.uchuimg.url }}',{% endif %}
+        ];
+        
+        if (images.length > 1) {
+            setInterval(() => {
+                imageIndex = (imageIndex + 1) % images.length;
+                document.getElementById('mainImage').src = images[imageIndex];
+                
+                // Update active thumbnail
+                document.querySelectorAll('.thumb-image').forEach((thumb, index) => {
+                    if (index === imageIndex) {
+                        thumb.classList.add('active');
+                    } else {
+                        thumb.classList.remove('active');
+                    }
+                });
+            }, 5000);
+        }
+        
+        // Premium glow effect
+        const premiumProduct = document.querySelector('.premium-product');
+        setInterval(() => {
+            premiumProduct.classList.toggle('shimmer');
+        }, 3000);
+    </script>
+</body>
+</html>

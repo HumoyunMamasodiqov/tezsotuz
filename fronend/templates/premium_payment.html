@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium To'lov - Tez Sot</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .payment-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .payment-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .payment-header {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            padding: 30px;
+            text-align: center;
+            color: black;
+        }
+        
+        .payment-body {
+            padding: 30px;
+        }
+        
+        .status-box {
+            background: #f0f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .payment-details {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            color: #1e40af;
+            font-size: 18px;
+        }
+        
+        .bank-info {
+            background: #f0f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #bae6fd;
+        }
+        
+        .bank-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .bank-row:last-child {
+            border-bottom: none;
+        }
+        
+        .extension-notice {
+            background: #d1fae5;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #10b981;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #10B981, #34D399);
+            color: white;
+            border: none;
+            padding: 18px 32px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .file-upload {
+            border: 2px dashed #e5e7eb;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-preview {
+            margin-top: 10px;
+        }
+        
+        .file-name {
+            background: #e5e7eb;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    {% include 'nav.html' %}
+    
+    <div class="payment-container">
+        <div class="payment-card">
+            <!-- Header -->
+            <div class="payment-header">
+                <div class="premium-icon">
+                    <i class="fas fa-crown" style="font-size: 48px;"></i>
+                </div>
+                <h1 class="text-2xl font-bold mb-2">Premium To'lov</h1>
+                <p class="opacity-90">To'lov qiling va premium bo'ling</p>
+            </div>
+            
+            <!-- Body -->
+            <div class="payment-body">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="mb-4 p-3 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                <!-- Status Box -->
+                <div class="status-box">
+                    <div class="status-badge status-pending">
+                        <i class="fas fa-clock"></i>
+                        To'lov kutilmoqda
+                    </div>
+                    
+                    <div class="mt-3">
+                        <strong>So'rov ID:</strong> {{ premium_request.id }}<br>
+                        <strong>Yuborilgan sana:</strong> {{ premium_request.created_at|date:"d.m.Y H:i" }}
+                    </div>
+                    
+                    {% if has_premium %}
+                    <div class="mt-3 text-blue-600">
+                        <i class="fas fa-info-circle"></i>
+                        Sizda allaqachon premium faol. Yangi kunlar avvalgi muddatga qo'shiladi.
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- To'lov Tafsilotlari -->
+                <div class="payment-details">
+                    <h3 class="text-lg font-bold mb-4">To'lov Tafsilotlari</h3>
+                    
+                    <div class="detail-row">
+                        <span>To'liq ism:</span>
+                        <span>{{ premium_request.full_name }}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span>Telefon:</span>
+                        <span>{{ premium_request.phone }}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span>Premium kunlar:</span>
+                        <span>{{ premium_request.requested_days }} kun</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span>Premium limit:</span>
+                        <span>{{ premium_request.requested_limit }} ta mahsulot</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span>To'lov miqdori:</span>
+                        <span>{{ premium_request.payment_amount|floatformat:0 }} so'm</span>
+                    </div>
+                </div>
+                
+                <!-- Avtomatik uzaytirish -->
+                {% if will_extend %}
+                <div class="extension-notice">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-plus-circle text-green-500 text-xl"></i>
+                        <div>
+                            <strong class="text-green-700">❗ MUHIM: Yangi kunlar avvalgi muddatga qo'shiladi</strong>
+                        </div>
+                    </div>
+                    <div class="ml-9">
+                        <div>Joriy premium tugash sanasi: {{ current_end|date:"d.m.Y" }}</div>
+                        <div>{{ premium_request.requested_days }} kun qo'shilgandan keyin: {{ new_end_date|date:"d.m.Y" }} gacha</div>
+                        <div class="text-sm text-gray-600 mt-1">{{ extension_text }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Bank Ma'lumotlari -->
+                <div class="bank-info">
+                    <h4 class="font-bold mb-3 text-blue-700">Bank Ma'lumotlari</h4>
+                    
+                    <div class="bank-row">
+                        <span class="text-gray-600">Bank nomi:</span>
+                        <span class="font-medium">{{ settings.bank_name }}</span>
+                    </div>
+                    
+                    <div class="bank-row">
+                        <span class="text-gray-600">Hisob raqami:</span>
+                        <span class="font-medium font-mono">{{ settings.bank_account_number }}</span>
+                    </div>
+                    
+                    <div class="bank-row">
+                        <span class="text-gray-600">Hisob egasi:</span>
+                        <span class="font-medium">{{ settings.bank_recipient_name }}</span>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-yellow-50 rounded-lg text-sm">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                        To'lov qilgandan so'ng quyidagi formani to'ldiring va chek rasmini yuklang.
+                    </div>
+                </div>
+                
+                <!-- To'lov Formasi -->
+                <form method="POST" enctype="multipart/form-data" id="paymentForm">
+                    {% csrf_token %}
+                    
+                    <!-- To'lov Usuli -->
+                    <div class="form-group">
+                        <label class="form-label">To'lov usuli *</label>
+                        <select name="payment_method" class="form-input" required>
+                            <option value="bank_transfer" selected>Bank o'tkazmasi</option>
+                            <option value="click">Click</option>
+                            <option value="payme">Payme</option>
+                            <option value="cash">Naqd pul</option>
+                            <option value="other">Boshqa</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Tranzaksiya ID -->
+                    <div class="form-group">
+                        <label class="form-label">Tranzaksiya ID (ixtiyoriy)</label>
+                        <input type="text" 
+                               name="transaction_id" 
+                               class="form-input" 
+                               placeholder="Bank yoki to'lov tizimidan olingan ID">
+                    </div>
+                    
+                    <!-- To'lov Cheki -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            To'lov cheki (rasm) *
+                            {% if settings.require_payment_proof %}
+                            <span class="text-red-500">(Majburiy)</span>
+                            {% endif %}
+                        </label>
+                        
+                        <div class="file-upload" onclick="document.getElementById('payment_proof').click()">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                            <div class="text-gray-600">
+                                To'lov chekini yuklash uchun bosing
+                            </div>
+                            <div class="text-sm text-gray-500 mt-1">
+                                PNG, JPG, JPEG fayllar (maksimum 5MB)
+                            </div>
+                            <input type="file" 
+                                   name="payment_proof" 
+                                   id="payment_proof" 
+                                   class="file-input" 
+                                   accept="image/*"
+                                   {% if settings.require_payment_proof %}required{% endif %}
+                                   onchange="previewFile(this)">
+                        </div>
+                        
+                        <div class="file-preview" id="filePreview"></div>
+                    </div>
+                    
+                    <!-- Qo'shimcha Eslatma -->
+                    <div class="form-group">
+                        <label class="form-label">Qo'shimcha eslatmalar (ixtiyoriy)</label>
+                        <textarea name="notes" 
+                                  class="form-input" 
+                                  rows="3"
+                                  placeholder="To'lov haqida qo'shimcha ma'lumotlar..."></textarea>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fas fa-check-circle"></i>
+                        To'lov Ma'lumotlarini Yuborish
+                    </button>
+                    
+                    <!-- Orqaga Link -->
+                    <a href="{% url 'my_premium_requests' %}" class="block text-center mt-4 text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        So'rovlarim sahifasiga qaytish
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Fayl yuklash preview
+        function previewFile(input) {
+            const preview = document.getElementById('filePreview');
+            preview.innerHTML = '';
+            
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const fileName = document.createElement('div');
+                    fileName.className = 'file-name';
+                    fileName.innerHTML = `
+                        <i class="fas fa-file-image text-green-500"></i>
+                        ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)
+                    `;
+                    preview.appendChild(fileName);
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Form yuborilganda
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Yuborilmoqda...';
+        });
+        
+        // Fayl yuklash hajmini tekshirish
+        document.getElementById('payment_proof').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.size > 5 * 1024 * 1024) {
+                alert('Fayl hajmi 5MB dan oshmasligi kerak!');
+                e.target.value = '';
+                document.getElementById('filePreview').innerHTML = '';
+            }
+        });
+    </script>
+</body>
+</html>

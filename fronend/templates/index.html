@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcha mahsulotlar - Tez Sot</title>
+    <link rel="icon" type="image/png" href="{% static 'img/iconlogo.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+      :root {
+        --primary-color: #4a6cf7;
+        --secondary-color: #6b7280;
+        --accent-color: #f59e0b;
+        --text-dark: #1f2937;
+        --text-light: #6b7280;
+        --bg-light: #f9fafb;
+        --border-radius: 12px;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --transition: all 0.3s ease;
+        --premium-gold: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", "Segoe UI", sans-serif;
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+        line-height: 1.6;
+      }
+
+      .wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+
+      /* QIDIRUV NATIJALARI SECTION */
+      .search-results-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: white;
+      }
+
+      .search-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .search-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+
+      .search-title i {
+        margin-right: 10px;
+      }
+
+      .search-count {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .search-clear-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .search-clear-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .page-title {
+        text-align: left;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        position: relative;
+      }
+
+      .page-title::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 80px;
+        height: 4px;
+        background: var(--accent-color);
+        border-radius: 2px;
+      }
+
+      /* FILTER SECTION */
+      .filter-section {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .filter-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid transparent;
+      }
+
+      .filter-btn.all {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .filter-btn.premium {
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #333;
+      }
+
+      .filter-btn.regular {
+        background: #f0f4ff;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+
+      .filter-btn.active {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .filter-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .filter-count {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .products-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+
+      .product-card {
+        background: white;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+      }
+
+      .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      .product-card.premium {
+        border: 2px solid #FFD700;
+      }
+
+      .product-card.premium::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--premium-gold);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite linear;
+        z-index: 10;
+      }
+
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+
+      .premium-badge {
+        position: absolute;
+        top: 15px;
+        right: -35px;
+        width: 140px;
+        padding: 5px 0;
+        background: var(--premium-gold);
+        color: #333;
+        text-align: center;
+        font-size: 0.7rem;
+        font-weight: 800;
+        transform: rotate(45deg);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 20;
+      }
+
+      .product-image {
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: var(--transition);
+      }
+
+      .product-card:hover .product-image img {
+        transform: scale(1.05);
+      }
+
+      .status-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        padding: 3px 8px;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+
+      .status-badge.sold {
+        background: #ef4444;
+        color: white;
+      }
+
+      .status-badge.new {
+        background: var(--accent-color);
+        color: white;
+      }
+
+      .product-content {
+        padding: 1rem;
+      }
+
+      .product-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .product-card.premium .product-price {
+        color: #f59e0b;
+      }
+
+      .product-name {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        color: var(--text-dark);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .product-category {
+        font-size: 0.7rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+        display: inline-block;
+        padding: 2px 8px;
+        background: #f3f4f6;
+        border-radius: 12px;
+      }
+
+      .product-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.8rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .product-location,
+      .product-date {
+        display: flex;
+        align-items: center;
+        font-size: 0.75rem;
+        color: var(--text-light);
+        gap: 4px;
+      }
+
+      .product-location i,
+      .product-date i {
+        font-size: 0.7rem;
+      }
+
+      .product-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 1rem;
+      }
+
+      .btn {
+        padding: 0.5rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        font-size: 0.8rem;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+      }
+
+      .btn-primary {
+        background: var(--primary-color);
+        color: white;
+        flex: 1;
+      }
+
+      .btn-primary:hover {
+        background: #3a56d4;
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+      }
+
+      .btn-secondary:hover {
+        background: #f0f4ff;
+      }
+
+      .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-light);
+        font-size: 1.2rem;
+      }
+
+      /* Pagination */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .pagination a, .pagination span {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .pagination a {
+        background: white;
+        color: var(--primary-color);
+        border: 1px solid #e5e7eb;
+      }
+
+      .pagination a:hover {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .pagination .current {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      /* Media so'rovlari */
+      @media (min-width: 768px) {
+        .products-grid {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+        .product-image {
+          height: 200px;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .products-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        .product-image {
+          height: 220px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .products-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .product-image {
+          height: 200px;
+        }
+        .page-title {
+          font-size: 1.5rem;
+        }
+        .search-title {
+          font-size: 1rem;
+        }
+      }
+
+      @media (min-width: 481px) and (max-width: 767px) {
+        .products-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+        .product-image {
+          height: 160px;
+        }
+      }
+    </style>
+</head>
+<body class="bg-gray-50">
+    {% include 'nav.html' %}
+    
+    <div class="wrapper">
+        <!-- QIDIRUV NATIJALARI SECTION -->
+        {% if search_query %}
+        <div class="search-results-section">
+            <div class="search-header">
+                <div>
+                    <h2 class="search-title">
+                        <i class="fas fa-search"></i> "{{ search_query }}" bo'yicha qidiruv natijalari
+                    </h2>
+                    <p class="text-white/80 text-sm mt-1">{{ total_results }} ta mahsulot topildi</p>
+                </div>
+                <a href="{% url 'index' %}" class="search-clear-btn">
+                    <i class="fas fa-times"></i> Tozalash
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <h1 class="page-title">
+            {% if search_query %}Qidiruv natijalari{% else %}Barcha e'lonlar{% endif %}
+        </h1>
+
+        <!-- FILTER SECTION -->
+        <div class="filter-section">
+            <div class="filter-buttons">
+                <a href="?filter=all{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn all {% if filter_type == 'all' or not filter_type %}active{% endif %}">
+                    <i class="fas fa-th-large"></i> Barchasi
+                </a>
+                <a href="?filter=premium{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn premium {% if filter_type == 'premium' %}active{% endif %}">
+                    <i class="fas fa-crown"></i> Premium
+                </a>
+                <a href="?filter=regular{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-btn regular {% if filter_type == 'regular' %}active{% endif %}">
+                    <i class="fas fa-star"></i> Oddiy
+                </a>
+            </div>
+            <span class="filter-count">{{ total_products }} ta mahsulot</span>
+        </div>
+
+        <div class="products-grid">
+            {% for product in mahsulotlar %}
+            <a href="{% url 'mahsulot_detail' product.id %}" class="product-card {% if product.is_premium %}premium{% endif %}">
+                {% if product.is_premium %}
+                <div class="premium-badge"><i class="fas fa-crown"></i> PREMIUM</div>
+                {% endif %}
+                
+                <div class="product-image">
+                    {% if product.asosiyimg %}
+                        <img src="{{ product.asosiyimg.url }}" alt="{{ product.name }}" loading="lazy" />
+                    {% else %}
+                        <div style="background: #f0f0f0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #999;">
+                            <i class="fas fa-image fa-2x"></i>
+                        </div>
+                    {% endif %}
+                    
+                    {% if product.sotilgan %}
+                    <div class="status-badge sold">SOTILGAN</div>
+                    {% else %}
+                    <div class="status-badge new">YANGI</div>
+                    {% endif %}
+                </div>
+    
+                <div class="product-content">
+                    <div class="product-price">
+                        {{ product.narx_formatted }} so'm
+                        {% if product.is_premium %}
+                        <i class="fas fa-gem text-xs" style="color: #f59e0b;"></i>
+                        {% endif %}
+                    </div>
+                    <h3 class="product-name">{{ product.name|truncatechars:50 }}</h3>
+                    
+                    <span class="product-category">
+                        <i class="fas fa-tag text-xs"></i> {{ product.mahsulotturi|truncatechars:20 }}
+                    </span>
+    
+                    <div class="product-details">
+                        <div class="product-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ product.viloyat|title }}
+                        </div>
+                        <div class="product-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ product.sana|date:"d.m.Y" }}
+                        </div>
+                    </div>
+    
+                    <div class="product-actions">
+                        <span class="btn btn-primary">
+                            <i class="fas fa-eye"></i> Ko'rish
+                        </span>
+                        {% if user.is_authenticated %}
+                        <form method="POST" action="{% url 'sevimliga_qoshish' product.id %}" style="flex:1; margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary w-full">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <a href="{% url 'kirish' %}" class="btn btn-secondary">
+                            <i class="fas fa-heart"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-box-open fa-3x mb-3"></i>
+                <p>{% if search_query %}Hech narsa topilmadi 😔{% else %}Hozircha mahsulotlar mavjud emas 😔{% endif %}</p>
+                {% if search_query %}
+                <p style="margin-top: 10px;">
+                    <a href="{% url 'index' %}" style="color: var(--primary-color); text-decoration: underline;">
+                        Barcha mahsulotlarni ko'rish
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- PAGINATION -->
+        {% if page_obj and page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if filter_type and filter_type != 'all' %}&filter={{ filter_type }}{% endif %}">
+                <i class="fas fa-chevron-left"></i> Oldingi
+            </a>
+            {% endif %}
+
+            <span class="current">{{ page_obj.number }}</span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if filter_type and filter_type != 'all' %}&filter={{ filter_type }}{% endif %}">
+                Keyingi <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium So'rov Yuborish | Tez Sot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        /* Minimalist Container */
+        .container-minimal {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Card Styles */
+        .card-premium {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        /* Header - Havorang (#3b82f6) */
+        .header-premium {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .badge-premium-minimal {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-premium h1 {
+            color: #ffffff;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.3px;
+        }
+
+        .header-premium p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Content */
+        .content-premium {
+            padding: 1.75rem;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: #eff6ff;
+            border-radius: 16px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.75rem;
+            border: 1px solid #dbeafe;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e40af;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label-minimal {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control-minimal,
+        .form-select-minimal {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: #ffffff;
+        }
+
+        .form-control-minimal:focus,
+        .form-select-minimal:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Price Card - Havorang gradient */
+        .price-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1.75rem 0;
+            color: white;
+        }
+
+        .price-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-amount-minimal {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .price-detail {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            margin-top: 0.5rem;
+        }
+
+        /* Payment Methods */
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-option {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.875rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .payment-option:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .payment-option.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+        }
+
+        .payment-option input {
+            display: none;
+        }
+
+        .payment-icon {
+            font-size: 1.5rem;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* Bank Cards - Havorang aksent */
+        .bank-card-minimal {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .bank-card-minimal.humo {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .bank-card-minimal.uzcard {
+            border-left: 4px solid #06b6d4;
+        }
+
+        .bank-card-minimal.click {
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .bank-card-minimal.payme {
+            border-left: 4px solid #ec4899;
+        }
+
+        .card-number-minimal {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #0f172a;
+            margin: 0.75rem 0;
+        }
+
+        .card-owner-minimal {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .copy-btn-minimal {
+            background: none;
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn-minimal:hover {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        /* Upload Area */
+        .upload-area-minimal {
+            border: 2px dashed #cbd5e0;
+            border-radius: 16px;
+            padding: 1.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        .upload-area-minimal:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        /* Button */
+        .btn-submit-minimal {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1.5rem;
+        }
+
+        .btn-submit-minimal:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+
+        /* Alert */
+        .alert-minimal {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+            margin: 1.5rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .content-premium {
+                padding: 1.25rem;
+            }
+            
+            .price-amount-minimal {
+                font-size: 1.75rem;
+            }
+            
+            .payment-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .card-number-minimal {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-minimal">
+        <div class="card-premium">
+            <!-- Header - Havorang -->
+            <div class="header-premium">
+                <div class="badge-premium-minimal">
+                    <i class="fas fa-crown"></i>
+                    <span>PREMIUM</span>
+                </div>
+                <h1>Premium So'rov</h1>
+                <p>Tez va sifatli xizmat</p>
+            </div>
+            
+            <!-- Content -->
+            <div class="content-premium">
+                <!-- Limit Info -->
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="fas fa-chart-line me-1"></i> Qolgan so'rovlar
+                    </div>
+                    <div class="info-value">
+                        5 / 10
+                    </div>
+                    <small style="color: #94a3b8;">bu oyga</small>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data" id="premiumForm">
+                    <!-- Shaxsiy ma'lumotlar -->
+                    <div class="form-group">
+                        <label class="form-label-minimal">
+                            <i class="fas fa-user me-1" style="color: #3b82f6;"></i> To'liq ism
+                        </label>
+                        <input type="text" class="form-control-minimal" name="full_name" 
+                               placeholder="Ism va familiyangiz" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label-minimal">
+                            <i class="fas fa-phone me-1" style="color: #3b82f6;"></i> Telefon raqam
+                        </label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <span style="background: #f1f5f9; padding: 0.75rem 1rem; border-radius: 12px; color: #475569;">+998</span>
+                            <input type="tel" class="form-control-minimal" name="phone" 
+                                   placeholder="90 123 45 67" pattern="[0-9]{9}" required>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label-minimal">
+                                <i class="fab fa-telegram me-1" style="color: #3b82f6;"></i> Telegram
+                            </label>
+                            <input type="text" class="form-control-minimal" name="telegram_username" 
+                                   placeholder="@username">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label-minimal">
+                                <i class="fas fa-envelope me-1" style="color: #3b82f6;"></i> Email
+                            </label>
+                            <input type="email" class="form-control-minimal" name="email" 
+                                   placeholder="email@example.com">
+                        </div>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <!-- Premium sozlamalar -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label-minimal">
+                                <i class="fas fa-calendar me-1" style="color: #3b82f6;"></i> Premium muddati
+                            </label>
+                            <select class="form-select-minimal" name="requested_days" id="daysSelect" required>
+                                <option value="7">1 hafta (7 kun)</option>
+                                <option value="30" selected>1 oy (30 kun)</option>
+                                <option value="90">3 oy (90 kun)</option>
+                                <option value="180">6 oy (180 kun)</option>
+                                <option value="365">1 yil (365 kun)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label-minimal">
+                                <i class="fas fa-box me-1" style="color: #3b82f6;"></i> Mahsulot limiti
+                            </label>
+                            <select class="form-select-minimal" name="requested_limit" id="limitSelect" required>
+                                <option value="1">1 ta mahsulot</option>
+                                <option value="3">3 ta mahsulot</option>
+                                <option value="5" selected>5 ta mahsulot</option>
+                                <option value="10">10 ta mahsulot</option>
+                                <option value="20">20 ta mahsulot</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Display - Havorang -->
+                    <div class="price-card">
+                        <div class="price-label">Jami to'lov</div>
+                        <div class="price-amount-minimal" id="calculatedPrice">105 000 so'm</div>
+                        <div class="price-detail">
+                            <span id="selectedDays">30</span> kun · 
+                            <span id="selectedLimit">5</span> ta mahsulot
+                        </div>
+                    </div>
+                    
+                    <!-- To'lov usullari -->
+                    <div class="form-group">
+                        <label class="form-label-minimal">
+                            <i class="fas fa-credit-card me-1" style="color: #3b82f6;"></i> To'lov usuli
+                        </label>
+                        <div class="payment-grid" id="paymentMethods">
+                            <div class="payment-option selected" data-method="humo">
+                                <input type="radio" name="payment_method" value="humo" checked>
+                                <div class="payment-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="payment-name">HUMO</div>
+                            </div>
+                            <div class="payment-option" data-method="uzcard">
+                                <input type="radio" name="payment_method" value="uzcard">
+                                <div class="payment-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="payment-name">UzCard</div>
+                            </div>
+                            <div class="payment-option" data-method="click">
+                                <input type="radio" name="payment_method" value="click">
+                                <div class="payment-icon">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                </div>
+                                <div class="payment-name">Click</div>
+                            </div>
+                            <div class="payment-option" data-method="payme">
+                                <input type="radio" name="payment_method" value="payme">
+                                <div class="payment-icon">
+                                    <i class="fas fa-mobile-alt"></i>
+                                </div>
+                                <div class="payment-name">Payme</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bank kartalari -->
+                    <div id="bankCardsContainer">
+                        <div class="bank-card-minimal humo" data-method="humo">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 1.5rem;">💳</span>
+                                <span style="background: #3b82f6; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600;">HUMO</span>
+                            </div>
+                            <div class="card-number-minimal">8600 1234 5678 9012</div>
+                            <div class="card-owner-minimal">TEZ SOT MCHJ</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;">
+                                <span style="font-size: 0.7rem; color: #94a3b8;">🏦 Bank: HUMO</span>
+                                <button type="button" class="copy-btn-minimal" onclick="copyCardNumber('8600 1234 5678 9012', this)">
+                                    <i class="fas fa-copy"></i> Nusxa olish
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bank-card-minimal uzcard" data-method="uzcard" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 1.5rem;">💳</span>
+                                <span style="background: #06b6d4; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600;">UZCARD</span>
+                            </div>
+                            <div class="card-number-minimal">9860 0102 0304 0506</div>
+                            <div class="card-owner-minimal">TEZ SOT MCHJ</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;">
+                                <span style="font-size: 0.7rem; color: #94a3b8;">🏦 Bank: UZCARD</span>
+                                <button type="button" class="copy-btn-minimal" onclick="copyCardNumber('9860 0102 0304 0506', this)">
+                                    <i class="fas fa-copy"></i> Nusxa olish
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bank-card-minimal click" data-method="click" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 1.5rem;">🖱️</span>
+                                <span style="background: #8b5cf6; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600;">CLICK</span>
+                            </div>
+                            <div class="card-number-minimal">8600 1234 5678 9012</div>
+                            <div class="card-owner-minimal">TEZ SOT MCHJ</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;">
+                                <span style="font-size: 0.7rem; color: #94a3b8;">🏦 Bank: CLICK</span>
+                                <button type="button" class="copy-btn-minimal" onclick="copyCardNumber('8600 1234 5678 9012', this)">
+                                    <i class="fas fa-copy"></i> Nusxa olish
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bank-card-minimal payme" data-method="payme" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 1.5rem;">📱</span>
+                                <span style="background: #ec4899; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600;">PAYME</span>
+                            </div>
+                            <div class="card-number-minimal">8600 1234 5678 9012</div>
+                            <div class="card-owner-minimal">TEZ SOT MCHJ</div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;">
+                                <span style="font-size: 0.7rem; color: #94a3b8;">🏦 Bank: PAYME</span>
+                                <button type="button" class="copy-btn-minimal" onclick="copyCardNumber('8600 1234 5678 9012', this)">
+                                    <i class="fas fa-copy"></i> Nusxa olish
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Muhim eslatma -->
+                    <div class="alert-minimal">
+                        <i class="fas fa-exclamation-triangle me-2" style="color: #f59e0b;"></i>
+                        <strong>Muhim!</strong> To'lov cheki yoki skrinshot yuklash majburiy
+                    </div>
+                    
+                    <!-- Yuklash maydoni -->
+                    <div class="form-group">
+                        <label class="form-label-minimal">
+                            <i class="fas fa-cloud-upload-alt me-1" style="color: #3b82f6;"></i> To'lov dalili
+                        </label>
+                        <div class="upload-area-minimal" id="uploadArea">
+                            <input type="file" name="payment_proof" id="paymentProof" 
+                                   accept="image/*,.pdf" required style="display: none;">
+                            <i class="fas fa-cloud-upload-alt fa-2x" style="color: #3b82f6; margin-bottom: 0.75rem;"></i>
+                            <p class="mb-0" style="font-weight: 500;">Faylni tanlang yoki bu yerga tashlang</p>
+                            <small style="color: #94a3b8;">Rasm yoki PDF (max 10MB)</small>
+                        </div>
+                        <div id="fileName" class="mt-2" style="font-size: 0.8rem; color: #3b82f6;"></div>
+                    </div>
+                    
+                    <!-- Qo'shimcha -->
+                    <div class="form-group">
+                        <label class="form-label-minimal">
+                            <i class="fas fa-pen me-1" style="color: #3b82f6;"></i> Qo'shimcha eslatmalar
+                        </label>
+                        <textarea class="form-control-minimal" name="notes" rows="3" 
+                                  placeholder="Premium uchun qo'shimcha talablar..."></textarea>
+                    </div>
+                    
+                    <!-- Avtomatik tasdiqlash -->
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0;">
+                        <input type="checkbox" id="autoApprove" style="width: 18px; height: 18px; cursor: pointer;">
+                        <label for="autoApprove" style="cursor: pointer; font-size: 0.85rem; color: #475569;">
+                            <i class="fas fa-check-circle me-1" style="color: #3b82f6;"></i>
+                            To'lov tasdiqlangandan so'ng avtomatik faollashtirish
+                        </label>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-submit-minimal" id="submitBtn">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        So'rovni Yuborish
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Narx hisoblash
+        function calculatePrice() {
+            const daysSelect = document.getElementById('daysSelect');
+            const limitSelect = document.getElementById('limitSelect');
+            
+            if (!daysSelect || !limitSelect) return;
+            
+            const days = parseInt(daysSelect.value);
+            const limit = parseInt(limitSelect.value);
+            
+            // Narxlar
+            const premiumPerWeek = 12000;
+            const premiumPerMonth = 60000;
+            const premiumPer3Months = 150000;
+            const premiumPer6Months = 270000;
+            const premiumPerYear = 500000;
+            const premiumPerProduct = 15000;
+            
+            let daysPrice = 0;
+            if (days == 7) daysPrice = premiumPerWeek;
+            else if (days == 30) daysPrice = premiumPerMonth;
+            else if (days == 90) daysPrice = premiumPer3Months;
+            else if (days == 180) daysPrice = premiumPer6Months;
+            else if (days == 365) daysPrice = premiumPerYear;
+            
+            const total = daysPrice + (limit * premiumPerProduct);
+            
+            document.getElementById('selectedDays').textContent = days;
+            document.getElementById('selectedLimit').textContent = limit;
+            document.getElementById('calculatedPrice').textContent = total.toLocaleString('uz-UZ') + ' so\'m';
+        }
+        
+        // Karta raqamini nusxalash
+        function copyCardNumber(cardNumber, btn) {
+            navigator.clipboard.writeText(cardNumber).then(function() {
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Nusxalandi!';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 2000);
+            });
+        }
+        
+        // To'lov usuli tanlanganda kartani o'zgartirish
+        function updateBankCard(method) {
+            const methodLower = method.toLowerCase();
+            const cards = document.querySelectorAll('.bank-card-minimal');
+            
+            cards.forEach(card => {
+                const cardMethod = card.getAttribute('data-method');
+                if (cardMethod && cardMethod.toLowerCase() === methodLower) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const daysSelect = document.getElementById('daysSelect');
+            const limitSelect = document.getElementById('limitSelect');
+            
+            if (daysSelect) daysSelect.addEventListener('change', calculatePrice);
+            if (limitSelect) limitSelect.addEventListener('change', calculatePrice);
+            
+            calculatePrice();
+            
+            // To'lov usuli tanlash
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) {
+                        radio.checked = true;
+                        const method = this.getAttribute('data-method') || radio.value;
+                        updateBankCard(method);
+                    }
+                });
+            });
+            
+            // Birinchi kartani ko'rsatish
+            const firstSelected = document.querySelector('input[name="payment_method"]:checked');
+            if (firstSelected) {
+                const parent = firstSelected.closest('.payment-option');
+                if (parent) {
+                    const method = parent.getAttribute('data-method') || firstSelected.value;
+                    updateBankCard(method);
+                }
+            }
+        });
+        
+        // File upload
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('paymentProof');
+        const fileName = document.getElementById('fileName');
+        
+        if (uploadArea && fileInput) {
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#3b82f6';
+                uploadArea.style.background = '#eff6ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#cbd5e0';
+                uploadArea.style.background = '#f8fafc';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#cbd5e0';
+                uploadArea.style.background = '#f8fafc';
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    const file = e.dataTransfer.files[0];
+                    const fileSize = (file.size / 1024).toFixed(2);
+                    const icon = file.type.includes('image') ? 'fa-file-image' : 'fa-file-pdf';
+                    fileName.innerHTML = `<i class="fas ${icon} me-1"></i> ${file.name} (${fileSize} KB)`;
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    const file = e.target.files[0];
+                    const fileSize = (file.size / 1024).toFixed(2);
+                    const icon = file.type.includes('image') ? 'fa-file-image' : 'fa-file-pdf';
+                    fileName.innerHTML = `<i class="fas ${icon} me-1"></i> ${file.name} (${fileSize} KB)`;
+                }
+            });
+        }
+        
+        // Form submission
+        const premiumForm = document.getElementById('premiumForm');
+        if (premiumForm) {
+            premiumForm.addEventListener('submit', function(e) {
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Yuborilmoqda...';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

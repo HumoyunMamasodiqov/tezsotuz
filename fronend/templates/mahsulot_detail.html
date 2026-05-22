@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>{{ mahsulot.name }} - Tez Sot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: #ffffff;
+            color: #0f172a;
+        }
+
+        /* Container - mobil uchun qulay */
+        .container-mobile {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        @media (min-width: 1024px) {
+            .container-mobile {
+                max-width: 1280px;
+                padding: 24px 32px;
+            }
+        }
+
+        /* Premium Page - yengil premium belgilari */
+        body.premium-page .premium-accent {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+        body.premium-page .premium-text {
+            color: #d97706;
+        }
+        body.premium-page .premium-border {
+            border-color: #fed7aa;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-scroll {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #475569;
+        }
+        .breadcrumb-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .breadcrumb-scroll i, .breadcrumb-scroll span {
+            pointer-events: none;
+        }
+        .premium-badge-bread {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #78350f;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Carousel (Mobile First / Minimal) */
+        .carousel-container {
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #f0f2f5;
+        }
+        body.premium-page .carousel-container {
+            border-color: #fde68a;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.08);
+        }
+        .carousel {
+            position: relative;
+        }
+        .carousel-track {
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
+            will-change: transform;
+        }
+        .carousel-card {
+            flex: 0 0 100%;
+            aspect-ratio: 1 / 1;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #f8fafc;
+        }
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.96);
+            border: none;
+            border-radius: 60px;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .btn-left { left: 12px; }
+        .btn-right { right: 12px; }
+        .dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            padding: 12px;
+        }
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 10px;
+            background: #cbd5e1;
+            transition: all 0.2s;
+        }
+        .dot.active {
+            width: 20px;
+            background: #3b82f6;
+        }
+        body.premium-page .dot.active { background: #f59e0b; }
+
+        /* Ma'lumot kartalari */
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #edf2f7;
+            transition: all 0.2s;
+        }
+        body.premium-page .info-card {
+            border-color: #fee2b5;
+        }
+        .info-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #475569;
+        }
+        .info-value {
+            font-weight: 500;
+            color: #0f172a;
+            text-align: right;
+            word-break: break-word;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-new { background: #e0f2fe; color: #0369a1; }
+        .status-sold { background: #fee2e2; color: #b91c1c; }
+        .premium-tag {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #78350f;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .regular-tag {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+
+        /* Narx va tugmalar */
+        .product-price {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+        body.premium-page .product-price {
+            background: linear-gradient(135deg, #fbbf24, #eab308);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+        .product-title {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 18px 0;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn-telegram { background: #2b9e4b; }
+        .btn-call { background: #e11d48; }
+        .btn-share { background: #4f46e5; }
+        body.premium-page .btn-telegram { background: #eab308; color: #422800; }
+        body.premium-page .btn-call { background: #f97316; }
+        body.premium-page .btn-share { background: #a855f7; }
+
+        /* Kontakt va sotuvchi */
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f2f5;
+            flex-wrap: wrap;
+        }
+        .contact-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+        .icon-phone { background: #10b981; }
+        .icon-telegram { background: #0ea5e9; }
+        .icon-email { background: #ec489a; }
+        .icon-location { background: #f97316; }
+        .contact-info {
+            flex: 1;
+            min-width: 140px;
+        }
+        .contact-info h4 {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .contact-info p {
+            font-weight: 600;
+            word-break: break-word;
+            font-size: 14px;
+        }
+        .contact-link {
+            color: #3b82f6;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .seller-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            border: 1px solid #edf2f7;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+        .seller-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 60px;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+        .seller-info h4 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* O'xshash mahsulotlar */
+        .similar-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+        @media (min-width: 640px) {
+            .similar-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        }
+        @media (min-width: 1024px) {
+            .similar-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .similar-card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid #eef2ff;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .similar-card:active { transform: scale(0.98); }
+        .similar-img {
+            aspect-ratio: 1 / 1;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .similar-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .similar-content {
+            padding: 10px;
+        }
+        .similar-price {
+            font-weight: 800;
+            font-size: 16px;
+            color: #2563eb;
+        }
+        body.premium-page .similar-price { color: #d97706; }
+
+        /* Favourite */
+        .favorite-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 60px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 16px;
+            border: none;
+            background: #f1f5f9;
+            color: #334155;
+        }
+        .fav-premium { background: #fef3c7; color: #92400e; }
+        .fav-regular { background: #eff6ff; color: #1e3a8a; }
+
+        /* Prem banner */
+        .premium-banner {
+            background: #fffbeb;
+            border-radius: 24px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .premium-banner-btn {
+            background: #fbbf24;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .description-text {
+            line-height: 1.55;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        @media (max-width: 500px) {
+            .action-btn { font-size: 12px; padding: 10px 12px; }
+            .product-price { font-size: 24px; }
+            .info-row { flex-direction: column; align-items: flex-start; }
+            .info-value { text-align: left; }
+            .contact-link { margin-left: 58px; white-space: normal; }
+        }
+    </style>
+</head>
+
+<body class="{% if mahsulot.is_premium %}premium-page{% else %}regular-page{% endif %}">
+    {% include 'newnav.html' %}
+    {% include 'nav.html' %}
+
+    <div class="container-mobile">
+        <!-- Breadcrumb mobil uchun scroll bilan -->
+        <div class="breadcrumb-scroll" onclick="history.back()">
+            <i class="fas fa-arrow-left text-gray-500"></i>
+            <span>Asosiy</span> <i class="fas fa-chevron-right text-xs"></i>
+            <span>{{ mahsulot.get_category_display|default:"Mahsulot" }}</span> <i class="fas fa-chevron-right text-xs"></i>
+            <span class="text-gray-700 font-medium">{{ mahsulot.name|truncatechars:35 }}</span>
+            {% if mahsulot.is_premium %}
+            <span class="premium-badge-bread"><i class="fas fa-crown text-amber-600"></i> PREMIUM</span>
+            {% endif %}
+        </div>
+
+        <!-- Asosiy grid -->
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Chap qism: rasm va tavsif -->
+            <div class="lg:w-2/3 w-full">
+                <!-- Karusel -->
+                <div class="carousel-container">
+                    <div class="carousel" id="carousel">
+                        <div class="carousel-track" id="carouselTrack">
+                            {% if mahsulot.asosiyimg %}
+                            <div class="carousel-card"><img src="{{ mahsulot.asosiyimg.url }}" alt="{{ mahsulot.name }}" loading="lazy"></div>
+                            {% endif %}
+                            {% if mahsulot.birimg %}
+                            <div class="carousel-card"><img src="{{ mahsulot.birimg.url }}" alt="{{ mahsulot.name }}" loading="lazy"></div>
+                            {% endif %}
+                            {% if mahsulot.ikkiimg %}
+                            <div class="carousel-card"><img src="{{ mahsulot.ikkiimg.url }}" alt="{{ mahsulot.name }}" loading="lazy"></div>
+                            {% endif %}
+                            {% if mahsulot.uchuimg %}
+                            <div class="carousel-card"><img src="{{ mahsulot.uchuimg.url }}" alt="{{ mahsulot.name }}" loading="lazy"></div>
+                            {% endif %}
+                            {% if not mahsulot.asosiyimg and not mahsulot.birimg and not mahsulot.ikkiimg and not mahsulot.uchuimg %}
+                            <div class="carousel-card flex flex-col"><i class="fas fa-image text-5xl text-gray-300"></i><span class="text-sm mt-2 text-gray-400">Rasm yo'q</span></div>
+                            {% endif %}
+                        </div>
+                        <button class="carousel-btn btn-left" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+                        <button class="carousel-btn btn-right" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="dots" id="dots"></div>
+                </div>
+
+                <!-- Narx va tugmalar -->
+                <div class="product-price">{{ mahsulot.narx_formatted }}</div>
+                <div class="product-title">{{ mahsulot.name }}</div>
+                <div class="text-sm text-blue-600 flex items-center gap-1 mb-3 cursor-pointer" onclick="alert('Kuzatuv qo‘shildi (demo)')">
+                    <i class="far fa-bell"></i> Narxni kuzatish
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn btn-telegram" onclick="window.open('{{ mahsulot.telegram_link }}', '_blank')"><i class="fab fa-telegram"></i> Telegram</button>
+                    <button class="action-btn btn-call" onclick="window.location.href='{{ mahsulot.telefon_link }}'"><i class="fas fa-phone"></i> Qo'ng'iroq</button>
+                    <button class="action-btn btn-share" onclick="shareProduct()"><i class="fas fa-share-alt"></i> Ulashish</button>
+                </div>
+
+                <!-- Tavsif -->
+                <div class="info-card">
+                    <h3><i class="far fa-file-alt"></i> Tavsif</h3>
+                    <div class="description-text">
+                        {% if mahsulot.tavsif %}
+                            {{ mahsulot.tavsif|linebreaksbr }}
+                        {% else %}
+                            {{ mahsulot.name }} - {{ mahsulot.mahsulotturi|default:"Mahsulot" }}. {{ mahsulot.toliq_manzil }} da joylashgan.
+                            {% if mahsulot.sotilgan %} Sotilgan.{% else %} Sotuvda.{% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- O'ng qism: detallar va kontakt -->
+            <div class="lg:w-1/3 w-full">
+                <!-- Xususiyatlar -->
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> Xususiyatlar</h3>
+                    <div class="info-grid">
+                        <div class="info-row"><span class="info-label">Toifa:</span><span class="info-value">{{ mahsulot.get_category_display }}</span></div>
+                        <div class="info-row"><span class="info-label">Turi:</span><span class="info-value">{{ mahsulot.mahsulotturi }}</span></div>
+                        <div class="info-row"><span class="info-label">Holat:</span><span class="info-value"><span class="status-badge {% if mahsulot.sotilgan %}status-sold{% else %}status-new{% endif %}">{% if mahsulot.sotilgan %}🔴 Sotilgan{% else %}🟢 Yangi{% endif %}</span></span></div>
+                        <div class="info-row"><span class="info-label">Status:</span><span class="info-value">{% if mahsulot.is_premium %}<span class="premium-tag"><i class="fas fa-crown"></i> PREMIUM</span>{% else %}<span class="regular-tag"><i class="fas fa-box"></i> ODDIY</span>{% endif %}</span></div>
+                        <div class="info-row"><span class="info-label">Manzil:</span><span class="info-value">{{ mahsulot.toliq_manzil }}</span></div>
+                        <div class="info-row"><span class="info-label">Sana:</span><span class="info-value">{{ mahsulot.sana|date:"d.m.Y" }}</span></div>
+                        <div class="info-row"><span class="info-label">Ko'rishlar:</span><span class="info-value">{{ mahsulot.korishlar_soni }} marta</span></div>
+                    </div>
+                </div>
+
+                <!-- Kontakt -->
+                <div class="info-card">
+                    <h3><i class="fas fa-address-card"></i> Bog'lanish</h3>
+                    <div class="contact-item"><div class="contact-icon icon-phone"><i class="fas fa-phone-alt"></i></div><div class="contact-info"><h4>Telefon</h4><p>{{ mahsulot.telefon_formatted }}</p></div><a href="{{ mahsulot.telefon_link }}" class="contact-link">Qo'ng'iroq <i class="fas fa-arrow-right"></i></a></div>
+                    {% if mahsulot.telegram_username %}<div class="contact-item"><div class="contact-icon icon-telegram"><i class="fab fa-telegram"></i></div><div class="contact-info"><h4>Telegram</h4><p>@{{ mahsulot.telegram_username }}</p></div><a href="{{ mahsulot.telegram_link }}" target="_blank" class="contact-link">Yozish <i class="fas fa-arrow-right"></i></a></div>{% endif %}
+                    {% if mahsulot.email %}<div class="contact-item"><div class="contact-icon icon-email"><i class="fas fa-envelope"></i></div><div class="contact-info"><h4>Email</h4><p class="break-all">{{ mahsulot.email }}</p></div><a href="mailto:{{ mahsulot.email }}" class="contact-link">Yuborish <i class="fas fa-arrow-right"></i></a></div>{% endif %}
+                    <div class="contact-item"><div class="contact-icon icon-location"><i class="fas fa-map-marker-alt"></i></div><div class="contact-info"><h4>Manzil</h4><p>{{ mahsulot.toliq_manzil }}</p></div></div>
+                </div>
+
+                <!-- Sotuvchi kartasi -->
+                <a href="{% url 'user_profile' username=mahsulot.user.username %}" class="seller-card">
+                    <div class="seller-info">
+                        <h4>{{ mahsulot.user_info|default:mahsulot.user.username }}</h4>
+                        <div class="flex items-center gap-2 text-xs text-gray-500 mt-1"><i class="fas fa-boxes"></i> {{ mahsulot.user.mahsulot_set.count }} ta e'lon</div>
+                        <div class="text-xs text-gray-400 mt-1"><i class="far fa-calendar-alt"></i> {{ mahsulot.sana|timesince }} dan beri</div>
+                    </div>
+                    {% if mahsulot.user.seller_profile.profile_image %}
+                    <img src="{{ mahsulot.user.seller_profile.profile_image.url }}" class="seller-avatar object-cover" alt="avatar">
+                    {% else %}
+                    <div class="seller-avatar">{{ mahsulot.user.username|first|upper }}</div>
+                    {% endif %}
+                </a>
+
+                <!-- Tasdiqlangan -->
+                <div class="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-3 rounded-2xl mb-4"><i class="fas fa-check-circle text-blue-500"></i> ID tasdiqlangan</div>
+
+                <!-- Sevimlilar -->
+                {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'sevimliga_qoshish' mahsulot.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="favorite-btn {% if mahsulot.is_premium %}fav-premium{% else %}fav-regular{% endif %}"><i class="far fa-heart"></i> Sevimlilarga qo'shish</button>
+                </form>
+                {% else %}
+                <button onclick="window.location.href='{% url 'kirish' %}'" class="favorite-btn {% if mahsulot.is_premium %}fav-premium{% else %}fav-regular{% endif %}"><i class="far fa-heart"></i> Sevimlilarga qo'shish</button>
+                {% endif %}
+
+                <!-- Premium banner -->
+                <div class="premium-banner">
+                    <div><i class="fas fa-crown text-amber-500 mr-1"></i> <strong>Tez Sot Premium</strong><p class="text-xs text-amber-800 mt-1">E'lonlaringizni birinchi o'ringa chiqaring</p></div>
+                    <a href="{% url 'reklama' %}"><button class="premium-banner-btn">Sotib olish</button></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- O'xshash mahsulotlar -->
+        {% if o_xshash_mahsulotlar %}
+        <div class="mt-8">
+            <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <h2 class="text-xl font-bold"><i class="fas fa-store"></i> O'xshash mahsulotlar</h2>
+                <span class="text-xs text-gray-400">Sizga yoqishi mumkin</span>
+            </div>
+            <div class="similar-grid">
+                {% for similar in o_xshash_mahsulotlar|slice:":8" %}
+                <a href="{% url 'mahsulot_detail' similar.id %}" class="similar-card">
+                    <div class="similar-img">
+                        {% if similar.asosiyimg %}
+                        <img src="{{ similar.asosiyimg.url }}" alt="{{ similar.name }}" loading="lazy">
+                        {% else %}
+                        <i class="fas fa-image text-3xl text-gray-300"></i>
+                        {% endif %}
+                        <div class="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white">{{ similar.sotilgan|yesno:"Sotilgan,Yangi" }}</div>
+                        {% if similar.is_premium %}<div class="absolute top-2 right-2 bg-amber-400 text-amber-900 text-[9px] font-black px-2 py-0.5 rounded-full"><i class="fas fa-crown"></i> PREM</div>{% endif %}
+                    </div>
+                    <div class="similar-content">
+                        <div class="similar-price">{{ similar.narx_formatted }}</div>
+                        <div class="text-sm font-medium text-gray-800 line-clamp-1">{{ similar.name|truncatechars:35 }}</div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1"><span>{{ similar.get_viloyat_display|default:"Manzil" }}</span><span>{{ similar.sana|date:"d.m.Y" }}</span></div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const track = document.getElementById('carouselTrack');
+            const cards = Array.from(document.querySelectorAll('.carousel-card'));
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const dotsContainer = document.getElementById('dots');
+            if (!cards.length) return;
+            let current = 0;
+
+            cards.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goTo(i));
+                dotsContainer.appendChild(dot);
+            });
+            const dots = document.querySelectorAll('.dot');
+
+            function goTo(idx) {
+                current = idx;
+                track.style.transform = `translateX(-${current * 100}%)`;
+                dots.forEach((d, i) => d.classList.toggle('active', i === current));
+            }
+            function next() { current = (current + 1) % cards.length; goTo(current); }
+            function prev() { current = (current - 1 + cards.length) % cards.length; goTo(current); }
+            nextBtn.addEventListener('click', next);
+            prevBtn.addEventListener('click', prev);
+            let autoplay = setInterval(next, 5000);
+            document.getElementById('carousel').addEventListener('mouseenter', () => clearInterval(autoplay));
+            document.getElementById('carousel').addEventListener('mouseleave', () => { autoplay = setInterval(next, 5000); });
+        });
+
+        function shareProduct() {
+            if (navigator.share) navigator.share({ title: '{{ mahsulot.name }}', text: '{{ mahsulot.narx_formatted }}', url: window.location.href }).catch(()=>{});
+            else navigator.clipboard.writeText(window.location.href).then(()=> alert('Havola nusxalandi!'));
+        }
+    </script>
+</body>
+</html>

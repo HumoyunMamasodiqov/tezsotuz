@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tizimga Kirish - TezSot Market</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9CA3AF;
+            font-size: 1.2rem;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #9CA3AF;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification.success {
+            background-color: #10B981;
+        }
+        
+        .notification.error {
+            background-color: #EF4444;
+        }
+        
+        .error-message {
+            color: #EF4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3B82F6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Notification -->
+    <div id="notification" class="hidden notification"></div>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <img src="{% static 'img/logo.png' %}" alt="Logo" class="h-16 mx-auto mb-4">
+                <h1 class="text-3xl font-bold text-gray-800">Xush Kelibsiz!</h1>
+                <p class="text-gray-600 mt-2">Hisobingizga kiring va boshlang</p>
+            </div>
+
+            <!-- Login Card -->
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-3 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="{% url 'kirish' %}" id="loginForm">
+                    {% csrf_token %}
+                    
+                    <!-- Identifier (Telefon/Email/Username) -->
+                    <div class="input-group">
+                        <i class="ri-user-line"></i>
+                        <input type="text" 
+                               name="identifier" 
+                               id="identifier"
+                               placeholder="Telefon raqam, Email yoki Username"
+                               value="{{ identifier|default:'' }}"
+                               required>
+                    </div>
+                    <div class="error-message" id="identifierError">Iltimos, ma'lumotni kiriting</div>
+
+                    <!-- Password -->
+                    <div class="input-group">
+                        <i class="ri-lock-line"></i>
+                        <input type="password" 
+                               name="password" 
+                               id="password"
+                               placeholder="Parol"
+                               required>
+                        <i class="ri-eye-off-line password-toggle" id="togglePassword"></i>
+                    </div>
+                    <div class="error-message" id="passwordError">Iltimos, parolni kiriting</div>
+
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="flex items-center justify-between mb-6">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="remember_me" class="mr-2 w-4 h-4 text-blue-600">
+                            <span class="text-sm text-gray-600">Eslab qolish</span>
+                        </label>
+                        <a href="{% url 'boglanish' %}" class="text-sm text-blue-600 hover:text-blue-700">
+                            Parolni unutdingizmi?
+                        </a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            id="submitBtn"
+                            class="btn-primary w-full text-white font-semibold py-3 rounded-xl flex items-center justify-center">
+                        <span id="btnText">Kirish</span>
+                        <div id="loader" class="hidden loader"></div>
+                    </button>
+
+                    <!-- Register Link -->
+                    <div class="text-center mt-6">
+                        <p class="text-gray-600">
+                            Hisobingiz yo'qmi?
+                            <a href="{% url 'signup' %}" class="text-blue-600 hover:text-blue-700 font-semibold">
+                                Ro'yxatdan o'tish
+                            </a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center mt-8">
+                <p class="text-sm text-gray-500">
+                    © 2024 TezSot Market. Barcha huquqlar himoyalangan.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password toggle
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.classList.toggle('ri-eye-line');
+                this.classList.toggle('ri-eye-off-line');
+            });
+            
+            // Form submission
+            const form = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            
+            form.addEventListener('submit', function(e) {
+                const identifier = document.getElementById('identifier').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                let isValid = true;
+                
+                if (!identifier) {
+                    showError('identifierError', 'Iltimos, telefon/email yoki usernameni kiriting');
+                    isValid = false;
+                } else {
+                    hideError('identifierError');
+                }
+                
+                if (!password) {
+                    showError('passwordError', 'Iltimos, parolni kiriting');
+                    isValid = false;
+                } else {
+                    hideError('passwordError');
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    showNotification('Iltimos, barcha maydonlarni to\'ldiring', 'error');
+                } else {
+                    // Loading state
+                    btnText.textContent = 'Kirish amalga oshirilmoqda';
+                    loader.classList.remove('hidden');
+                    submitBtn.disabled = true;
+                }
+            });
+            
+            function showError(elementId, message) {
+                const errorElement = document.getElementById(elementId);
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+            
+            function hideError(elementId) {
+                const errorElement = document.getElementById(elementId);
+                errorElement.style.display = 'none';
+            }
+            
+            function showNotification(message, type) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    notification.classList.add('hidden');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

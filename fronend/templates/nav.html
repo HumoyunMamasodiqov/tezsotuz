@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>TezSot - Online Market</title>
+    <link rel="icon" type="image/png" href="{% static 'img/iconlogo.png' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+    <meta name="description" content="TezSot - O'zbekistondagi eng yirik online savdo platformasi" />
+    <meta name="keywords" content="sotib olish, sotish, online do'kon, O'zbekiston" />
+    
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            padding-bottom: 72px;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Header */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #eef2ff;
+        }
+        
+        /* Qidiruv input */
+        .search-input {
+            width: 100%;
+            padding: 0.7rem 3rem 0.7rem 1.2rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .search-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+        }
+        
+        /* Qidiruv natijalari dropdown */
+        .search-results {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.15);
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            border: 1px solid #eef2ff;
+        }
+        .search-results.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Natija elementi */
+        .search-result-item {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+        .search-result-item:hover { background: #f8fafc; }
+        .search-result-item:active { background: #f1f5f9; }
+        
+        .search-result-image {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .search-result-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #0f172a;
+        }
+        .search-result-price {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #3b82f6;
+        }
+        .search-result-category {
+            font-size: 0.7rem;
+            background: #f1f5f9;
+            padding: 2px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        /* Loading spinner */
+        .loading-dots {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .loading-dots div {
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+        .loading-dots div:nth-child(2) { animation-delay: 0.1s; }
+        .loading-dots div:nth-child(3) { animation-delay: 0.2s; }
+        
+        @keyframes bounce {
+            0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Mobile Modal - TO'G'RILANGAN */
+        .mobile-search-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 9999;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            display: flex;
+            flex-direction: column;
+            visibility: hidden;
+        }
+        .mobile-search-modal.active {
+            transform: translateY(0);
+            visibility: visible;
+        }
+        .mobile-search-header {
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid #eef2ff;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .mobile-search-input-full {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: #f8fafc;
+        }
+        .mobile-search-input-full:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+        }
+        
+        /* Mobile Bottom Nav */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid #eef2ff;
+            padding: 0.5rem 0.75rem;
+            display: none;
+            justify-content: space-around;
+            z-index: 40;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+        }
+        .nav-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.7rem;
+            color: #64748b;
+            transition: 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .nav-icon i {
+            font-size: 1.3rem;
+        }
+        .nav-icon:active { color: #3b82f6; transform: scale(0.95); }
+        
+        /* Suggestion tag */
+        .suggestion-tag {
+            padding: 6px 16px;
+            background: #f1f5f9;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .suggestion-tag:active {
+            background: #e2e8f0;
+            transform: scale(0.96);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .desktop-only { display: none !important; }
+            .mobile-bottom-nav { display: flex !important; }
+            .logo { max-width: 100px; height: auto; }
+        }
+        @media (min-width: 769px) {
+            .mobile-only { display: none !important; }
+        }
+        
+        .recent-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.7rem;
+            background: #f8fafc;
+            border-radius: 14px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        .recent-item:active { background: #f1f5f9; }
+        
+        /* Filtr panel */
+        .filter-select, .price-input {
+            padding: 0.6rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 999px;
+            width: 100%;
+        }
+        .filter-btn {
+            padding: 0.6rem 1rem;
+            border-radius: 999px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        .filter-btn.apply { background: #3b82f6; color: white; }
+        .filter-btn.reset { background: #f1f5f9; color: #334155; }
+
+@media (max-width: 768px) {
+  .yoqbol {
+    display: none;
+  }
+}
+    </style>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="sticky-header">
+        <div class="max-w-7xl mx-auto px-4 py-2">
+            <div class="flex items-center justify-between gap-3">
+                <a href="/" class="flex-shrink-0">
+                    <img class="logo" style="width: 110px; height: auto;" src="{% static 'img/logo.png' %}" alt="Tez Sot" />
+                </a>
+                
+                <!-- Desktop qidiruv -->
+                <div class="flex-1 max-w-md desktop-only">
+                    <div style="position: relative;">
+                        <input type="text" id="desktopSearch" class="search-input" placeholder="Mahsulot qidirish..." autocomplete="off" />
+                        <div class="search-icon"><i class="fas fa-search"></i></div>
+                        <div class="search-results" id="desktopSearchResults">
+                            <div id="desktopLoadingSpinner" class="loading-dots" style="display: none;"><div></div><div></div><div></div></div>
+                            <div id="desktopResultsContainer"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigatsiya -->
+                <nav class="hidden lg:flex items-center gap-5">
+                    <a href="/" class="text-gray-700 hover:text-blue-600 text-sm font-medium">Bosh sahifa</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'sevimlilarim' %}" class="text-gray-700 relative">Sevimli <span class="absolute -top-1 -right-3 bg-blue-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{{ request.user.sevimli_set.count }}</span></a>
+                    {% else %}
+                        <a href="{% url 'kirish' %}" class="text-gray-700">Sevimli</a>
+                    {% endif %}
+                </nav>
+                
+                <div class="flex items-center gap-[10px] ">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'mening_elonlarim' %}" class="p-2 yoqbol    rounded-[5px] hover:bg-gray-100"><i class="ri-user-line mr-[5px] text-xl"></i><span class="ml-[10px]">mening elonlarim</span></i></a>
+                        <a href="{% url 'elon_qoshish' %}" class="p-2 yoqbol   rounded-[5px] hover:bg-gray-100"> <i class="ri-add-line text-xl"></i> elon qoshish</a>
+                    {% else %}
+                        <a href="{% url 'kirish' %}" class="p-2 yoqbol rounded-[5px] hover:bg-gray-100"><i class="ri-user-line text-xl"></i> kirish     </a>
+                        <a href="{% url 'kirish' %}" class="p-2 yoqbol  rounded-[5px] hover:bg-gray-100"><i class="ri-add-line text-xl"></i>  elon qoshish</a>
+                    {% endif %}
+                    <button id="mobileMenuBtn" class="lg:hidden  p-2 rounded-full hover:bg-gray-100"><i class="ri-menu-line text-xl"></i></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MOBILE QIDIRUV INPUT (768px ostida) -->
+    <div class="mobile-only px-4 mt-3 ">
+        <div style="position: relative;">
+            <input type="text" id="mobileSearchInput" class="search-input" placeholder="Mahsulotlar va turkumlar..." autocomplete="off" />
+            <div class="search-icon"><i class="fas fa-search"></i></div>
+            <div class="search-results" id="mobileSearchResults">
+                <div id="mobileLoadingSpinner" class="loading-dots" style="display: none;"><div></div><div></div><div></div></div>
+                <div id="mobileResultsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE FULLSCREEN SEARCH MODAL - TO'G'RILANGAN VA ISHLAYDI -->
+    <div id="mobileSearchModal" class="mobile-search-modal">
+        <div class="mobile-search-header">
+            <button id="closeMobileModal" class="p-2 rounded-full hover:bg-gray-100" style="background: none; border: none; cursor: pointer;">
+                <i class="ri-arrow-left-line text-xl"></i>
+            </button>
+            <input type="text" id="fullscreenSearchInput" class="mobile-search-input-full" placeholder="Mahsulot nomi..." autocomplete="off" />
+            <button id="voiceSearchBtn" class="p-2 rounded-full hover:bg-gray-100" style="background: none; border: none; cursor: pointer;">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4" id="fullscreenResultsArea">
+            <!-- Oxirgi qidiruvlar shu yerga yuklanadi -->
+            <div id="recentSearchesArea"></div>
+            <div class="mt-4">
+                <div class="text-gray-500 text-sm font-medium mb-2">⭐ Ko'p qidirilganlar</div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="suggestion-tag" data-search="iPhone">iPhone</span>
+                    <span class="suggestion-tag" data-search="Samsung">Samsung</span>
+                    <span class="suggestion-tag" data-search="MacBook">MacBook</span>
+                    <span class="suggestion-tag" data-search="Telefon">Telefon</span>
+                    <span class="suggestion-tag" data-search="Noutbuk">Noutbuk</span>
+                    <span class="suggestion-tag" data-search="Avtomobil">Avtomobil</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE MENU SIDEBAR -->
+    <div id="menuOverlay" class="fixed inset-0 bg-black/40 z-50 hidden" style="backdrop-filter: blur(2px);"></div>
+    <div id="menuPanel" class="fixed top-0 left-0 bottom-0 w-80 bg-white z-50 transform -translate-x-full transition-transform duration-300 shadow-xl rounded-r-2xl">
+        <div class="p-5 border-b flex justify-between">
+            <img src="{% static 'img/logo.png' %}" style="height: 32px;" />
+            <button id="closeMenuBtn" class="p-1"><i class="ri-close-line text-xl"></i></button>
+        </div>
+        <div class="p-5 space-y-4">
+            <a href="/" class="flex items-center gap-3 py-2"><i class="ri-home-line"></i><span>Bosh sahifa</span></a>
+            <a href="{% url 'reklama' %}" class="flex items-center gap-3 py-2"><i class="ri-ad-line"></i><span>Reklama</span></a>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'sevimlilarim' %}" class="flex items-center gap-3 py-2"><i class="ri-heart-line"></i><span>Sevimlilar</span></a>
+                <a href="{% url 'mening_elonlarim' %}" class="flex items-center gap-3 py-2"><i class="ri-user-line"></i><span>Profil</span></a>
+            {% else %}
+                <a href="{% url 'kirish' %}" class="flex items-center gap-3 py-2"><i class="ri-user-line"></i><span>Kirish</span></a>
+            {% endif %}
+            <button id="showFiltersBtn" class="w-full text-left flex items-center gap-3 py-2"><i class="ri-filter-line"></i><span>Filtrlash</span></button>
+            {% if user.is_authenticated %}
+            <a href="{% url 'settings' %}" class="flex items-center gap-3 py-2"><i class="ri-settings-line"></i><span>Sozlamalar</span></a>
+            {% endif %}
+            <a href="{% url 'boglanish' %}" class="flex items-center gap-3 py-2"><i class="ri-question-line"></i><span>Bog'lanish</span></a>
+            
+            <a href="{% url 'qoidalar' %}" class="flex items-center gap-3 py-2"><i class="ri-file-line"></i><span>Qoidalar</span></a>
+            <a href="{% url 'maxfiyliksiyosati' %}" class="flex items-center gap-3 py-2"><i class="ri-lock-line"></i><span>Maxfiylik siyosati</span></a>
+            <a href="{% url 'biz_haqimizda' %}" class="flex items-center gap-3 py-2"><i class="ri-information-line"></i><span>biz haqimizda</span></a>
+        </div>
+    </div>
+
+    <!-- FILTRLASH PANELI -->
+    <div id="filtersPanel" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-xl z-50 transform translate-y-full transition-transform duration-300">
+        <div class="p-5">
+            <div class="flex justify-between mb-4"><h3 class="font-bold text-lg">Filtrlash</h3><button id="closeFiltersBtn"><i class="ri-close-line text-xl"></i></button></div>
+            <div class="space-y-3">
+                <div><label class="text-sm font-medium">Kategoriya</label><select id="categoryFilter" class="filter-select mt-1"><option value="">Barchasi</option>{% for cat in categories %}<option value="{{ cat.id }}">{{ cat.name }}</option>{% endfor %}</select></div>
+                <div><label class="text-sm font-medium">Narx oralig'i</label><div class="flex gap-2 mt-1"><input type="number" id="minPrice" class="price-input" placeholder="Min"><input type="number" id="maxPrice" class="price-input" placeholder="Max"></div></div>
+                <div><label class="text-sm font-medium">Holati</label><select id="conditionFilter" class="filter-select mt-1"><option value="">Barchasi</option><option value="new">Yangi</option><option value="used">Ishlatilgan</option></select></div>
+            </div>
+            <div class="flex gap-3 mt-5"><button id="resetFilters" class="filter-btn reset flex-1">Tozalash</button><button id="applyFilters" class="filter-btn apply flex-1">Qo'llash</button></div>
+        </div>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <div class="mobile-bottom-nav">
+        <a href="/" class="nav-icon"><i class="ri-home-5-line"></i><span>Bosh</span></a>
+        <button id="openModalBtn" class="nav-icon"><i class="ri-search-line"></i><span>Qidirish</span></button>
+        {% if user.is_authenticated %}<a href="{% url 'elon_qoshish' %}" class="nav-icon"><i class="ri-add-circle-line"></i><span>Qo'shish</span></a>{% else %}<a href="{% url 'kirish' %}" class="nav-icon"><i class="ri-add-circle-line"></i><span>Qo'shish</span></a>{% endif %}
+        {% if user.is_authenticated %}<a href="{% url 'sevimlilarim' %}" class="nav-icon relative"><i class="ri-heart-line"></i><span>Sevimli</span>{% if request.user.sevimli_set.count > 0 %}<span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center">{{ request.user.sevimli_set.count }}</span>{% endif %}</a>{% else %}<a href="{% url 'kirish' %}" class="nav-icon"><i class="ri-heart-line"></i><span>Sevimli</span></a>{% endif %}
+        {% if user.is_authenticated %}<a href="{% url 'mening_elonlarim' %}" class="nav-icon"><i class="ri-user-3-line"></i><span>Mening</span></a>{% else %}<a href="{% url 'kirish' %}" class="nav-icon"><i class="ri-user-3-line"></i><span>Kirish</span></a>{% endif %}
+    </div>
+
+    <script>
+        // ==================== TO'LIQ QAYTA ISHLANGAN SCRIPT ====================
+        
+        // LocalStorage oxirgi qidiruvlar
+        function getRecentSearch() {
+            try {
+                return JSON.parse(localStorage.getItem('tezsot_recent') || '[]');
+            } catch(e) { return []; }
+        }
+        
+        function saveRecentSearch(query) {
+            if (!query || !query.trim()) return;
+            let arr = getRecentSearch().filter(i => i !== query);
+            arr.unshift(query.trim());
+            if (arr.length > 6) arr = arr.slice(0, 6);
+            localStorage.setItem('tezsot_recent', JSON.stringify(arr));
+            renderRecentSearches();
+        }
+        
+        function removeRecentSearch(query) {
+            let arr = getRecentSearch().filter(i => i !== query);
+            localStorage.setItem('tezsot_recent', JSON.stringify(arr));
+            renderRecentSearches();
+        }
+        
+        function renderRecentSearches() {
+            const container = document.getElementById('recentSearchesArea');
+            if (!container) return;
+            const recents = getRecentSearch();
+            if (recents.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = `
+                <div class="text-gray-500 text-sm font-medium mb-2">📜 Oxirgi qidiruvlar</div>
+                ${recents.map(r => `
+                    <div class="recent-item" data-recent="${escapeHtml(r)}">
+                        <span><i class="fas fa-history text-gray-400 mr-2"></i>${escapeHtml(r)}</span>
+                        <i class="fas fa-times text-gray-400" data-remove="${escapeHtml(r)}" style="cursor: pointer;"></i>
+                    </div>
+                `).join('')}
+            `;
+            // Qidiruvni bosganda
+            document.querySelectorAll('[data-recent]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('fa-times')) return;
+                    const val = el.getAttribute('data-recent');
+                    if (val) window.location.href = `/barcha-mahsulotlar/?q=${encodeURIComponent(val)}`;
+                });
+            });
+            // O'chirish tugmasi
+            document.querySelectorAll('[data-remove]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const val = btn.getAttribute('data-remove');
+                    removeRecentSearch(val);
+                });
+            });
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        // API qidiruv (faqat natijalarni ko'rsatadi)
+        let searchTimeout;
+        async function performAPISearch(query, resultsContainer, loadingSpinner, resultsWrapper) {
+            if (!query || query.length < 2) {
+                if (resultsWrapper) resultsWrapper.classList.remove('active');
+                if (resultsContainer) resultsContainer.innerHTML = '';
+                return;
+            }
+            if (loadingSpinner) loadingSpinner.style.display = 'flex';
+            if (resultsContainer) resultsContainer.innerHTML = '';
+            if (resultsWrapper) resultsWrapper.classList.add('active');
+            
+            try {
+                const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error('Server xatosi');
+                const data = await response.json();
+                
+                if (!data || data.length === 0) {
+                    resultsContainer.innerHTML = `<div class="p-6 text-center text-gray-500"><i class="fas fa-box-open text-3xl mb-2"></i><p>Hech narsa topilmadi</p></div>`;
+                    return;
+                }
+                
+                resultsContainer.innerHTML = data.map(p => `
+                    <div class="search-result-item" data-url="${p.url || `/mahsulot/${p.id}/`}">
+                        <div class="search-result-image">
+                            ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : '<i class="fas fa-image text-gray-400 text-2xl"></i>'}
+                        </div>
+                        <div style="flex:1">
+                            <div class="search-result-name">${escapeHtml(p.name)}</div>
+                            <div class="search-result-price">💰 ${p.price || 'Narxi mavjud emas'}</div>
+                            <div class="search-result-category mt-1">${p.category || 'Kategoriya'}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.search-result-item').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const url = el.getAttribute('data-url');
+                        if (url) window.location.href = url;
+                    });
+                });
+            } catch (error) {
+                resultsContainer.innerHTML = `<div class="p-6 text-center text-red-500"><i class="fas fa-wifi"></i><p>Ulanish xatosi</p></div>`;
+            } finally {
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+            }
+        }
+        
+        // Qidiruv inputlarini sozlash (Enter bilan to'liq sahifaga o'tadi)
+        function setupSearchInput(inputId, resultsId, spinnerId, wrapperId) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const resultsDiv = document.getElementById(resultsId);
+            const spinner = document.getElementById(spinnerId);
+            const wrapper = document.getElementById(wrapperId);
+            
+            input.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const val = e.target.value.trim();
+                if (val.length < 2) {
+                    if (wrapper) wrapper.classList.remove('active');
+                    return;
+                }
+                searchTimeout = setTimeout(() => {
+                    performAPISearch(val, resultsDiv, spinner, wrapper);
+                }, 350);
+            });
+            
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const val = input.value.trim();
+                    if (val) {
+                        window.location.href = `/barcha-mahsulotlar/?q=${encodeURIComponent(val)}`;
+                    }
+                }
+            });
+        }
+        
+        // Modal boshqaruvi - HECH QACHON QOTIB QOLMAYDI
+        function initMobileModal() {
+            const modal = document.getElementById('mobileSearchModal');
+            const openBtn = document.getElementById('openModalBtn');
+            const closeBtn = document.getElementById('closeMobileModal');
+            const fullInput = document.getElementById('fullscreenSearchInput');
+            const fullResultsArea = document.getElementById('fullscreenResultsArea');
+            
+            if (!modal || !openBtn) return;
+            
+            // Modalni ochish
+            openBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => {
+                    if (fullInput) fullInput.focus();
+                }, 100);
+            });
+            
+            // Modalni yopish
+            const closeModal = () => {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            };
+            
+            if (closeBtn) closeBtn.addEventListener('click', closeModal);
+            
+            // Orqaga tugmasi uchun (agar boshqa element bo'lsa)
+            const backBtn = modal.querySelector('.mobile-search-header button:first-child');
+            if (backBtn && backBtn !== closeBtn) {
+                backBtn.addEventListener('click', closeModal);
+            }
+            
+            // Modal ustiga bosganda yopilmasin, faqat button bilan
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+            
+            // ESC tugmasi
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+            
+            // Fullscreen qidiruv inputi
+            if (fullInput && fullResultsArea) {
+                let fullTimeout;
+                fullInput.addEventListener('input', (e) => {
+                    clearTimeout(fullTimeout);
+                    const val = e.target.value.trim();
+                    if (val.length < 2) {
+                        renderRecentSearches();
+                        return;
+                    }
+                    fullTimeout = setTimeout(async () => {
+                        fullResultsArea.innerHTML = `<div class="loading-dots"><div></div><div></div><div></div></div>`;
+                        try {
+                            const resp = await fetch(`/api/search/?q=${encodeURIComponent(val)}`);
+                            const data = await resp.json();
+                            if (!data.length) {
+                                fullResultsArea.innerHTML = `<div class="text-center p-6 text-gray-500">Topilmadi</div>`;
+                                return;
+                            }
+                            fullResultsArea.innerHTML = data.map(p => `
+                                <div class="search-result-item" data-url="${p.url || `/mahsulot/${p.id}/`}">
+                                    <div class="search-result-image">${p.image ? `<img src="${p.image}">` : '<i class="fas fa-image text-2xl text-gray-400"></i>'}</div>
+                                    <div><div class="search-result-name">${escapeHtml(p.name)}</div><div class="search-result-price">${p.price}</div></div>
+                                </div>
+                            `).join('');
+                            document.querySelectorAll('#fullscreenResultsArea .search-result-item').forEach(el => {
+                                el.addEventListener('click', () => {
+                                    window.location.href = el.getAttribute('data-url');
+                                });
+                            });
+                        } catch(e) {
+                            fullResultsArea.innerHTML = `<div class="text-center p-6 text-red-500">Xatolik</div>`;
+                        }
+                    }, 350);
+                });
+                
+                fullInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const val = fullInput.value.trim();
+                        if (val) {
+                            window.location.href = `/barcha-mahsulotlar/?q=${encodeURIComponent(val)}`;
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Mobil menyu
+        function initMobileMenu() {
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            const overlay = document.getElementById('menuOverlay');
+            const panel = document.getElementById('menuPanel');
+            const closeBtn = document.getElementById('closeMenuBtn');
+            
+            if (!menuBtn || !panel) return;
+            
+            const openMenu = () => {
+                panel.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            };
+            const closeMenu = () => {
+                panel.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            };
+            
+            menuBtn.addEventListener('click', openMenu);
+            if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+            if (overlay) overlay.addEventListener('click', closeMenu);
+        }
+        
+        // Filtr paneli
+        function initFilters() {
+            const filtersPanel = document.getElementById('filtersPanel');
+            const showBtn = document.getElementById('showFiltersBtn');
+            const closeBtn = document.getElementById('closeFiltersBtn');
+            const applyBtn = document.getElementById('applyFilters');
+            const resetBtn = document.getElementById('resetFilters');
+            
+            if (!filtersPanel) return;
+            
+            const openFilters = () => {
+                filtersPanel.classList.remove('translate-y-full');
+            };
+            const closeFilters = () => {
+                filtersPanel.classList.add('translate-y-full');
+            };
+            
+            if (showBtn) showBtn.addEventListener('click', openFilters);
+            if (closeBtn) closeBtn.addEventListener('click', closeFilters);
+            if (applyBtn) applyBtn.addEventListener('click', closeFilters);
+            if (resetBtn) resetBtn.addEventListener('click', closeFilters);
+        }
+        
+        // Voice search
+        function initVoiceSearch() {
+            const voiceBtn = document.getElementById('voiceSearchBtn');
+            if (!voiceBtn) return;
+            
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'uz-UZ';
+                recognition.interimResults = false;
+                
+                voiceBtn.addEventListener('click', () => {
+                    recognition.start();
+                    voiceBtn.style.background = '#fee2e2';
+                    voiceBtn.style.color = '#ef4444';
+                });
+                
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    const fullInput = document.getElementById('fullscreenSearchInput');
+                    if (fullInput) {
+                        fullInput.value = transcript;
+                        fullInput.dispatchEvent(new Event('input'));
+                    }
+                    voiceBtn.style.background = '';
+                    voiceBtn.style.color = '';
+                };
+                recognition.onerror = () => {
+                    voiceBtn.style.background = '';
+                    voiceBtn.style.color = '';
+                };
+                recognition.onend = () => {
+                    voiceBtn.style.background = '';
+                    voiceBtn.style.color = '';
+                };
+            } else {
+                voiceBtn.addEventListener('click', () => {
+                    alert("Ovozli qidiruv brauzeringizda qo'llab-quvvatlanmaydi");
+                });
+            }
+        }
+        
+        // Sahifa yuklanganda
+        document.addEventListener('DOMContentLoaded', () => {
+            // Desktop qidiruv
+            setupSearchInput('desktopSearch', 'desktopResultsContainer', 'desktopLoadingSpinner', 'desktopSearchResults');
+            // Mobil qidiruv
+            setupSearchInput('mobileSearchInput', 'mobileResultsContainer', 'mobileLoadingSpinner', 'mobileSearchResults');
+            
+            renderRecentSearches();
+            initMobileModal();
+            initMobileMenu();
+            initFilters();
+            initVoiceSearch();
+            
+            // Click outside qidiruv dropdownlarini yopish
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-input-container') && !e.target.closest('#mobileSearchInput')?.parentElement) {
+                    document.querySelectorAll('.search-results.active').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

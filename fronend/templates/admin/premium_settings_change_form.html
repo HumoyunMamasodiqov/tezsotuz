@@ -1,0 +1,46 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Qo'shimcha CSS */
+    .preview-section {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .price-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .price-table th, .price-table td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: left;
+    }
+    .price-table th {
+        background: #e9ecef;
+    }
+    .discount-badge {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block field_sets %}
+<div class="preview-section">
+    <h3>Premium Narxlari Ko'rinishi:</h3>
+    {{ adminform.form.get_prices_preview|safe }}
+</div>
+{{ block.super }}
+{% endblock %}

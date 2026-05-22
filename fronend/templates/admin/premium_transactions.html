@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Tranzaksiyalari - Admin</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .transaction-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid transparent;
+        }
+        
+        .transaction-type-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .type-new { background: #d1fae5; color: #065f46; }
+        .type-extend { background: #dbeafe; color: #1e40af; }
+        .type-renew { background: #fef3c7; color: #92400e; }
+        .type-product_add { background: #f3e8ff; color: #6b21a8; }
+        .type-manual { background: #fce7f3; color: #9d174d; }
+        
+        .filter-form {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    {% include 'admin/admin_nav.html' %}
+    
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Premium Tranzaksiyalari</h1>
+            <p class="text-gray-600">Barcha premium tranzaksiyalar tarixi</p>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Jami Tranzaksiyalar</div>
+                <div class="stat-value">{{ stats.total }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Jami Qo'shilgan Kunlar</div>
+                <div class="stat-value">{{ stats.total_days }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Jami To'lov Miqdori</div>
+                <div class="stat-value">{{ stats.total_amount|floatformat:0 }} so'm</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Yangi Premiumlar</div>
+                <div class="stat-value">{{ stats.new_count }}</div>
+            </div>
+        </div>
+        
+        <!-- Filter Form -->
+        <div class="filter-form">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Foydalanuvchi ID</label>
+                    <input type="number" 
+                           name="user_id" 
+                           value="{{ user_id|default:'' }}" 
+                           class="form-input" 
+                           placeholder="Foydalanuvchi ID">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tranzaksiya turi</label>
+                    <select name="type" class="form-select">
+                        <option value="all" {% if transaction_type == 'all' %}selected{% endif %}>Barcha</option>
+                        <option value="new" {% if transaction_type == 'new' %}selected{% endif %}>Yangi premium</option>
+                        <option value="extend" {% if transaction_type == 'extend' %}selected{% endif %}>Muddat uzaytirish</option>
+                        <option value="renew" {% if transaction_type == 'renew' %}selected{% endif %}>Avtomatik uzaytirish</option>
+                        <option value="product_add" {% if transaction_type == 'product_add' %}selected{% endif %}>Mahsulot qo'shish</option>
+                        <option value="manual" {% if transaction_type == 'manual' %}selected{% endif %}>Qo'lda qo'shish</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-end">
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i class="fas fa-filter"></i>
+                        Filtrlash
+                    </button>
+                </div>
+                
+                <div class="flex items-end">
+                    <a href="{% url 'admin_premium_transactions' %}" class="btn btn-secondary w-full">
+                        <i class="fas fa-redo"></i>
+                        Tozalash
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Tranzaksiyalar Ro'yxati -->
+        {% if transactions %}
+        <div class="space-y-4">
+            {% for transaction in transactions %}
+            <div class="transaction-card">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">
+                            {{ transaction.user.username }}
+                            <span class="text-sm text-gray-500">#{{ transaction.user.id }}</span>
+                        </h3>
+                        <div class="text-sm text-gray-500 mt-1">
+                            {{ transaction.created_at|date:"d.m.Y H:i" }}
+                            • ID: {{ transaction.transaction_id }}
+                        </div>
+                    </div>
+                    
+                    <div class="text-right">
+                        <span class="transaction-type-badge type-{{ transaction.transaction_type }}">
+                            {{ transaction.get_transaction_type_display }}
+                        </span>
+                        <div class="font-bold text-lg mt-2">
+                            {{ transaction.days_added }} kun
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tranzaksiya Tafsilotlari -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <div class="text-sm text-gray-500">To'lov miqdori</div>
+                        <div class="font-medium {% if transaction.amount > 0 %}text-green-600{% else %}text-gray-600{% endif %}">
+                            {{ transaction.amount|floatformat:0 }} so'm
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500">Avvalgi sanalar</div>
+                        <div class="font-medium">
+                            {% if transaction.previous_end_date %}
+                            {{ transaction.previous_end_date|date:"d.m.Y H:i" }}
+                            {% else %}
+                            Yo'q
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500">Yangi sana</div>
+                        <div class="font-medium">
+                            {% if transaction.new_end_date %}
+                            {{ transaction.new_end_date|date:"d.m.Y H:i" }}
+                            {% else %}
+                            Yo'q
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                {% if transaction.description %}
+                <div class="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <div class="text-sm text-gray-500">Tavsif</div>
+                    <div class="text-gray-700">{{ transaction.description }}</div>
+                </div>
+                {% endif %}
+                
+                <!-- User Info -->
+                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                    <div class="text-sm text-gray-500">
+                        Foydalanuvchi: {{ transaction.user.get_full_name|default:transaction.user.username }}
+                    </div>
+                    
+                    <a href="{% url 'admin_search_users' %}?q={{ transaction.user.id }}" 
+                       class="text-sm text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-external-link-alt mr-1"></i>
+                        Profilni ko'rish
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="flex justify-center mt-8">
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if user_id %}&user_id={{ user_id }}{% endif %}{% if transaction_type != 'all' %}&type={{ transaction_type }}{% endif %}" 
+                   class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">
+                    ← Oldingi
+                </a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                    {{ num }}
+                </span>
+                {% else %}
+                <a href="?page={{ num }}{% if user_id %}&user_id={{ user_id }}{% endif %}{% if transaction_type != 'all' %}&type={{ transaction_type }}{% endif %}" 
+                   class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">
+                    {{ num }}
+                </a>
+                {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if user_id %}&user_id={{ user_id }}{% endif %}{% if transaction_type != 'all' %}&type={{ transaction_type }}{% endif %}" 
+                   class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50">
+                    Keyingi →
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-16 bg-white rounded-lg shadow">
+            <i class="fas fa-exchange-alt text-gray-300 text-6xl mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Tranzaksiyalar Topilmadi</h3>
+            <p class="text-gray-600 mb-6">
+                Hozircha hech qanday premium tranzaksiya yo'q.
+            </p>
+        </div>
+        {% endif %}
+        
+        <!-- Back Button -->
+        <div class="mt-8">
+            <a href="{% url 'admin_premium_dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Dashboardga Qaytish
+            </a>
+        </div>
+    </div>
+</body>
+</html>

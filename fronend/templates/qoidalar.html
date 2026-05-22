@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#3b82f6">
+    <title>Foydalanish Qoidalari - Tez Sot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            line-height: 1.5;
+        }
+
+        /* Main Container */
+        .terms-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        @media (min-width: 768px) {
+            .terms-container {
+                padding: 32px 24px 48px;
+            }
+        }
+
+        /* Header Section */
+        .terms-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-wrapper {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+        }
+
+        .logo-wrapper i {
+            font-size: 32px;
+            color: white;
+        }
+
+        .terms-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0f172a, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .terms-header p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .rule-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #eef2ff;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #3b82f6;
+            margin-top: 12px;
+        }
+
+        /* Search / Filter */
+        .search-box {
+            background: white;
+            border-radius: 14px;
+            padding: 8px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-box i {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            padding: 10px 0;
+        }
+
+        .search-box input::placeholder {
+            color: #cbd5e1;
+        }
+
+        /* Rules List - Minimalistic */
+        .rules-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        /* Rule Card */
+        .rule-card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            border: 1px solid #eef2ff;
+        }
+
+        .rule-card:hover {
+            border-color: #dbeafe;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .rule-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            cursor: pointer;
+            background: white;
+        }
+
+        .rule-number {
+            width: 32px;
+            height: 32px;
+            background: #eff6ff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #3b82f6;
+            flex-shrink: 0;
+        }
+
+        .rule-icon {
+            width: 40px;
+            height: 40px;
+            background: #f8fafc;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .rule-icon i {
+            font-size: 18px;
+            color: #3b82f6;
+        }
+
+        .rule-title {
+            flex: 1;
+            font-weight: 600;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        .rule-arrow {
+            color: #94a3b8;
+            font-size: 12px;
+            transition: transform 0.25s;
+            flex-shrink: 0;
+        }
+
+        .rule-card.open .rule-arrow {
+            transform: rotate(180deg);
+        }
+
+        .rule-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease-out;
+            background: #fafcff;
+            border-top: 1px solid transparent;
+        }
+
+        .rule-card.open .rule-content {
+            max-height: 500px;
+            border-top-color: #eef2ff;
+        }
+
+        .rule-content-inner {
+            padding: 16px 18px;
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .rule-content-inner p {
+            margin-bottom: 8px;
+        }
+
+        .rule-content-inner p:last-child {
+            margin-bottom: 0;
+        }
+
+        .rule-content-inner ul {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        .rule-content-inner li {
+            margin-bottom: 6px;
+        }
+
+        /* Footer Action */
+        .footer-action {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #eef2ff;
+            margin-top: 8px;
+        }
+
+        .agree-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .agree-checkbox input {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+        }
+
+        .agree-checkbox label {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.45;
+            cursor: pointer;
+        }
+
+        .agree-checkbox label strong {
+            color: #3b82f6;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-decoration: none;
+            pointer-events: none;
+        }
+
+        .submit-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            pointer-events: auto;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .submit-btn.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Toast Message */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* No results */
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 18px;
+            color: #94a3b8;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            .terms-container {
+                padding: 16px 12px 32px;
+            }
+
+            .rule-header {
+                padding: 14px 14px;
+            }
+
+            .rule-number {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .rule-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .rule-title {
+                font-size: 14px;
+            }
+
+            .rule-content-inner {
+                padding: 12px 14px;
+                font-size: 12px;
+            }
+
+            .footer-action {
+                padding: 16px;
+            }
+
+            .agree-checkbox label {
+                font-size: 13px;
+            }
+
+            .submit-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .toast {
+                font-size: 12px;
+                padding: 10px 16px;
+                bottom: 20px;
+            }
+            .sa {
+                width: 250px;
+                height: 50px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .rule-card {
+            animation: fadeIn 0.3s ease forwards;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="terms-container">
+        <!-- Header -->
+        <div class="terms-header">
+           <img src="{% static 'img/logo.png' %}" alt="Tez Sot Logo" class="sa">
+            <h1>Foydalanish Qoidalari</h1>
+            <p>Tez Sot platformasidan xavfsiz foydalanish uchun</p>
+            <div class="rule-count">
+                <i class="fas fa-list"></i>
+                <span>8 ta asosiy qoida</span>
+            </div>
+        </div>
+
+        <!-- Search Box -->
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Qoidalar ichidan qidirish...">
+        </div>
+
+        <!-- Rules List -->
+        <div class="rules-list" id="rulesList">
+            <!-- Rule 1 -->
+            <div class="rule-card" data-title="umumiy qoidalar umumiy qoidalar">
+                <div class="rule-header" onclick="toggleRule(this)">
+                    <div class="rule-number">1</div>
+                    <div class="rule-icon"><i class="fas fa-book-open"></i></div>
+                    <div class="rule-title">Umumiy qoidalar</div>
+                    <div class="rule-arrow"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-content-inner">
+                        <p>1.1. Ushbu Qoidalar "Tez Sot Market" platformasidan foydalanish tartibini belgilaydi.</p>
+                        <p>1.2. Platformadan foydalangan har bir shaxs mazkur Qoidalar bilan tanishgan va ularga to'liq rozilik bildirgan hisoblanadi.</p>
+                        <p>1.3. "Tez Sot Market" sotuvchi va xaridor o'rtasida vositachilik qiluvchi axborot platformasi hisoblanadi.</p>
+                        <p>1.4. Platforma ma'muriyati Qoidalarni bir tomonlama o'zgartirish huquqiga ega.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 2 -->
+            <div class="rule-card" data-title="ro'yxatdan o'tish akkaunt">
+                <div class="rule-header" onclick="toggleRule(this)">
+                    <div class="rule-number">2</div>
+                    <div class="rule-icon"><i class="fas fa-user-plus"></i></div>
+                    <div class="rule-title">Ro'yxatdan o'tish va akkaunt</div>
+                    <div class="rule-arrow"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-content-inner">
+                        <p>2.1. Foydalanuvchi ro'yxatdan o'tishda haqqoniy va to'liq ma'lumotlarni taqdim etishi shart.</p>
+                        <p>2.2. Bir foydalanuvchi tomonidan bir nechta akkaunt ochish taqiqlanadi.</p>
+                        <p>2.3. Akkaunt orqali amalga oshirilgan barcha harakatlar foydalanuvchining shaxsiy javobgarligi hisoblanadi.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 3 -->
+            <div class="rule-card" data-title="sotuvchilar sotuvchi qoidalar">
+                <div class="rule-header" onclick="toggleRule(this)">
+                    <div class="rule-number">3</div>
+                    <div class="rule-icon"><i class="fas fa-store"></i></div>
+                    <div class="rule-title">Sotuvchilar uchun qoidalar</div>
+                    <div class="rule-arrow"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-content-inner">
+                        <p>3.1. Joylashtirilayotgan mahsulotlar to'g'risidagi ma'lumotlar aniq, to'liq va ishonchli bo'lishi shart.</p>
+                        <p>3.2. Qonunchilikda taqiqlangan mahsulot va xizmatlarni joylashtirish man etiladi.</p>
+                        <p>3.3. Narx, yetkazib berish shartlari va aloqa ma'lumotlari to'g'ri ko'rsatilishi lozim.</p>
+                        <p>3.4. Soxta e'lonlar va spam faoliyati taqiqlanadi.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 4 -->
+            <div class="rule-card" data-title="xaridorlar xaridor uchun qoidalar">
+                <div class="rule-header" onclick="toggleRule(this)">
+                    <div class="rule-number">4</div>
+                    <div class="rule-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="rule-title">Xaridorlar uchun qoidalar</div>
+                    <div class="rule-arrow"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-content-inner">
+                        <p>4.1. Xaridor buyurtma berishdan oldin mahsulot tavsifi bilan to'liq tanishishi lozim.</p>
+                        <p>4.2. Sotuvchi bilan muloqotda odob-axloq va qonuniy normalarga rioya qilinishi shart.</p>
+                        <p>4.3. Asossiz shikoyatlar berish taqiqlanadi.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 5 -->
+            <div class="rule-card" data-title="to'lov yetkazib berish">
+                <div class="rule-header" onclick="toggleRule(this)">
+                    <div class="rule-number">5</div>
+                    <div class="rule-icon"><i class="fas fa-truck"></i></div>
+                    <div class="rule-title">To'lov va yetkazib berish</div>
+                    <div class="rule-arrow"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-content-inner">
+                        <p>5.1. To'lov va yetkazib berish shartlari sotuvchi tomonidan belgilanadi.</p>
+                        <p>5.2. "Tez Sot Market" tomonlar o'rtasidagi moliyaviy kelishmovchiliklar uchun javobgar emas.</p>
+                        <p>5.3. Platforma faqat axborot vositachisi sifatida xizmat ko'rsatadi.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 6 -->
+            <div class="rule-card" data-title="taqiqlangan mahsulotlar faoliyat">
+                <div class="rule-header" onclick="toggleRule(this)">
+                    <div class="rule-number">6</div>
+                    <div class="rule-icon"><i class="fas fa-ban"></i></div>
+                    <div class="rule-title">Taqiqlangan mahsulotlar va faoliyat</div>
+                    <div class="rule-arrow"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-content-inner">
+                        <p>6.1. Amaldagi qonunchilikka zid mahsulotlar.</p>
+                        <p>6.2. Giyohvandlik vositalari va psixotrop moddalar.</p>
+                        <p>6.3. Qurol-yarog', portlovchi va xavfli moddalar.</p>
+                        <p>6.4. Soxta hujjatlar va axloqqa zid materiallar.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 7 -->
+            <div class="rule-card" data-title="javobgarlik cheklash">
+                <div class="rule-header" onclick="toggleRule(this)">
+                    <div class="rule-number">7</div>
+                    <div class="rule-icon"><i class="fas fa-balance-scale"></i></div>
+                    <div class="rule-title">Javobgarlikni cheklash</div>
+                    <div class="rule-arrow"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-content-inner">
+                        <p>7.1. Platforma foydalanuvchilar tomonidan joylashtirilgan e'lonlar mazmuni uchun javobgar emas.</p>
+                        <p>7.2. Barcha mas'uliyat sotuvchi va xaridor zimmasida bo'ladi.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rule 8 -->
+            <div class="rule-card" data-title="yakuniy qoidalar">
+                <div class="rule-header" onclick="toggleRule(this)">
+                    <div class="rule-number">8</div>
+                    <div class="rule-icon"><i class="fas fa-flag-checkered"></i></div>
+                    <div class="rule-title">Yakuniy qoidalar</div>
+                    <div class="rule-arrow"><i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="rule-content">
+                    <div class="rule-content-inner">
+                        <p>8.1. Ushbu Qoidalar platformada e'lon qilingan paytdan boshlab kuchga kiradi.</p>
+                        <p>8.2. Qoidalarga rioya etilmagan taqdirda foydalanuvchi akkaunti vaqtincha yoki doimiy bloklanishi mumkin.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Action -->
+        <div class="footer-action">
+            <div class="agree-checkbox" id="checkboxContainer">
+                <input type="checkbox" id="agreeCheckbox">
+                <label for="agreeCheckbox">
+                    Men <strong>Tez Sot</strong> platformasining foydalanish qoidalarini o'qidim va 
+                    barcha shartlarga <strong>rozilik</strong> bildiraman
+                </label>
+            </div>
+            
+            <a href="{% url 'signup' %}" id="submitBtn" class="submit-btn">
+                <i class="fas fa-user-check"></i>
+                Ro'yxatdan o'tish
+            </a>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>Iltimos, avval qoidalarga rozilik bildiring!</span>
+    </div>
+
+    <script>
+        // Toggle rule accordion
+        function toggleRule(headerElement) {
+            const card = headerElement.closest('.rule-card');
+            card.classList.toggle('open');
+        }
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const ruleCards = document.querySelectorAll('.rule-card');
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            ruleCards.forEach(card => {
+                const title = card.querySelector('.rule-title').innerText.toLowerCase();
+                const content = card.querySelector('.rule-content-inner')?.innerText.toLowerCase() || '';
+                const ruleNumber = card.querySelector('.rule-number').innerText;
+                
+                if (searchTerm === '') {
+                    card.style.display = '';
+                    return;
+                }
+                
+                if (title.includes(searchTerm) || content.includes(searchTerm) || ruleNumber.includes(searchTerm)) {
+                    card.style.display = '';
+                    // Automatically open matching cards
+                    if (searchTerm.length > 2) {
+                        card.classList.add('open');
+                    }
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Checkbox and button logic
+        const agreeCheckbox = document.getElementById('agreeCheckbox');
+        const submitBtn = document.getElementById('submitBtn');
+        const toast = document.getElementById('toast');
+
+        function showToast(message) {
+            const toastSpan = toast.querySelector('span');
+            toastSpan.textContent = message || 'Iltimos, avval qoidalarga rozilik bildiring!';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        agreeCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                submitBtn.classList.add('active');
+                // Animate checkbox container
+                const container = document.getElementById('checkboxContainer');
+                container.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    container.style.transform = '';
+                }, 200);
+            } else {
+                submitBtn.classList.remove('active');
+            }
+        });
+
+        submitBtn.addEventListener('click', function(e) {
+            if (!agreeCheckbox.checked) {
+                e.preventDefault();
+                showToast('Iltimos, avval foydalanish qoidalariga rozilik bildiring!');
+                // Shake animation
+                const container = document.getElementById('checkboxContainer');
+                container.style.transform = 'translateX(4px)';
+                setTimeout(() => container.style.transform = 'translateX(-4px)', 50);
+                setTimeout(() => container.style.transform = 'translateX(2px)', 100);
+                setTimeout(() => container.style.transform = 'translateX(0)', 150);
+            }
+        });
+
+        // Open first rule by default for better UX
+        const firstCard = document.querySelector('.rule-card');
+        if (firstCard) {
+            setTimeout(() => {
+                firstCard.classList.add('open');
+            }, 300);
+        }
+
+        // Smooth scroll to top on load
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    </script>
+</body>
+</html>

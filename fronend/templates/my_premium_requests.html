@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default:"Premium So'rovlar Tarixi" }}</title>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS for additional styling -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+        
+        .table-row-hover:hover {
+            background-color: #f8fafc;
+        }
+        
+        /* Custom animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Premium status colors */
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-approved { background-color: #d1fae5; color: #065f46; }
+        .status-rejected { background-color: #fee2e2; color: #991b1b; }
+        .status-expired { background-color: #e5e7eb; color: #374151; }
+        
+        /* Responsive table */
+        @media (max-width: 768px) {
+            .responsive-table {
+                display: block;
+            }
+            .responsive-table thead {
+                display: none;
+            }
+            .responsive-table tbody, 
+            .responsive-table tr, 
+            .responsive-table td {
+                display: block;
+                width: 100%;
+            }
+            .responsive-table tr {
+                margin-bottom: 1rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                padding: 1rem;
+            }
+            .responsive-table td {
+                padding: 0.5rem 0;
+                border: none;
+            }
+            .responsive-table td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                display: inline-block;
+                width: 120px;
+                color: #6b7280;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header Section -->
+        <div class="mb-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <div class="mb-6 md:mb-0">
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">
+                        {{ title|default:"Premium So'rovlar Tarixi" }}
+                    </h1>
+                    <p class="text-gray-600 text-lg">Premium so'rovlaringiz tarixi va joriy holati</p>
+                </div>
+                
+                <!-- User Info Badge -->
+                <div class="flex items-center bg-white rounded-xl shadow-md p-4 border-l-4 border-blue-500">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center mr-4">
+                        <i class="fas fa-user text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Foydalanuvchi</p>
+                        <p class="font-semibold text-gray-800">{{ request.user.username }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium mb-1">Jami So'rovlar</p>
+                            <p class="text-3xl font-bold text-gray-800">{{ stats.total|default:"0" }}</p>
+                        </div>
+                        <div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
+                            <i class="fas fa-list-alt text-blue-600 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 flex items-center">
+                            <i class="fas fa-arrow-up text-green-500 mr-1"></i>
+                            <span>Oxirgi 30 kunda {{ stats.this_month_requests|default:"0" }} ta</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-l-4 border-yellow-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium mb-1">Kutilmoqda</p>
+                            <p class="text-3xl font-bold text-gray-800">{{ stats.pending|default:"0" }}</p>
+                        </div>
+                        <div class="w-14 h-14 rounded-full bg-yellow-50 flex items-center justify-center">
+                            <i class="fas fa-clock text-yellow-600 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 flex items-center">
+                            <i class="fas fa-info-circle text-yellow-500 mr-1"></i>
+                            <span>O'rtacha javob: 24 soat</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-l-4 border-green-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium mb-1">Tasdiqlangan</p>
+                            <p class="text-3xl font-bold text-gray-800">{{ stats.approved|default:"0" }}</p>
+                        </div>
+                        <div class="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 flex items-center">
+                            <i class="fas fa-percentage text-green-500 mr-1"></i>
+                            <span>
+                                {% if stats.total > 0 %}
+                                    Muvaffaqiyat darajasi: {{ stats.approved|floatformat:0|default:0|add:0|floatformat:0 }}%
+                                {% else %}
+                                    Muvaffaqiyat darajasi: 0%
+                                {% endif %}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-l-4 border-red-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium mb-1">Rad Etilgan</p>
+                            <p class="text-3xl font-bold text-gray-800">{{ stats.rejected|default:"0" }}</p>
+                        </div>
+                        <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center">
+                            <i class="fas fa-times-circle text-red-600 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 flex items-center">
+                            <i class="fas fa-history text-gray-500 mr-1"></i>
+                            <span>
+                                {% if stats.rejected > 0 %}
+                                    Oxirgi rad: {{ last_rejected_date|default:"-" }}
+                                {% else %}
+                                    Rad etilgan so'rov yo'q
+                                {% endif %}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Section -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-md p-6 mb-10 border border-blue-100">
+            <div class="flex flex-col lg:flex-row justify-between items-center">
+                <div class="mb-6 lg:mb-0 lg:mr-6">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                            <i class="fas fa-bolt text-blue-600"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900">Premium So'rov Limitlari</h2>
+                    </div>
+                    <p class="text-gray-700">
+                        Sizda oyiga <span class="font-bold text-blue-600">{{ max_requests|default:"3" }} ta</span> premium so'rov qilish imkoniyati mavjud.
+                        Joriy oyda siz <span class="font-bold text-green-600">{{ used_requests|default:"0" }} ta</span> so'rov qildingiz, 
+                        <span class="font-bold text-orange-600">{{ requests_left|default:"3" }} tasi</span> qolgan.
+                    </p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <!-- Request Limit Progress -->
+                    <div class="bg-white rounded-xl p-5 shadow-md min-w-[250px]">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-sm font-medium text-gray-700">Oylik Limit</span>
+                            <span class="text-sm font-bold text-gray-900">{{ used_requests|default:"0" }}/{{ max_requests|default:"3" }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-gradient-to-r from-green-500 to-blue-500 h-2.5 rounded-full" 
+                                 style="width: {% widthratio used_requests|default:0 max_requests|default:3 100 %}%"></div>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-xs text-gray-500">Qolgan: {{ requests_left|default:"3" }} so'rov</span>
+                            <span class="text-xs text-gray-500">30 kundan keyin yangilanadi</span>
+                        </div>
+                    </div>
+                    
+                    <!-- New Request Button -->
+                    {% if requests_left > 0 %}
+                    <a href="{% url 'submit_premium_request' %}" class="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold px-6 py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+                        <i class="fas fa-plus-circle text-xl mr-3"></i>
+                        <span class="text-lg">Yangi Premium So'rov</span>
+                    </a>
+                    {% else %}
+                    <div class="inline-flex items-center justify-center bg-red-100 text-red-700 border border-red-200 font-bold px-6 py-4 rounded-xl shadow">
+                        <i class="fas fa-exclamation-triangle text-xl mr-3"></i>
+                        <span class="text-lg">Oylik limit tugagan</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Requests Table Section -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-10">
+            <!-- Table Header -->
+            <div class="border-b border-gray-200 px-6 py-5">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">So'rovlar Tarixi</h2>
+                        <p class="text-gray-600 mt-1">Barcha premium so'rovlaringiz ro'yxati</p>
+                    </div>
+                    
+                    <!-- Filter Options -->
+                    <div class="flex items-center space-x-3 mt-4 sm:mt-0">
+                        <div class="relative">
+                            <select id="statusFilter" class="appearance-none bg-gray-50 border border-gray-300 text-gray-700 text-sm rounded-lg pl-4 pr-10 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                                <option value="all">Barchasi</option>
+                                <option value="pending">Kutilmoqda</option>
+                                <option value="approved">Tasdiqlangan</option>
+                                <option value="rejected">Rad etilgan</option>
+                                <option value="expired">Muddati o'tgan</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        
+                        <button id="searchBtn" class="bg-gray-50 hover:bg-gray-100 border border-gray-300 text-gray-700 font-medium rounded-lg px-4 py-2.5 transition duration-200 flex items-center">
+                            <i class="fas fa-search mr-2"></i>
+                            <span>Qidirish</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Table Content -->
+            {% if premium_requests %}
+            <div class="overflow-x-auto responsive-table">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <span>ID</span>
+                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                <div class="flex items-center">
+                                    <span>Sana</span>
+                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Muddati</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Limit</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Summa</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Holati</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Harakatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for req in premium_requests %}
+                        <tr class="table-row-hover" data-status="{{ req.status }}">
+                            <td class="px-6 py-5 whitespace-nowrap" data-label="ID">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg 
+                                        {% if req.status == 'pending' %}bg-yellow-50 text-yellow-700
+                                        {% elif req.status == 'approved' %}bg-green-50 text-green-700
+                                        {% elif req.status == 'rejected' %}bg-red-50 text-red-700
+                                        {% else %}bg-gray-50 text-gray-700{% endif %}
+                                        flex items-center justify-center mr-3">
+                                        <span class="font-bold">#{{ req.id }}</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-gray-900">Premium So'rov</div>
+                                        <div class="text-xs text-gray-500">ID: PR-{{ req.created_at|date:"Y" }}-{{ req.id|stringformat:"03d" }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap" data-label="Sana">
+                                <div class="text-sm font-medium text-gray-900">{{ req.created_at|date:"d.m.Y" }}</div>
+                                <div class="text-xs text-gray-500">{{ req.created_at|date:"H:i" }}</div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap" data-label="Muddati">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-day text-blue-500 mr-2"></i>
+                                    <span class="font-medium text-gray-900">{{ req.requested_days }} kun</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap" data-label="Limit">
+                                <div class="flex items-center">
+                                    <i class="fas fa-box text-green-500 mr-2"></i>
+                                    <span class="font-medium text-gray-900">{{ req.requested_limit }} ta</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap" data-label="Summa">
+                                {% if req.calculated_total %}
+                                <div class="font-bold text-gray-900">
+                                    {{ req.calculated_total|floatformat:0 }} so'm
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    {% if req.status == 'approved' %}To'langan
+                                    {% elif req.status == 'pending' %}To'lanishi kerak
+                                    {% else %}To'lanmagan{% endif %}
+                                </div>
+                                {% else %}
+                                <div class="font-medium text-gray-400">-</div>
+                                <div class="text-xs text-gray-500">Hisoblanmagan</div>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap" data-label="Holati">
+                                {% if req.status == 'pending' %}
+                                <span class="status-badge status-pending pulse-animation">
+                                    <i class="fas fa-clock mr-1.5"></i>
+                                    Kutilmoqda
+                                </span>
+                                {% elif req.status == 'approved' %}
+                                <span class="status-badge status-approved">
+                                    <i class="fas fa-check-circle mr-1.5"></i>
+                                    Tasdiqlangan
+                                </span>
+                                {% elif req.status == 'rejected' %}
+                                <span class="status-badge status-rejected">
+                                    <i class="fas fa-times-circle mr-1.5"></i>
+                                    Rad Etilgan
+                                </span>
+                                {% else %}
+                                <span class="status-badge status-expired">
+                                    <i class="fas fa-hourglass-end mr-1.5"></i>
+                                    Muddati Tugagan
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap" data-label="Harakatlar">
+                                <div class="flex space-x-2">
+                                    <a href="{% url 'premium_request_detail' req.id %}" 
+                                       class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center">
+                                        <i class="fas fa-eye mr-1.5"></i>
+                                        Ko'rish
+                                    </a>
+                                    {% if req.status == 'pending' %}
+                                    <form method="post" action="{% url 'cancel_premium_request' req.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                onclick="return confirm('Bu so\'rovni bekor qilmoqchimisiz?')"
+                                                class="text-red-600 hover:text-red-800 font-medium text-sm flex items-center ml-4">
+                                            <i class="fas fa-times mr-1.5"></i>
+                                            Bekor qilish
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Table Footer -->
+            <div class="border-t border-gray-200 px-6 py-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center">
+                    <div class="text-sm text-gray-500 mb-4 sm:mb-0">
+                        Jami <span class="font-semibold text-gray-700">{{ premium_requests.count }} ta</span> so'rov
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <div class="flex items-center space-x-2">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" 
+                           class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <span class="w-10 h-10 flex items-center justify-center rounded-lg bg-blue-600 text-white font-medium">
+                                {{ num }}
+                            </span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}" 
+                               class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition">
+                                {{ num }}
+                            </a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" 
+                           class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-16">
+                <div class="mb-6">
+                    <div class="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mx-auto">
+                        <i class="fas fa-inbox text-gray-400 text-4xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Premium So'rovingiz Yo'q</h3>
+                <p class="text-gray-600 max-w-md mx-auto mb-8">
+                    Hozircha premium so'rovingiz mavjud emas. Birinchi premium so'rovingizni yuborish uchun quyidagi tugmani bosing.
+                </p>
+                {% if requests_left > 0 %}
+                <a href="{% url 'submit_premium_request' %}" class="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+                    <i class="fas fa-plus-circle text-xl mr-3"></i>
+                    <span class="text-lg">Birinchi Premium So'rov</span>
+                </a>
+                {% else %}
+                <div class="inline-flex items-center justify-center bg-red-100 text-red-700 border border-red-200 font-bold px-8 py-4 rounded-xl shadow">
+                    <i class="fas fa-exclamation-triangle text-xl mr-3"></i>
+                    <span class="text-lg">Oylik limit tugagan</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Help Section -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-md p-8 border border-blue-100">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="mb-6 md:mb-0 md:mr-8">
+                    <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-question-circle text-blue-600 text-3xl"></i>
+                    </div>
+                </div>
+                
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Premium So'rovlar Haqida</h3>
+                    <p class="text-gray-700 mb-4">
+                        Premium so'rovlar orqali siz platformada maxsus imtiyozlarga ega bo'lasiz. 
+                        Har bir so'rov ma'lum muddatga (kunlar soni) va ma'lum limitga (maksimal son) ega bo'ladi.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Tez javob</p>
+                                <p class="text-sm text-gray-600">So'rovingiz 24 soat ichida ko'rib chiqiladi</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">Yuqori limit</p>
+                                <p class="text-sm text-gray-600">Premium akkauntlar uchun yuqori limitlar</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 md:mt-0 md:ml-8">
+                    <a href="{% url 'submit_premium_request' %}" class="inline-flex items-center justify-center bg-white hover:bg-gray-50 text-blue-600 font-semibold px-6 py-3 rounded-xl border border-blue-200 shadow-sm hover:shadow transition duration-300">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span>Ko'proq ma'lumot</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="border-t border-gray-200 mt-12 pt-8 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-600 text-sm">© 2023 TezSot. Barcha huquqlar himoyalangan.</p>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <a href="#" class="text-gray-500 hover:text-blue-600 text-sm transition">
+                        <i class="fas fa-life-ring mr-1"></i> Yordam
+                    </a>
+                    <a href="{% url 'qoidalar' %}" class="text-gray-500 hover:text-blue-600 text-sm transition">
+                        <i class="fas fa-file-alt mr-1"></i> Qoidalar
+                    </a>
+                    <a href="{% url 'boglanish' %}" class="text-gray-500 hover:text-blue-600 text-sm transition">
+                        <i class="fas fa-envelope mr-1"></i> Aloqa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript for interactive elements -->
+    <script>
+        // Add hover effects to table rows
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableRows = document.querySelectorAll('tbody tr');
+            
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.classList.add('bg-blue-50');
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.classList.remove('bg-blue-50');
+                });
+            });
+            
+            // Status filter functionality
+            const statusFilter = document.getElementById('statusFilter');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            if (statusFilter && searchBtn) {
+                searchBtn.addEventListener('click', function() {
+                    const selectedStatus = statusFilter.value;
+                    if (selectedStatus !== 'all') {
+                        // Filter table rows by status
+                        tableRows.forEach(row => {
+                            const rowStatus = row.getAttribute('data-status');
+                            if (rowStatus === selectedStatus) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    } else {
+                        // Show all rows
+                        tableRows.forEach(row => {
+                            row.style.display = '';
+                        });
+                    }
+                });
+                
+                // Reset filter on page load
+                statusFilter.value = 'all';
+            }
+            
+            // Add data-labels for responsive table
+            if (window.innerWidth <= 768) {
+                const headers = document.querySelectorAll('thead th');
+                const rows = document.querySelectorAll('tbody tr');
+                
+                if (headers.length > 0 && rows.length > 0) {
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        cells.forEach((cell, index) => {
+                            if (index < headers.length) {
+                                const headerText = headers[index].textContent.trim();
+                                cell.setAttribute('data-label', headerText);
+                            }
+                        });
+                    });
+                }
+            }
+            
+            // New request button animation
+            const newRequestBtn = document.querySelector('a.bg-gradient-to-r.from-orange-500');
+            if (newRequestBtn) {
+                newRequestBtn.addEventListener('click', function(e) {
+                    // Navigation will be handled by href
+                });
+            }
+        });
+        
+        // Responsive table on window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                const headers = document.querySelectorAll('thead th');
+                const rows = document.querySelectorAll('tbody tr');
+                
+                if (headers.length > 0 && rows.length > 0) {
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        cells.forEach((cell, index) => {
+                            if (index < headers.length) {
+                                const headerText = headers[index].textContent.trim();
+                                cell.setAttribute('data-label', headerText);
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
