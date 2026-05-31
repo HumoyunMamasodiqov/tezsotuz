@@ -532,7 +532,7 @@ function processRequest(requestId, action) {
         formData.append('reason', reason);
     }
     
-    fetch(`/admin/premium/process-request/${requestId}/`, {
+    fetch(`/admin/process-premium-request/${requestId}/`, {
         method: 'POST',
         body: formData
     })
@@ -544,7 +544,7 @@ function processRequest(requestId, action) {
 }
 
 function checkExpiry() {
-    fetch(`{% url 'admin_check_all_expired %}`)
+    fetch(`{% url 'admin_check_all_expired' %}`)
     .then(response => response.json())
     .then(data => {
         if (data.success) {

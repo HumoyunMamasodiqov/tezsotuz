@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatlarim - TezSot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <style>
+        body { background: #f3f4f6; font-family: 'Segoe UI', sans-serif; }
+        .chat-card { background: white; border-radius: 14px; padding: 14px 18px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px; transition: all 0.2s; border: 1px solid #f0f0f0; }
+        .chat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px; flex-shrink: 0; }
+        .unread-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+    <div class="max-w-3xl mx-auto px-4 py-6">
+        <div class="flex items-center gap-3 mb-6">
+            <i class="fas fa-comments text-2xl text-indigo-600"></i>
+            <h1 class="text-2xl font-bold text-gray-800">Chatlarim</h1>
+        </div>
+
+        {% if not chats %}
+        <div class="bg-white rounded-2xl shadow-sm p-10 text-center">
+            <i class="fas fa-comment-dots text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg">Hali chatlar mavjud emas</p>
+            <p class="text-gray-400 text-sm mt-1">Mahsulot sotib olish yoki sotuvchi bilan bog'lanishingiz mumkin</p>
+        </div>
+        {% endif %}
+
+        <div class="space-y-3">
+            {% for chat in chats %}
+            <a href="{% url 'chat_detail' chat.id %}" class="text-decoration-none">
+                <div class="chat-card">
+                    <div class="avatar">
+                        {% if request.user == chat.buyer %}
+                            {{ chat.seller.username|first|upper }}
+                        {% else %}
+                            {{ chat.buyer.username|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-gray-900">
+                                {% if request.user == chat.buyer %}
+                                    {{ chat.seller.username }}
+                                {% else %}
+                                    {{ chat.buyer.username }}
+                                {% endif %}
+                            </span>
+                            {% if chat.unread > 0 %}
+                            <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ chat.unread }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-sm text-gray-500 truncate">
+                            {{ chat.mahsulot.name|truncatechars:40 }}
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            {% if chat.last_msg %}
+                                {{ chat.last_msg.text|truncatechars:60 }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <div class="text-xs text-gray-400">{{ chat.updated_at|date:"d.m H:i" }}</div>
+                        {% if chat.unread > 0 %}<div class="unread-dot ms-auto mt-1"></div>{% endif %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% include 'footer.html' %}
+</body>
+</html>

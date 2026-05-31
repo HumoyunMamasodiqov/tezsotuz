@@ -502,7 +502,19 @@
                     </div>
                 </div>
                 
-                {% if user.is_authenticated %}
+                {% if user.is_authenticated and user != mahsulot.user and not mahsulot.sotilgan %}
+                <div class="flex gap-1 mt-1">
+                    <a href="{% url 'add_to_cart' mahsulot.id %}" class="btn btn-sm btn-success" style="padding:2px 8px;font-size:11px;border-radius:4px;text-decoration:none;color:white">
+                        <i class="fas fa-shopping-cart"></i> Savat
+                    </a>
+                    <form method="POST" action="{% url 'sevimliga_qoshish' mahsulot.id %}" class="wishlist-form" style="display:inline">
+                        {% csrf_token %}
+                        <button type="submit" class="wishlist-btn" title="Sevimlilarga qo'shish">
+                            <i class="far fa-heart text-gray-500 text-sm"></i>
+                        </button>
+                    </form>
+                </div>
+                {% elif user.is_authenticated %}
                 <form method="POST" action="{% url 'sevimliga_qoshish' mahsulot.id %}" class="wishlist-form">
                     {% csrf_token %}
                     <button type="submit" class="wishlist-btn" title="Sevimlilarga qo'shish">

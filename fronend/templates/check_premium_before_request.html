@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    {% include 'nav.html' %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                {% if has_active_premium %}
+                <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+                <h1 class="text-2xl font-bold mb-4">Premium obunangiz aktiv</h1>
+                <p class="text-gray-600 mb-2">Sizda aktiv Premium obuna mavjud!</p>
+                <p class="text-gray-600 mb-6">{{ message }}</p>
+                <div class="flex gap-4 justify-center">
+                    <a href="{% url 'check_premium_status' %}" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-eye mr-2"></i>Holatni ko'rish
+                    </a>
+                    <a href="{% url 'home' %}" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-home mr-2"></i>Bosh sahifa
+                    </a>
+                </div>
+                {% else %}
+                <i class="fas fa-crown text-6xl text-yellow-500 mb-4"></i>
+                <h1 class="text-2xl font-bold mb-4">Premium so'rov yuborish</h1>
+                <p class="text-gray-600 mb-6">Premium obunaga ega bo'lish uchun so'rov yuboring.</p>
+                <a href="{% url 'submit_premium_request' %}" class="px-8 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-semibold">
+                    <i class="fas fa-paper-plane mr-2"></i>So'rov yuborish
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% include 'footer.html' %}
+</body>
+</html>

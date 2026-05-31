@@ -13,7 +13,7 @@ import json
 from .models import (
     Banner, Mahsulot, Sevimli, Category, SellerProfile, AdminAloqa,
     PremiumUser, PremiumProduct, AdminPremiumSettings, PremiumRequest, 
-    PremiumNotification
+    PremiumNotification, SotibOlish, BannerPurchase, FeaturedPurchase
 )
 
 
@@ -96,6 +96,18 @@ class SellerProfileAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at')
         }),
     )
+
+
+@admin.register(SotibOlish)
+class SotibOlishAdmin(admin.ModelAdmin):
+    list_display = ['id', 'mahsulot', 'xaridor', 'sotuvchi', 'jami_narx', 'status', 'created_at']
+    list_filter = ['status', 'created_at']
+    search_fields = ['mahsulot__name', 'xaridor__username', 'sotuvchi__username', 'xaridor_telefon']
+    list_editable = ['status']
+    date_hierarchy = 'created_at'
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('mahsulot', 'xaridor', 'sotuvchi')
 
 
 @admin.register(AdminAloqa)
@@ -430,7 +442,7 @@ import json
 
 @admin.register(AdminPremiumSettings)
 class AdminPremiumSettingsAdmin(admin.ModelAdmin):
-    """Premium sozlamalar - JSON formatli to'lov usullari bilan"""
+    """Premium sozlamalar"""
     
     list_display = ['premium_fee_amount', 'premium_per_day_price', 'has_discount', 'is_premium_enabled']
     
@@ -448,14 +460,14 @@ class AdminPremiumSettingsAdmin(admin.ModelAdmin):
             'fields': ('has_discount', 'discount_percentage', 'discount_end_date')
         }),
         
-        ('To\'lov Usullari - JSON', {
-            'fields': ('payment_methods_json',),
-            'description': 'To\'lov usullarini JSON formatida boshqaring. Misol: [{"name": "HUMO", "icon": "credit-card", "active": true}]'
+        ('To\'lov Usullari', {
+            'fields': ('payment_methods',),
+            'description': 'Har bir to\'lov usulini yangi qatorda yozing'
         }),
         
-        ('Bank Kartalari - JSON', {
-            'fields': ('bank_cards_json',),
-            'description': 'Bank kartalarini JSON formatida boshqaring. Misol: [{"card_number": "8600 1234 5678 9012", "card_owner": "TEZ SOT", "bank_name": "HUMO", "card_type": "humo", "active": true}]'
+        ('Bank Karta Ma\'lumotlari', {
+            'fields': (('bank_card_number', 'bank_name'), 'bank_card_owner'),
+            'description': 'Bank karta ma\'lumotlari'
         }),
         
         ('Aloqa Ma\'lumotlari', {
@@ -477,54 +489,50 @@ class AdminPremiumSettingsAdmin(admin.ModelAdmin):
         }),
     )
     
-    def save_model(self, request, obj, form, change):
-        """Model saqlanganda JSON validatsiya"""
-        
-        # Payment methods validatsiya
-        if obj.payment_methods_json:
-            try:
-                if isinstance(obj.payment_methods_json, str):
-                    obj.payment_methods_json = json.loads(obj.payment_methods_json)
-                
-                for method in obj.payment_methods_json:
-                    if not isinstance(method, dict):
-                        raise ValueError("Har bir to'lov usuli dict bo'lishi kerak")
-                    if 'name' not in method:
-                        raise ValueError("Har bir to'lov usulida 'name' bo'lishi kerak")
-                    
-                    method.setdefault('icon', 'credit-card')
-                    method.setdefault('active', True)
-                
-            except (json.JSONDecodeError, ValueError) as e:
-                self.message_user(request, f"To'lov usullari JSON xatosi: {str(e)}", level='ERROR')
-                return
-        
-        # Bank cards validatsiya
-        if obj.bank_cards_json:
-            try:
-                if isinstance(obj.bank_cards_json, str):
-                    obj.bank_cards_json = json.loads(obj.bank_cards_json)
-                
-                for card in obj.bank_cards_json:
-                    if not isinstance(card, dict):
-                        raise ValueError("Har bir karta dict bo'lishi kerak")
-                    
-                    required_fields = ['card_number', 'card_owner', 'bank_name']
-                    for field in required_fields:
-                        if field not in card:
-                            raise ValueError(f"Kartada '{field}' bo'lishi kerak")
-                    
-                    card.setdefault('card_type', 'humo')
-                    card.setdefault('active', True)
-                
-            except (json.JSONDecodeError, ValueError) as e:
-                self.message_user(request, f"Bank kartalari JSON xatosi: {str(e)}", level='ERROR')
-                return
-        
-        super().save_model(request, obj, form, change)
-    
     def has_add_permission(self, request):
         return not AdminPremiumSettings.objects.exists()
     
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(BannerPurchase)
+class BannerPurchaseAdmin(admin.ModelAdmin):
+    list_display = ['title', 'user', 'status', 'days', 'price', 'created_at']
+    list_filter = ['status', 'device_type', 'created_at']
+    search_fields = ['title', 'user__username']
+    actions = ['approve_purchases', 'reject_purchases']
+    
+    def approve_purchases(self, request, queryset):
+        for p in queryset.filter(status='kutilmoqda'):
+            p.approve()
+        self.message_user(request, f"{queryset.count()} ta banner tasdiqlandi")
+    approve_purchases.short_description = "Tanlangan bannerlarni tasdiqlash"
+    
+    def reject_purchases(self, request, queryset):
+        for p in queryset.filter(status='kutilmoqda'):
+            p.status = 'bekor_qilindi'
+            p.save()
+        self.message_user(request, f"{queryset.count()} ta banner rad etildi")
+    reject_purchases.short_description = "Tanlangan bannerlarni rad etish"
+
+
+@admin.register(FeaturedPurchase)
+class FeaturedPurchaseAdmin(admin.ModelAdmin):
+    list_display = ['mahsulot', 'user', 'status', 'days', 'price', 'created_at']
+    list_filter = ['status', 'created_at']
+    search_fields = ['mahsulot__name', 'user__username']
+    actions = ['approve_purchases', 'reject_purchases']
+    
+    def approve_purchases(self, request, queryset):
+        for p in queryset.filter(status='kutilmoqda'):
+            p.approve()
+        self.message_user(request, f"{queryset.count()} ta top mahsulot tasdiqlandi")
+    approve_purchases.short_description = "Tanlanganlarni tasdiqlash"
+    
+    def reject_purchases(self, request, queryset):
+        for p in queryset.filter(status='kutilmoqda'):
+            p.status = 'bekor_qilindi'
+            p.save()
+        self.message_user(request, f"{queryset.count()} ta rad etildi")
+    reject_purchases.short_description = "Tanlanganlarni rad etish"

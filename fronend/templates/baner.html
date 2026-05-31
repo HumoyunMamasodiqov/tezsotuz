@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Tez Sot | Bannerlar</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    <style>
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -148,9 +141,7 @@
             }
         }
     </style>
-</head>
 
-<body>
     <div class="wrappers">
         <div class="img_carusel">
             {% if banners %}
@@ -159,6 +150,7 @@
                 <div class="slides">
                     {% for banner in banners %}
                     <div class="slide">
+                        {% if banner.image %}
                         {% if banner.link %}
                         <a href="{{ banner.link }}" target="_blank" class="slide-link">
                             <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
@@ -167,6 +159,7 @@
                         <div class="slide-no-link">
                             <img src="{{ banner.image.url }}" alt="{{ banner.title }}">
                         </div>
+                        {% endif %}
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -366,5 +359,4 @@
         });
     </script>
     {% endif %}
-</body>
-</html>
+</div>

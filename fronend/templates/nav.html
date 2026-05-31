@@ -1,18 +1,5 @@
-<!DOCTYPE html>
-<html lang="uz">
 {% load static %}
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>TezSot - Online Market</title>
-    <link rel="icon" type="image/png" href="{% static 'img/iconlogo.png' %}">
-    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    
-    <meta name="description" content="TezSot - O'zbekistondagi eng yirik online savdo platformasi" />
-    <meta name="keywords" content="sotib olish, sotish, online do'kon, O'zbekiston" />
-    
-    <style>
+<style>
 
         * {
             margin: 0;
@@ -293,8 +280,6 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
-</head>
-<body>
 
     <!-- HEADER -->
     <header class="sticky-header">
@@ -320,6 +305,11 @@
                 <nav class="hidden lg:flex items-center gap-5">
                     <a href="/" class="text-gray-700 hover:text-blue-600 text-sm font-medium">Bosh sahifa</a>
                     {% if user.is_authenticated %}
+                        <a href="{% url 'my_chats' %}" class="text-gray-700 relative"><i class="fas fa-comment"></i> Chat</a>
+                        <a href="{% url 'profile_search' %}" class="text-gray-700"><i class="fas fa-search"></i> Profil</a>
+                        <a href="{% url 'view_cart' %}" class="text-gray-700 relative">Savat {% if cart_count > 0 %}<span class="absolute -top-1 -right-3 bg-green-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{{ cart_count }}</span>{% endif %}</a>
+                        <a href="{% url 'my_purchases' %}" class="text-gray-700">Xaridlarim</a>
+                        <a href="{% url 'my_sales' %}" class="text-gray-700">Sotuvlarim</a>
                         <a href="{% url 'sevimlilarim' %}" class="text-gray-700 relative">Sevimli <span class="absolute -top-1 -right-3 bg-blue-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{{ request.user.sevimli_set.count }}</span></a>
                     {% else %}
                         <a href="{% url 'kirish' %}" class="text-gray-700">Sevimli</a>
@@ -392,6 +382,8 @@
             <a href="{% url 'reklama' %}" class="flex items-center gap-3 py-2"><i class="ri-ad-line"></i><span>Reklama</span></a>
             
             {% if user.is_authenticated %}
+                <a href="{% url 'my_chats' %}" class="flex items-center gap-3 py-2"><i class="ri-chat-3-line"></i><span>Chatlar</span></a>
+                <a href="{% url 'profile_search' %}" class="flex items-center gap-3 py-2"><i class="ri-search-line"></i><span>Profil qidirish</span></a>
                 <a href="{% url 'sevimlilarim' %}" class="flex items-center gap-3 py-2"><i class="ri-heart-line"></i><span>Sevimlilar</span></a>
                 <a href="{% url 'mening_elonlarim' %}" class="flex items-center gap-3 py-2"><i class="ri-user-line"></i><span>Profil</span></a>
             {% else %}
@@ -426,7 +418,9 @@
     <div class="mobile-bottom-nav">
         <a href="/" class="nav-icon"><i class="ri-home-5-line"></i><span>Bosh</span></a>
         <button id="openModalBtn" class="nav-icon"><i class="ri-search-line"></i><span>Qidirish</span></button>
+        {% if user.is_authenticated %}<a href="{% url 'my_chats' %}" class="nav-icon"><i class="ri-chat-3-line"></i><span>Chat</span></a>{% else %}<a href="{% url 'kirish' %}" class="nav-icon"><i class="ri-chat-3-line"></i><span>Chat</span></a>{% endif %}
         {% if user.is_authenticated %}<a href="{% url 'elon_qoshish' %}" class="nav-icon"><i class="ri-add-circle-line"></i><span>Qo'shish</span></a>{% else %}<a href="{% url 'kirish' %}" class="nav-icon"><i class="ri-add-circle-line"></i><span>Qo'shish</span></a>{% endif %}
+        {% if user.is_authenticated %}<a href="{% url 'view_cart' %}" class="nav-icon relative"><i class="ri-shopping-cart-line"></i><span>Savat</span>{% if cart_count > 0 %}<span class="absolute -top-1 -right-1 bg-green-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center">{{ cart_count }}</span>{% endif %}</a>{% else %}<a href="{% url 'kirish' %}" class="nav-icon"><i class="ri-shopping-cart-line"></i><span>Savat</span></a>{% endif %}
         {% if user.is_authenticated %}<a href="{% url 'sevimlilarim' %}" class="nav-icon relative"><i class="ri-heart-line"></i><span>Sevimli</span>{% if request.user.sevimli_set.count > 0 %}<span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center">{{ request.user.sevimli_set.count }}</span>{% endif %}</a>{% else %}<a href="{% url 'kirish' %}" class="nav-icon"><i class="ri-heart-line"></i><span>Sevimli</span></a>{% endif %}
         {% if user.is_authenticated %}<a href="{% url 'mening_elonlarim' %}" class="nav-icon"><i class="ri-user-3-line"></i><span>Mening</span></a>{% else %}<a href="{% url 'kirish' %}" class="nav-icon"><i class="ri-user-3-line"></i><span>Kirish</span></a>{% endif %}
     </div>
@@ -785,5 +779,3 @@
             });
         });
     </script>
-</body>
-</html>

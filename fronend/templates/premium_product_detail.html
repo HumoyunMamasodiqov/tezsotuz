@@ -417,7 +417,7 @@
                         {% endif %}
                     </div>
                     
-                    {% if not mahsulot.sotilgan and user.is_authenticated %}
+                        {% if not mahsulot.sotilgan and user.is_authenticated %}
                     <div class="mt-6 pt-6 border-t border-gray-200">
                         <form method="POST" action="{% url 'sevimliga_qoshish' mahsulot.id %}" class="mb-4">
                             {% csrf_token %}
@@ -427,12 +427,29 @@
                                 Sevimlilarga qo'shish
                             </button>
                         </form>
+
+                        {% if user != mahsulot.user %}
+                        <a href="{% url 'start_chat' mahsulot.id mahsulot.user.id %}" 
+                           class="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors font-semibold mb-4">
+                            <i class="fas fa-comment"></i>
+                            Sotuvchi bilan bog'lanish
+                        </a>
+                        {% endif %}
                         
                         <a href="#" 
                            class="block text-center contact-btn py-3 rounded-lg font-semibold">
                             <i class="fas fa-shopping-cart mr-2"></i>
                             Sotib olish
                         </a>
+                        
+                        {% if has_purchased %}
+                        <a href="{% url 'buy_featured' mahsulot.id %}" 
+                           class="block text-center mt-2 py-3 rounded-lg font-semibold text-white"
+                           style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                            <i class="fas fa-fire mr-2"></i>
+                            TOP mahsulot qilish
+                        </a>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>

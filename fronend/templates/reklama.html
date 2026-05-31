@@ -1,11 +1,159 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Reklama - TezSot</title>
+    <link rel="icon" type="image/png" href="{% static 'img/iconlogo.png' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    reklama
+<body class="bg-gray-50">
+    {% include 'nav.html' %}
+
+    <div class="max-w-5xl mx-auto px-4 py-6">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Reklama va Premium xizmatlar</h1>
+            <p class="text-gray-500 mt-2">Mahsulotingizni millionlab xaridorlarga yetkazing</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- Premium obuna -->
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-purple-100 hover:shadow-lg transition">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-5 text-white text-center">
+                    <i class="fas fa-crown text-4xl mb-2"></i>
+                    <h2 class="text-xl font-bold">Premium obuna</h2>
+                </div>
+                <div class="p-5">
+                    <p class="text-gray-600 text-sm mb-4">Cheksiz e'lon qo'yish, premium badge, ko'proq ko'rishlar va boshqa imtiyozlar</p>
+                    <ul class="text-sm text-gray-600 space-y-2 mb-5">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>10+ ta e'lon qo'yish</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Premium badge</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Ko'proq ko'rishlar</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Birinchi o'rinlarda ko'rinish</li>
+                    </ul>
+                    <a href="{% url 'buy_premium' %}" class="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-center py-3 rounded-xl font-semibold hover:opacity-90 transition">
+                        Premium olish
+                    </a>
+                </div>
+            </div>
+
+            <!-- Banner reklama -->
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-sky-100 hover:shadow-lg transition">
+                <div class="bg-gradient-to-r from-sky-500 to-blue-600 p-5 text-white text-center">
+                    <i class="fas fa-ad text-4xl mb-2"></i>
+                    <h2 class="text-xl font-bold">Banner reklama</h2>
+                </div>
+                <div class="p-5">
+                    <p class="text-gray-600 text-sm mb-4">Banneringizni saytning eng ko'zga ko'ringan joylarida namoyish eting</p>
+                    <ul class="text-sm text-gray-600 space-y-2 mb-5">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Mobil va desktop banner</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>1 kundan boshlab</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Rasmingizni yuklang</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i><strong>{{ banner_price_per_day|floatformat:0 }} so'm/kun</strong></li>
+                    </ul>
+                    <a href="{% url 'buy_banner' %}" class="block w-full bg-gradient-to-r from-sky-500 to-blue-600 text-white text-center py-3 rounded-xl font-semibold hover:opacity-90 transition">
+                        Banner olish
+                    </a>
+                </div>
+            </div>
+
+            <!-- Top/Featured mahsulot -->
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-amber-100 hover:shadow-lg transition">
+                <div class="bg-gradient-to-r from-amber-500 to-orange-600 p-5 text-white text-center">
+                    <i class="fas fa-fire text-4xl mb-2"></i>
+                    <h2 class="text-xl font-bold">Top mahsulot</h2>
+                </div>
+                <div class="p-5">
+                    <p class="text-gray-600 text-sm mb-4">Mahsulotingizni TOP da birinchi qatorda ko'rsating va ko'proq xaridor toping</p>
+                    <ul class="text-sm text-gray-600 space-y-2 mb-5">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>TOP bo'limida birinchi o'rin</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Maxsus "Top" belgisi</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>1 kundan boshlab</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i><strong>{{ featured_price_per_day|floatformat:0 }} so'm/kun</strong></li>
+                    </ul>
+                    <a href="{% url 'select_product_for_featured' %}" class="block w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-center py-3 rounded-xl font-semibold hover:opacity-90 transition">
+                        Top qilish
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Premium narxlar jadvali -->
+        <div class="mt-10 bg-white rounded-2xl shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Premium obuna narxlari</h2>
+            <div class="grid md:grid-cols-5 gap-4">
+                <div class="border rounded-xl p-4 text-center hover:border-purple-400 transition">
+                    <div class="text-2xl font-bold text-purple-600">{{ settings.premium_per_day_price|floatformat:0 }}</div>
+                    <div class="text-sm text-gray-500">1 kun</div>
+                </div>
+                <div class="border rounded-xl p-4 text-center hover:border-purple-400 transition">
+                    <div class="text-2xl font-bold text-purple-600">{{ settings.premium_per_week_price|floatformat:0 }}</div>
+                    <div class="text-sm text-gray-500">7 kun</div>
+                </div>
+                <div class="border rounded-xl p-4 text-center hover:border-purple-400 transition ring-2 ring-purple-400 bg-purple-50">
+                    <div class="text-2xl font-bold text-purple-600">{{ settings.premium_per_month_price|floatformat:0 }}</div>
+                    <div class="text-sm text-gray-500">30 kun</div>
+                    <span class="text-xs text-purple-500 font-semibold">Mashhur</span>
+                </div>
+                <div class="border rounded-xl p-4 text-center hover:border-purple-400 transition">
+                    <div class="text-2xl font-bold text-purple-600">{{ settings.premium_per_3months_price|floatformat:0 }}</div>
+                    <div class="text-sm text-gray-500">90 kun</div>
+                    <span class="text-xs text-green-500 font-semibold">{{ settings.discount_percentage }}% chegirma</span>
+                </div>
+                <div class="border rounded-xl p-4 text-center hover:border-purple-400 transition">
+                    <div class="text-2xl font-bold text-purple-600">{{ settings.premium_per_year_price|floatformat:0 }}</div>
+                    <div class="text-sm text-gray-500">365 kun</div>
+                    <span class="text-xs text-green-500 font-semibold">Eng tejamli</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banner narxlar -->
+        <div class="mt-6 bg-white rounded-2xl shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Banner narxlari</h2>
+            <div class="grid md:grid-cols-3 gap-4 text-center">
+                <div class="border rounded-xl p-4">
+                    <div class="text-2xl font-bold text-sky-600">{{ banner_price_per_day }} so'm</div>
+                    <div class="text-sm text-gray-500">1 kun</div>
+                </div>
+                <div class="border rounded-xl p-4 ring-2 ring-sky-400 bg-sky-50">
+                    <div class="text-2xl font-bold text-sky-600">{{ banner_price_per_day_7 }}</div>
+                    <div class="text-sm text-gray-500">7 kun</div>
+                    <span class="text-xs text-sky-500 font-semibold">Mashhur</span>
+                </div>
+                <div class="border rounded-xl p-4">
+                    <div class="text-2xl font-bold text-sky-600">{{ banner_price_per_day_30 }}</div>
+                    <div class="text-sm text-gray-500">30 kun</div>
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">* Narxlar bir kun uchun. To'lov kunlar soniga qarab hisoblanadi.</p>
+        </div>
+
+        <!-- Featured narxlar -->
+        <div class="mt-6 bg-white rounded-2xl shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Top mahsulot narxlari</h2>
+            <div class="grid md:grid-cols-3 gap-4 text-center">
+                <div class="border rounded-xl p-4">
+                    <div class="text-2xl font-bold text-amber-600">{{ featured_price_per_day }} so'm</div>
+                    <div class="text-sm text-gray-500">1 kun</div>
+                </div>
+                <div class="border rounded-xl p-4 ring-2 ring-amber-400 bg-amber-50">
+                    <div class="text-2xl font-bold text-amber-600">{{ featured_price_per_day_7 }}</div>
+                    <div class="text-sm text-gray-500">7 kun</div>
+                    <span class="text-xs text-amber-500 font-semibold">Mashhur</span>
+                </div>
+                <div class="border rounded-xl p-4">
+                    <div class="text-2xl font-bold text-amber-600">{{ featured_price_per_day_30 }}</div>
+                    <div class="text-sm text-gray-500">30 kun</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8 text-sm text-gray-400">
+            <i class="fas fa-shield-alt mr-1"></i> Barcha xaridlar admin tomonidan tasdiqlanadi
+        </div>
+    </div>
 </body>
 </html>

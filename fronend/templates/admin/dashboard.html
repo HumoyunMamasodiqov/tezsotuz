@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TezSot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #eef1f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .dashboard-nav { background: linear-gradient(135deg, #1a237e 0%, #4a148c 100%); padding: 12px 0; box-shadow: 0 2px 15px rgba(0,0,0,0.15); }
+        .dashboard-nav .navbar-brand { color: white; font-size: 22px; font-weight: 700; }
+        .dashboard-nav .nav-link { color: rgba(255,255,255,0.85) !important; font-size: 14px; }
+        .dashboard-nav .nav-link:hover { color: white !important; }
+        .stat-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.25s; height: 100%; border: 1px solid rgba(0,0,0,0.03); }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 10px; }
+        .stat-value { font-size: 26px; font-weight: 700; margin: 6px 0 2px; }
+        .stat-label { color: #6b7280; font-size: 12.5px; }
+        .bg-gradient-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .bg-gradient-success { background: linear-gradient(135deg, #10B981, #059669); color: white; }
+        .bg-gradient-warning { background: linear-gradient(135deg, #F59E0B, #D97706); color: white; }
+        .bg-gradient-danger { background: linear-gradient(135deg, #EF4444, #DC2626); color: white; }
+        .bg-gradient-info { background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; }
+        .bg-gradient-purple { background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white; }
+        .bg-gradient-pink { background: linear-gradient(135deg, #EC4899, #DB2777); color: white; }
+        .bg-gradient-teal { background: linear-gradient(135deg, #14B8A6, #0D9488); color: white; }
+        .bg-gradient-orange { background: linear-gradient(135deg, #F97316, #EA580C); color: white; }
+        .bg-gradient-dark { background: linear-gradient(135deg, #374151, #1F2937); color: white; }
+        .bg-gradient-indigo { background: linear-gradient(135deg, #6366F1, #4338CA); color: white; }
+        .quick-action-btn { padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+        .quick-action-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.13); }
+        .section-title { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
+        .admin-card { background: white; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 18px; margin-bottom: 18px; border: 1px solid rgba(0,0,0,0.03); }
+        .table { margin-bottom: 0; }
+        .table th { font-weight: 600; color: #374151; border-top: none; font-size: 13px; padding: 10px 8px; }
+        .table td { padding: 10px 8px; font-size: 13px; vertical-align: middle; }
+        .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+        .badge-pending { background: #FEF3C7; color: #D97706; }
+        .badge-approved { background: #D1FAE5; color: #059669; }
+        .badge-rejected { background: #FEE2E2; color: #DC2626; }
+        .badge-premium { background: linear-gradient(135deg, #FFD700, #FFA500); color: white; }
+        .badge-info { background: #DBEAFE; color: #2563EB; }
+        .badge-sold { background: #F3E8FF; color: #7C3AED; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #e5e7eb; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; color: #6b7280; font-size: 13px; flex-shrink: 0; }
+        .model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .model-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; text-align: center; transition: all 0.2s; text-decoration: none; color: #334155; }
+        .model-card:hover { background: #eef2ff; border-color: #818cf8; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.15); color: #1e293b; }
+        .model-card .icon { font-size: 26px; margin-bottom: 6px; }
+        .model-card .name { font-size: 13px; font-weight: 600; }
+        .model-card .count { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .search-box { border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 14px; font-size: 14px; outline: none; width: 200px; }
+        .search-box:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+        @media (max-width: 768px) { .model-grid { grid-template-columns: repeat(2, 1fr); } .top-bar { flex-direction: column; align-items: stretch; } .search-box { width: 100%; } }
+    </style>
+</head>
+<body>
+    <nav class="dashboard-nav">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{% url 'admin_dashboard' %}" class="navbar-brand text-decoration-none">
+                    <i class="fas fa-crown me-1"></i>TezSot Admin
+                </a>
+                <div>
+                    <a href="{% url 'home' %}" class="nav-link d-inline me-3"><i class="fas fa-home"></i> Sayt</a>
+                    <a href="/admin/" class="nav-link d-inline"><i class="fas fa-database"></i> Django Admin</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 py-3">
+        <div class="top-bar mb-3">
+            <div>
+                <h4 class="mb-0 fw-bold"><i class="fas fa-chart-line me-2 text-primary"></i>Boshqaruv paneli</h4>
+                <small class="text-muted">{{ premium_users }} premium foydalanuvchi, {{ pending_requests }} kutilayotgan so'rov</small>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'admin_premium_dashboard' %}" class="quick-action-btn btn btn-outline-warning btn-sm">
+                    <i class="fas fa-crown"></i> Premium Dashboard
+                </a>
+                <a href="{% url 'admin_premium_requests' %}" class="quick-action-btn btn btn-outline-info btn-sm">
+                    <i class="fas fa-inbox"></i> So'rovlar
+                </a>
+                <a href="{% url 'admin_banner_purchases' %}" class="quick-action-btn btn btn-outline-info btn-sm">
+                    <i class="fas fa-ad"></i> Banner xaridlari
+                </a>
+                <a href="{% url 'admin_featured_purchases' %}" class="quick-action-btn btn btn-outline-warning btn-sm">
+                    <i class="fas fa-fire"></i> Top xaridlar
+                </a>
+                <a href="{% url 'admin_all_products' %}" class="quick-action-btn btn btn-outline-primary btn-sm">
+                    <i class="fas fa-box"></i> Mahsulotlar
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-4">
+            <div class="col-md-2 col-4"><div class="stat-card"><div class="stat-icon bg-gradient-primary"><i class="fas fa-users"></i></div><div class="stat-value">{{ total_users }}</div><div class="stat-label">Foydalanuvchilar</div><small class="text-success"><i class="fas fa-arrow-up"></i> +{{ today_users }}</small></div></div>
+            <div class="col-md-2 col-4"><div class="stat-card"><div class="stat-icon bg-gradient-success"><i class="fas fa-shopping-bag"></i></div><div class="stat-value">{{ total_products }}</div><div class="stat-label">Mahsulotlar</div><small class="text-muted">{{ active_products }} faol</small></div></div>
+            <div class="col-md-2 col-4"><div class="stat-card"><div class="stat-icon bg-gradient-warning"><i class="fas fa-crown"></i></div><div class="stat-value">{{ premium_products }}</div><div class="stat-label">Premium</div><small class="text-muted">{{ premium_users }} foydalanuvchi</small></div></div>
+            <div class="col-md-2 col-4"><div class="stat-card"><div class="stat-icon bg-gradient-danger"><i class="fas fa-dollar-sign"></i></div><div class="stat-value">{{ total_revenue|floatformat:0 }}</div><div class="stat-label">Daromad so'm</div><small class="text-muted">{{ approved_requests }} tasdiqlangan</small></div></div>
+            <div class="col-md-2 col-4"><div class="stat-card"><div class="stat-icon bg-gradient-teal"><i class="fas fa-check-double"></i></div><div class="stat-value">{{ sold_products }}</div><div class="stat-label">Sotilgan</div><small class="text-info">{{ today_products }} bugun</small></div></div>
+            <div class="col-md-2 col-4"><div class="stat-card"><div class="stat-icon bg-gradient-orange"><i class="fas fa-clock"></i></div><div class="stat-value">{{ pending_requests }}</div><div class="stat-label">Kutilmoqda</div><small class="text-danger">{{ expiring_soon }} muddat</small></div></div>
+        </div>
+
+        <div class="admin-card mb-3">
+            <div class="section-title">
+                <i class="fas fa-th-large text-primary"></i> Barcha bo'limlar
+                <span class="ms-auto text-muted" style="font-size:12px;font-weight:400;">
+                    <i class="fas fa-database"></i> Django Admin orqali boshqaring
+                </span>
+            </div>
+            <div class="model-grid">
+                <a href="{% url 'admin_banners' %}" class="model-card"><div class="icon text-info"><i class="fas fa-image"></i></div><div class="name">Bannerlar</div><div class="count">{{ banners_count }} ta</div></a>
+                <a href="{% url 'admin_categories' %}" class="model-card"><div class="icon text-success"><i class="fas fa-tags"></i></div><div class="name">Kategoriyalar</div><div class="count">{{ categories_count }} ta</div></a>
+                <a href="{% url 'admin_all_products' %}" class="model-card"><div class="icon text-primary"><i class="fas fa-box"></i></div><div class="name">Mahsulotlar</div><div class="count">{{ total_products }} ta</div></a>
+                <a href="{% url 'admin_favorites' %}" class="model-card"><div class="icon text-danger"><i class="fas fa-heart"></i></div><div class="name">Sevimlilar</div><div class="count">{{ favorites_count }} ta</div></a>
+                <a href="{% url 'admin_sellers' %}" class="model-card"><div class="icon text-secondary"><i class="fas fa-store"></i></div><div class="name">Sotuvchi Profillari</div><div class="count">{{ sellers_count }} ta</div></a>
+                <a href="{% url 'admin_contact_edit' %}" class="model-card"><div class="icon text-warning"><i class="fas fa-address-card"></i></div><div class="name">Admin Aloqa</div><div class="count">{{ admin_aloqa_count }} ta</div></a>
+                <a href="{% url 'admin_premium_users_list' %}" class="model-card"><div class="icon text-warning"><i class="fas fa-crown"></i></div><div class="name">Premium Foydalanuvchilar</div><div class="count">{{ premium_users }} ta</div></a>
+                <a href="{% url 'admin_premium_dashboard' %}" class="model-card"><div class="icon text-premium"><i class="fas fa-star"></i></div><div class="name">Premium Mahsulotlar</div><div class="count">{{ premium_products_model_count }} ta</div></a>
+                <a href="{% url 'admin_premium_requests' %}" class="model-card"><div class="icon text-info"><i class="fas fa-paper-plane"></i></div><div class="name">Premium So'rovlar</div><div class="count">{{ pending_requests }} kutilmoqda</div></a>
+                <a href="{% url 'admin_premium_settings_view' %}" class="model-card"><div class="icon text-dark"><i class="fas fa-cog"></i></div><div class="name">Premium Sozlamalar</div><div class="count">{{ premium_settings_count }} ta</div></a>
+                <a href="{% url 'admin_notifications_list' %}" class="model-card"><div class="icon text-pink"><i class="fas fa-bell"></i></div><div class="name">Bildirishnomalar</div><div class="count">{{ notifications_count }} ta</div></a>
+                <a href="/admin/fronend/sotibolish/" class="model-card"><div class="icon text-success"><i class="fas fa-shopping-cart"></i></div><div class="name">Sotib Olishlar</div><div class="count">{{ purchases_count }} ta</div></a>
+                <a href="{% url 'admin_banner_purchases' %}" class="model-card"><div class="icon text-info"><i class="fas fa-ad"></i></div><div class="name">Banner xaridlari</div><div class="count">{{ banner_purchases_count }} ta</div></a>
+                <a href="{% url 'admin_featured_purchases' %}" class="model-card"><div class="icon text-warning"><i class="fas fa-fire"></i></div><div class="name">Top xaridlar</div><div class="count">{{ featured_purchases_count }} ta</div></a>
+                <a href="{% url 'admin_all_users' %}" class="model-card"><div class="icon text-primary"><i class="fas fa-user"></i></div><div class="name">Auth Foydalanuvchilar</div><div class="count">{{ total_users }} ta</div></a>
+            </div>
+        </div>
+
+        <div class="row g-2">
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="section-title"><i class="fas fa-spinner text-warning"></i>Oxirgi premium so'rovlar</div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead><tr><th>Foydalanuvchi</th><th>Kunlar</th><th>Summa</th><th>Status</th><th>Sana</th></tr></thead>
+                            <tbody>
+                                {% for req in recent_requests %}
+                                <tr>
+                                    <td>{{ req.user.username }}</td>
+                                    <td>{{ req.requested_days }}</td>
+                                    <td>{{ req.payment_amount|floatformat:0 }} so'm</td>
+                                    <td>
+                                        {% if req.status == 'pending' %}<span class="status-badge badge-pending">Kutilmoqda</span>
+                                        {% elif req.status == 'approved' %}<span class="status-badge badge-approved">Tasdiqlangan</span>
+                                        {% else %}<span class="status-badge badge-rejected">Rad etilgan</span>{% endif %}
+                                    </td>
+                                    <td>{{ req.created_at|date:"d.m H:i" }}</td>
+                                </tr>
+                                {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">So'rovlar mavjud emas</td></tr>{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2"><a href="{% url 'admin_premium_requests' %}" class="btn btn-sm btn-outline-warning"><i class="fas fa-external-link-alt"></i> Barcha so'rovlar</a></div>
+                </div>
+                <div class="admin-card">
+                    <div class="section-title"><i class="fas fa-shopping-cart text-success"></i>Oxirgi xaridlar</div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead><tr><th>#</th><th>Mahsulot</th><th>Xaridor</th><th>Narx</th><th>Holati</th></tr></thead>
+                            <tbody>
+                                {% for p in recent_purchases %}
+                                <tr>
+                                    <td>{{ p.id }}</td>
+                                    <td>{{ p.mahsulot.name|truncatechars:20 }}</td>
+                                    <td>{{ p.xaridor_ism }}</td>
+                                    <td>{{ p.jami_narx|floatformat:0 }} so'm</td>
+                                    <td><span class="status-badge {% if p.status == 'yangi' %}badge-pending{% elif p.status == 'bekor_qilindi' %}badge-rejected{% else %}badge-approved{% endif %}">{{ p.get_status_display }}</span></td>
+                                </tr>
+                                {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Xaridlar mavjud emas</td></tr>{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="section-title"><i class="fas fa-box-open text-primary"></i>Oxirgi mahsulotlar</div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead><tr><th>Mahsulot</th><th>Foydalanuvchi</th><th>Narx</th><th>Premium</th></tr></thead>
+                            <tbody>
+                                {% for p in recent_products %}
+                                <tr>
+                                    <td><a href="{% url 'mahsulot_detail' p.id %}" target="_blank" class="text-decoration-none">{{ p.name|truncatechars:25 }}</a></td>
+                                    <td>{{ p.user.username }}</td>
+                                    <td>{{ p.narx_formatted }}</td>
+                                    <td>{% if p.is_premium %}<span class="status-badge badge-premium">Premium</span>{% endif %}</td>
+                                </tr>
+                                {% empty %}<tr><td colspan="4" class="text-center text-muted py-3">Mahsulotlar mavjud emas</td></tr>{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2"><a href="{% url 'admin_all_products' %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-external-link-alt"></i> Barcha mahsulotlar</a></div>
+                </div>
+                <div class="admin-card">
+                    <div class="section-title"><i class="fas fa-crown text-warning"></i>Premium mahsulotlar</div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead><tr><th>Mahsulot</th><th>Egasi</th><th>Tasdiqlangan</th><th>Aktiv</th></tr></thead>
+                            <tbody>
+                                {% for pp in recent_premium_products %}
+                                <tr>
+                                    <td><a href="{% url 'mahsulot_detail' pp.mahsulot.id %}" target="_blank" class="text-decoration-none">{{ pp.mahsulot.name|truncatechars:20 }}</a></td>
+                                    <td>{{ pp.premium_owner.username }}</td>
+                                    <td>{% if pp.admin_approved %}<span class="badge bg-success" style="font-size:11px;">Ha</span>{% else %}<span class="badge bg-warning" style="font-size:11px;">Yo'q</span>{% endif %}</td>
+                                    <td>{% if pp.is_active %}<span class="badge bg-success" style="font-size:11px;">Aktiv</span>{% else %}<span class="badge bg-secondary" style="font-size:11px;">Aktiv emas</span>{% endif %}</td>
+                                </tr>
+                                {% empty %}<tr><td colspan="4" class="text-center text-muted py-3">Premium mahsulotlar mavjud emas</td></tr>{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <div class="section-title"><i class="fas fa-user-plus text-info"></i>Oxirgi foydalanuvchilar</div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead><tr><th>Username</th><th>Ism</th><th>Email</th><th>Mahsulotlar</th><th>Ro'yxatdan o'tgan</th></tr></thead>
+                    <tbody>
+                        {% for u in recent_users %}
+                        <tr>
+                            <td><div class="d-flex align-items-center gap-2"><div class="user-avatar">{{ u.username|first|upper }}</div>{{ u.username }}</div></td>
+                            <td>{{ u.first_name }} {{ u.last_name }}</td>
+                            <td>{{ u.email|default:"-" }}</td>
+                            <td>{{ u.mahsulot_set.count }}</td>
+                            <td>{{ u.date_joined|date:"d.m.Y" }}</td>
+                        </tr>
+                        {% empty %}<tr><td colspan="5" class="text-center text-muted py-3">Foydalanuvchilar mavjud emas</td></tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2"><a href="{% url 'admin_all_users' %}" class="btn btn-sm btn-outline-info"><i class="fas fa-external-link-alt"></i> Barcha foydalanuvchilar</a></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

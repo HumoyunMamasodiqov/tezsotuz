@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sozlamalar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    {% include 'nav.html' %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold mb-8">Sozlamalar</h1>
+            
+            {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Shaxsiy ma'lumotlar</h2>
+                <form method="post" action="{% url 'update_profile_settings' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ism</label>
+                            <input type="text" name="firstName" value="{{ user.first_name }}" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Familiya</label>
+                            <input type="text" name="lastName" value="{{ user.last_name }}" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                            <input type="text" name="username" value="{{ user.username }}" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" name="email" value="{{ user.email }}" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-save mr-2"></i>Saqlash
+                    </button>
+                </form>
+            </div>
+
+            {% if seller_profile %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Sotuvchi profili</h2>
+                <form method="post" action="{% url 'edit_profile' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+                            <input type="text" name="phone" value="{{ seller_profile.phone|default:'' }}" class="w-full px-4 py-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Telegram</label>
+                            <input type="text" name="telegram" value="{{ seller_profile.telegram|default:'' }}" class="w-full px-4 py-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                            <input type="text" name="instagram" value="{{ seller_profile.instagram|default:'' }}" class="w-full px-4 py-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Manzil</label>
+                            <input type="text" name="location" value="{{ seller_profile.location|default:'' }}" class="w-full px-4 py-2 border rounded-lg">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                        <textarea name="bio" rows="3" class="w-full px-4 py-2 border rounded-lg">{{ seller_profile.bio|default:'' }}</textarea>
+                    </div>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-save mr-2"></i>Saqlash
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if premium_profile %}
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Premium holat</h2>
+                <div class="flex items-center gap-4">
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold {% if premium_profile.is_premium %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ premium_profile.is_premium|yesno:"Premium aktiv, Premium yo'q" }}
+                    </span>
+                    {% if premium_profile.is_premium %}
+                    <span class="text-gray-600">Tugash: {{ premium_profile.premium_end|date:"d.m.Y" }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% include 'footer.html' %}
+</body>
+</html>

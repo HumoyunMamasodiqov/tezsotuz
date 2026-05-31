@@ -8,6 +8,7 @@ from django.db.models import Q, Count, Sum, F
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 import json
+import os
 import re
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
@@ -21,13 +22,26 @@ from decimal import Decimal
 from .models import (
     Mahsulot, Sevimli, Category, Banner, SellerProfile, 
     PremiumUser, PremiumProduct, AdminPremiumSettings, 
-    AdminAloqa, PremiumRequest, PremiumNotification
+    AdminAloqa, PremiumRequest, PremiumNotification,
+    BannerPurchase, FeaturedPurchase, SotibOlish
 )
 
 # ==================== HELPER FUNCTIONS ====================
 def reklama(request):
     """Reklama sahifasi"""
-    return render(request, 'reklama.html')
+    from .models import AdminPremiumSettings
+    settings = AdminPremiumSettings.get_settings()
+    bppd = int(settings.banner_price_per_day or 5000)
+    fppd = int(settings.featured_price_per_day or 3000)
+    return render(request, 'reklama.html', {
+        'settings': settings,
+        'banner_price_per_day': bppd,
+        'banner_price_per_day_7': bppd * 7,
+        'banner_price_per_day_30': bppd * 30,
+        'featured_price_per_day': fppd,
+        'featured_price_per_day_7': fppd * 7,
+        'featured_price_per_day_30': fppd * 30,
+    })
 def is_admin(user):
     """Foydalanuvchi admin ekanligini tekshirish"""
     return user.is_superuser or user.is_staff or user.groups.filter(name='Admin').exists()
@@ -173,45 +187,81 @@ def home_view(request):
     """Bosh sahifa"""
     try:
         user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
-
         mobile_keywords = ['mobile', 'android', 'iphone', 'ipad', 'tablet']
         device_type = 'mobile' if any(k in user_agent for k in mobile_keywords) else 'desktop'
 
+        # Bannerlar - admin tomonidan qo'shilgan
         banners = Banner.objects.filter(
             device_type=device_type,
             is_active=True
         ).order_by('-created_at')[:5]
+        
+        # User tomonidan sotib olingan va admin tasdiqlagan bannerlar
+        purchased_banners = BannerPurchase.objects.filter(
+            status='aktiv',
+            device_type__in=[device_type, 'all']
+        ).order_by('-created_at')[:5]
+        
+        # Ikkala banner turini birlashtir
+        from itertools import chain
+        all_banners = list(chain(banners, purchased_banners))[:8]
+        
+        # Featured/top mahsulotlar (cheklanmagan)
+        featured_products = Mahsulot.objects.filter(
+            is_featured=True,
+            aktiv=True,
+            sotilgan=False
+        ).order_by('-id')[:6]  # 6 ta featured
 
+        # PREMIUM MAHSULOTLAR - CHEKLANGAN
         premium_products = Mahsulot.objects.filter(
             is_premium=True,
             aktiv=True,
             sotilgan=False
-        ).order_by('-premium_priority', '-premium_since')[:6]
+        ).order_by('-premium_priority', '-premium_since')[:8]  # 8 TA
 
+        # ODDIY MAHSULOTLAR - CHEKLANGAN
         regular_products = Mahsulot.objects.filter(
             is_premium=False,
             aktiv=True,
             sotilgan=False
-        ).order_by('-id')[:12]
+        ).order_by('-id')[:12]  # 12 TA
 
+        # Barcha mahsulotlarni birlashtirish
         all_products = list(premium_products) + list(regular_products)
+        
+        # YANA QO'SHIMCHA MAHSULOTLAR (agar kam bo'lsa)
+        if len(all_products) < 12:
+            extra_products = Mahsulot.objects.filter(
+                aktiv=True,
+                sotilgan=False
+            ).exclude(id__in=[p.id for p in all_products]).order_by('-sana')[:12 - len(all_products)]
+            all_products.extend(list(extra_products))
 
-        # ⭐ MUHIM QOSHILDI
+        # Admin contact
         admin_contact = AdminAloqa.objects.first()
 
         return render(request, 'home.html', {
-            'mahsulotlar': all_products[:12],
-            'banners': banners,
+            'mahsulotlar': all_products[:12],  # 12 tagacha mahsulot
+            'banners': all_banners,
+            'purchased_banners': purchased_banners,
+            'featured_products': featured_products,
             'device_type': device_type,
             'premium_count': premium_products.count(),
             'regular_count': regular_products.count(),
-            'admin_contact': admin_contact   # ⭐ SHU MUHIM
+            'admin_contact': admin_contact,
+            'total_products': Mahsulot.objects.filter(aktiv=True, sotilgan=False).count(),
         })
 
     except Exception as e:
-        print(e)
-        return render(request, 'home.html', {})
-
+        print(f"Home view error: {e}")
+        import traceback
+        traceback.print_exc()
+        return render(request, 'home.html', {
+            'mahsulotlar': [],
+            'banners': [],
+            'featured_products': [],
+        })
 
 def index(request):
     """Barcha mahsulotlar sahifasi"""
@@ -264,7 +314,14 @@ def barcha_mahsulotlar(request):
         elif filter_type == 'regular':
             mahsulotlar = mahsulotlar.filter(is_premium=False)
         
-        # Saralash...
+        if sort == 'newest':
+            mahsulotlar = mahsulotlar.order_by('-sana')
+        elif sort == 'oldest':
+            mahsulotlar = mahsulotlar.order_by('sana')
+        elif sort == 'premium':
+            mahsulotlar = mahsulotlar.order_by('-is_premium', '-premium_priority', '-sana')
+        else:
+            mahsulotlar = mahsulotlar.order_by('-is_premium', '-sana')
     
     paginator = Paginator(mahsulotlar, 24)
     page_obj = paginator.get_page(request.GET.get('page'))
@@ -337,9 +394,19 @@ def kategoriya_view(request, category_name):
         elif sort == 'oldest':
             mahsulotlar.sort(key=lambda x: x.sana)
         elif sort == 'price_low':
-            mahsulotlar.sort(key=lambda x: float(str(x.narx).replace(',', '').replace(' ', '')) if str(x.narx).replace(',', '').replace(' ', '').replace('.', '').isdigit() else 0)
+            def safe_price(p):
+                try:
+                    return float(re.sub(r'[^\d.]', '', str(p.narx).replace(',', '')) or 0)
+                except (ValueError, TypeError):
+                    return 0
+            mahsulotlar.sort(key=safe_price)
         elif sort == 'price_high':
-            mahsulotlar.sort(key=lambda x: float(str(x.narx).replace(',', '').replace(' ', '')) if str(x.narx).replace(',', '').replace(' ', '').replace('.', '').isdigit() else 0, reverse=True)
+            def safe_price(p):
+                try:
+                    return float(re.sub(r'[^\d.]', '', str(p.narx).replace(',', '')) or 0)
+                except (ValueError, TypeError):
+                    return 0
+            mahsulotlar.sort(key=safe_price, reverse=True)
         elif sort == 'premium':
             # Premiumlar birinchi, keyin oddiy mahsulotlar
             mahsulotlar = [p for p in mahsulotlar if p.is_premium] + [p for p in mahsulotlar if not p.is_premium]
@@ -432,11 +499,16 @@ def mahsulot_detail_view(request, mahsulot_id):
             sotilgan=False
         ).exclude(id=mahsulot.id).order_by('-is_premium', '-premium_priority', '-sana')[:4]
 
+        has_purchased = False
+        if request.user.is_authenticated:
+            has_purchased = SotibOlish.objects.filter(mahsulot=mahsulot, xaridor=request.user).exists()
+
         return render(request, 'mahsulot_detail.html', {
             'mahsulot': mahsulot,
             'o_xshash_mahsulotlar': o_xshash,
             'in_favorites': in_favorites,
-            'is_premium': mahsulot.is_premium
+            'is_premium': mahsulot.is_premium,
+            'has_purchased': has_purchased,
         })
 
     except Mahsulot.DoesNotExist:
@@ -508,6 +580,10 @@ def premium_product_detail_view(request, mahsulot_id):
         if hasattr(mahsulot, 'uchuimg') and mahsulot.uchuimg:
             images.append(mahsulot.uchuimg.url)
 
+        has_purchased = False
+        if request.user.is_authenticated:
+            has_purchased = SotibOlish.objects.filter(mahsulot=mahsulot, xaridor=request.user).exists()
+
         context = {
             'mahsulot': mahsulot,
             'seller_profile': seller_profile,
@@ -515,6 +591,7 @@ def premium_product_detail_view(request, mahsulot_id):
             'in_favorites': in_favorites,
             'is_premium': mahsulot.is_premium,
             'images': images,
+            'has_purchased': has_purchased,
             'title': f'{mahsulot.name} - Premium Mahsulot | Tez Sot',
             'meta_description': f'{mahsulot.name} - {mahsulot.narx_formatted()}. {mahsulot.tavsif[:150] if mahsulot.tavsif else ""}',
             'premium_time_left': mahsulot.get_premium_time_left() if hasattr(mahsulot, 'get_premium_time_left') else 0,
@@ -768,16 +845,31 @@ def add_premium_product_view(request):
 
                 # Premium qilish
                 success, message = mahsulot.make_premium(
-                    user=request.user,
+                    days=30,
                     auto_approve=settings.auto_approve_premium if hasattr(settings, 'auto_approve_premium') else False
                 )
                 
                 if success:
+                    # PremiumProduct yozuvini yaratish
+                    try:
+                        from .models import PremiumProduct
+                        PremiumProduct.objects.create(
+                            mahsulot=mahsulot,
+                            premium_owner=request.user,
+                            admin_approved=True,
+                            approval_date=timezone.now(),
+                            approved_by=request.user,
+                            premium_until=mahsulot.premium_expiry,
+                            is_active=True
+                        )
+                    except Exception as e:
+                        print(f"[add_premium_product_view] PremiumProduct yaratishda xatolik: {e}")
+                    
                     messages.success(request, f'"{name}" premium mahsuloti muvaffaqiyatli qo\'shildi!')
                     return redirect('premium_product_detail', mahsulot_id=mahsulot.id)
                 else:
                     messages.error(request, f'Premium qilishda xatolik: {message}')
-                    mahsulot.delete()  # Mahsulotni o'chirish
+                    mahsulot.delete()
                     return redirect('add_premium_product')
 
             except Exception as e:
@@ -865,22 +957,21 @@ def my_premium_requests_view(request):
         return redirect('my_profile')
 
 @login_required
+@login_required
 def cancel_premium_request_view(request, request_id):
     """Premium so'rovni bekor qilish"""
     try:
-        # So'rovni topish
-        premium_request = PremiumRequest.objects.get(
+        premium_request = get_object_or_404(
+            PremiumRequest,
             id=request_id,
             user=request.user
         )
         
-        # Faqat pending holatdagilarni bekor qilish mumkin
         if premium_request.status != 'pending':
             messages.error(request, "Faqat kutilayotgan so'rovlarni bekor qilish mumkin")
             return redirect('my_premium_requests')
         
-        # So'rovni o'chirish
-        premium_request.delete()
+        premium_request.cancel_request()
         
         messages.success(request, "So'rovingiz muvaffaqiyatli bekor qilindi")
         
@@ -1121,17 +1212,13 @@ def update_password(request):
     return redirect('sozlamalar')
 
 @login_required
-@csrf_exempt
+@require_POST
 def update_notifications(request):
-    """Bildirishnoma sozlamalarini yangilash"""
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            return JsonResponse({'status': 'success', 'message': 'Sozlamalar saqlandi!'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    
-    return JsonResponse({'status': 'error', 'message': 'Noto\'g\'ri so\'rov'})
+    try:
+        data = json.loads(request.body)
+        return JsonResponse({'status': 'success', 'message': 'Sozlamalar saqlandi!'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 # ==================== Mening e'lonlarim VIEWLARI ====================
 
@@ -1395,43 +1482,73 @@ def admin_premium_requests_view(request):
 
 @login_required
 @user_passes_test(is_admin)
-@require_POST
 def admin_process_premium_request(request, request_id):
     """Premium so'rovni qayta ishlash"""
     try:
         premium_request = PremiumRequest.objects.get(id=request_id)
         action = request.POST.get('action')
         
+        if request.method != 'POST':
+            return JsonResponse({'success': False, 'error': 'POST so\'rovi kerak'})
+        
         if action == 'approve':
             days = int(request.POST.get('days', premium_request.requested_days))
             limit = int(request.POST.get('limit', premium_request.requested_limit))
             admin_notes = request.POST.get('admin_notes', '')
             
+            # Admin izohini saqlash
+            if admin_notes:
+                premium_request.admin_notes = admin_notes
+            
             # Premium so'rovni tasdiqlash
             success = premium_request.approve(request.user, days, limit)
             
             if success:
-                messages.success(request, f"Premium so'rov tasdiqlandi. Foydalanuvchi {days} kun va {limit} limit bilan premium bo'ldi.")
+                message = f"Premium so'rov tasdiqlandi. Foydalanuvchi {days} kun va {limit} limit bilan premium bo'ldi."
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': True, 'message': message})
+                messages.success(request, message)
             else:
-                messages.error(request, "Premium so'rovni tasdiqlashda xatolik yuz berdi")
+                message = "Premium so'rovni tasdiqlashda xatolik yuz berdi"
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'error': message})
+                messages.error(request, message)
             
         elif action == 'reject':
             reason = request.POST.get('reason', '')
             premium_request.reject(request.user, reason)
             
-            messages.success(request, "Premium so'rov rad etildi")
+            message = "Premium so'rov rad etildi"
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': message})
+            messages.success(request, message)
         
         elif action == 'delete':
             premium_request.delete()
-            messages.success(request, "Premium so'rov o'chirildi")
+            message = "Premium so'rov o'chirildi"
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': message})
+            messages.success(request, message)
         
         elif action == 'mark_expired':
             premium_request.mark_as_expired()
-            messages.success(request, "Premium so'rov muddati o'tgan deb belgilandi")
+            message = "Premium so'rov muddati o'tgan deb belgilandi"
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': message})
+            messages.success(request, message)
+        
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'Noto\'g\'ri harakat'})
+            messages.error(request, "Noto'g'ri harakat")
         
     except PremiumRequest.DoesNotExist:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': "So'rov topilmadi"})
         messages.error(request, "So'rov topilmadi")
     except Exception as e:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': str(e)})
         messages.error(request, f"Xatolik yuz berdi: {str(e)}")
     
     return redirect('admin_premium_requests')
@@ -1631,7 +1748,6 @@ def admin_reactivate_premium(request, user_id):
                 
                 for product in old_premium_products:
                     product.make_premium(
-                        user=premium_user.user,
                         days=days,
                         auto_approve=True
                     )
@@ -1746,42 +1862,6 @@ def admin_update_premium_settings(request):
 
 # ==================== API VIEWLARI ====================
 
-def api_search(request):
-    """Real-time qidiruv API"""
-    query = request.GET.get('q', '').strip()
-    
-    if len(query) < 2:
-        return JsonResponse([], safe=False)
-    
-    try:
-        # Mahsulotlarni qidirish
-        mahsulotlar = Mahsulot.objects.filter(
-            Q(name__icontains=query) | 
-            Q(tavsif__icontains=query) |
-            Q(category__icontains=query) |
-            Q(mahsulotturi__icontains=query),
-            aktiv=True,
-            sotilgan=False
-        ).order_by('-is_premium', '-premium_priority', '-sana')[:10]
-        
-        results = []
-        for product in mahsulotlar:
-            results.append({
-                'id': product.id,
-                'name': product.name,
-                'price': product.narx_formatted(),
-                'category': product.get_category_display(),
-                'image': product.asosiyimg.url if product.asosiyimg else None,
-                'url': f"/mahsulot/{product.id}/",
-                'is_premium': product.is_premium,
-                'premium_badge': product.get_premium_badge() if product.is_premium else ''
-            })
-        
-        return JsonResponse(results, safe=False)
-    except Exception as e:
-        print(f"DEBUG api_search xatolik: {e}")
-        return JsonResponse([], safe=False)
-
 @login_required
 @require_GET
 def get_premium_status(request):
@@ -1816,7 +1896,6 @@ def get_premium_status(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 @login_required
-@csrf_exempt
 @require_POST
 def make_product_premium(request, product_id):
     """Mahsulotni premium qilish (AJAX)"""
@@ -1844,7 +1923,7 @@ def make_product_premium(request, product_id):
         # Premium qilish
         settings = AdminPremiumSettings.get_settings()
         success, message = mahsulot.make_premium(
-            user=request.user,
+            days=30,
             auto_approve=settings.auto_approve_premium if hasattr(settings, 'auto_approve_premium') else False
         )
         
@@ -1873,7 +1952,6 @@ def make_product_premium(request, product_id):
         return JsonResponse({'success': False, 'error': str(e)})
 
 @login_required
-@csrf_exempt
 @require_POST
 def remove_product_premium(request, product_id):
     """Mahsulotni premiumdan olib tashlash (AJAX)"""
@@ -2156,16 +2234,12 @@ def maxfiyliksiyosati(request):
 
 # ==================== CRON VIEWLARI ====================
 
-@csrf_exempt
 @require_POST
 def cron_check_premium_expiry(request):
     """CRON endpoint for checking premium expiry"""
-    # Faqat ma'lum IP manzillardan kirishga ruxsat
-    allowed_ips = ['127.0.0.1', 'localhost', '::1']
-    client_ip = request.META.get('REMOTE_ADDR')
-    
-    # Agar IP manzil ro'yxatda bo'lmasa va superuser bo'lmasa
-    if client_ip not in allowed_ips and not request.user.is_superuser:
+    cron_key = request.headers.get('X-CRON-KEY') or request.POST.get('cron_key')
+    expected_key = os.getenv('CRON_API_KEY', '')
+    if not expected_key or cron_key != expected_key:
         return JsonResponse({'error': 'Ruxsat etilmagan'}, status=403)
     
     try:
@@ -2407,95 +2481,6 @@ def admin_premium_request_details(request, request_id):
 
 # ==================== ADMIN VIEWLARI ====================
 
-@login_required
-@require_GET
-def check_premium_access_view(request):
-    """Premium qo'shish huquqini tekshirish (AJAX)"""
-    try:
-        has_access, reason = check_premium_access(request.user)
-        
-        if has_access:
-            # Qo'shish mumkin bo'lgan mahsulotlar sonini tekshirish
-            premium_profile = PremiumUser.objects.get(user=request.user)
-            can_add, add_reason = premium_profile.can_add_more_premium_products()
-            
-            return JsonResponse({
-                'success': True,
-                'has_access': True,
-                'can_add_more': can_add,
-                'remaining': premium_profile.get_remaining_premium_products(),
-                'total_limit': premium_profile.premium_limit,
-                'premium_used': premium_profile.premium_used,
-                'message': add_reason if can_add else 'Premium huquq mavjud',
-                'days_remaining': premium_profile.get_days_remaining()
-            })
-        else:
-            return JsonResponse({
-                'success': False,
-                'has_access': False,
-                'message': reason,
-                'admin_phone': AdminPremiumSettings.get_settings().admin_contact_phone,
-                'admin_telegram': AdminPremiumSettings.get_settings().admin_contact_telegram,
-                'admin_email': AdminPremiumSettings.get_settings().admin_contact_email,
-                'reason': reason
-            })
-            
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'has_access': False,
-            'message': f'Xatolik yuz berdi: {str(e)}'
-        })
-    """Premium qo'shish huquqini tekshirish (AJAX)"""
-    try:
-        premium_profile = PremiumUser.objects.get(user=request.user)
-        settings = AdminPremiumSettings.get_settings()
-        
-        has_access, reason = check_premium_access(request.user)
-        
-        if has_access:
-            # Qo'shish mumkin bo'lgan mahsulotlar sonini tekshirish
-            can_add, add_reason = premium_profile.can_add_more_premium_products()
-            
-            return JsonResponse({
-                'success': True,
-                'has_access': True,
-                'can_add_more': can_add,
-                'remaining': premium_profile.get_remaining_premium_products(),
-                'total_limit': premium_profile.premium_limit,
-                'premium_used': premium_profile.premium_used,
-                'message': add_reason if can_add else 'Premium huquq mavjud',
-                'days_remaining': premium_profile.get_days_remaining()
-            })
-        else:
-            return JsonResponse({
-                'success': False,
-                'has_access': False,
-                'message': reason,
-                'admin_phone': settings.admin_contact_phone,
-                'admin_telegram': settings.admin_contact_telegram,
-                'admin_email': settings.admin_contact_email,
-                'reason': reason
-            })
-            
-    except PremiumUser.DoesNotExist:
-        settings = AdminPremiumSettings.get_settings()
-        return JsonResponse({
-            'success': False,
-            'has_access': False,
-            'message': 'Premium profil topilmadi',
-            'admin_phone': settings.admin_contact_phone,
-            'admin_telegram': settings.admin_contact_telegram,
-            'admin_email': settings.admin_contact_email,
-            'reason': 'Premium profil yo\'q'
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'has_access': False,
-            'message': f'Xatolik yuz berdi: {str(e)}'
-        })
-
 
 
 
@@ -2643,14 +2628,32 @@ def check_premium_status_view(request):
             'rejected_requests': PremiumRequest.objects.filter(user=request.user, status='rejected').count(),
         }
         
+        # Admin contact ma'lumotlari
+        try:
+            settings = AdminPremiumSettings.get_settings()
+            admin_contact = {
+                'phone': settings.admin_contact_phone,
+                'telegram': settings.admin_contact_telegram,
+                'email': settings.admin_contact_email,
+            }
+        except:
+            admin_contact = {
+                'phone': '+998901234567',
+                'telegram': '@tezsot_admin',
+                'email': 'admin@tezsot.uz',
+            }
+        
         context = {
             'premium_info': premium_info,
-            'premium_products': premium_products_list,  # LIST
-            'premium_requests': premium_requests_list,  # LIST
+            'premium_products': premium_products_list,
+            'premium_requests': premium_requests_list,
             'stats': stats,
             'title': 'Premium Holatim',
             'description': 'Premium obuna holatingiz va huquqlaringiz',
             'is_premium_user': is_premium,
+            'current_time': timezone.now(),
+            'admin_contact': admin_contact,
+            'reason': request.GET.get('reason', ''),
         }
         
         return render(request, 'check_premium_status.html', context)
@@ -2827,10 +2830,13 @@ def submit_premium_request_view(request):
                 if telegram_username and telegram_username.startswith('@'):
                     telegram_username = telegram_username[1:]
                 
-                # Narxni hisoblash (soddalashtirilgan)
-                price_per_day = 2000
-                price_per_product = 15000
-                calculated_total = (int(requested_days) * price_per_day) + (int(requested_limit) * price_per_product)
+                # Narxni hisoblash (AdminPremiumSettings orqali)
+                if settings:
+                    calculated_total = settings.calculate_price(int(requested_days), int(requested_limit))
+                else:
+                    price_per_day = 2000
+                    price_per_product = 15000
+                    calculated_total = (int(requested_days) * price_per_day) + (int(requested_limit) * price_per_product)
                 
                 print(f"DEBUG: calculated_total: {calculated_total}")
                 
@@ -2905,230 +2911,6 @@ def submit_premium_request_view(request):
         traceback.print_exc()
         messages.error(request, f"Sahifani yuklashda xatolik yuz berdi: {str(e)}")
         return redirect('my_profile')
-
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.utils import timezone
-from datetime import timedelta
-from .models import (
-    PremiumRequest, PremiumUser, AdminPremiumSettings, 
-    PremiumNotification, SellerProfile
-)
-import json
-
-@login_required
-def create_premium_request(request):
-    # Foydalanuvchining premium holatini tekshirish
-    try:
-        premium_user = PremiumUser.objects.get(user=request.user)
-        
-        # Agar foydalanuvchi allaqachon premium bo'lsa va muddati tugamagan bo'lsa
-        if premium_user.is_premium and premium_user.status == 'active':
-            if premium_user.premium_end and premium_user.premium_end > timezone.now():
-                days_left = (premium_user.premium_end - timezone.now()).days
-                premium_end_date = premium_user.premium_end.strftime('%d.%m.%Y')
-                
-                messages.warning(
-                    request,
-                    f"Sizda aktiv Premium obuna mavjud! Premium {days_left} kundan keyin "
-                    f"({premium_end_date}) tugaydi. Premium tugagach yangi so'rov yuborishingiz mumkin."
-                )
-                return redirect('dashboard')
-    except PremiumUser.DoesNotExist:
-        pass
-    
-    # Admin sozlamalarini olish
-    settings = AdminPremiumSettings.get_settings()
-    
-    # Foydalanuvchining oyiga qancha so'rov yuborganligini hisoblash
-    one_month_ago = timezone.now() - timedelta(days=30)
-    user_requests_count = PremiumRequest.objects.filter(
-        user=request.user,
-        created_at__gte=one_month_ago
-    ).count()
-    
-    # Limitni tekshirish
-    max_requests = settings.max_premium_requests_per_user
-    requests_left = max_requests - user_requests_count
-    
-    # Agar limit tugagan bo'lsa
-    if requests_left <= 0:
-        context = {
-            'title': 'Premium So\'rov',
-            'requests_left': 0,
-            'max_requests': max_requests,
-            'settings': settings,
-        }
-        return render(request, 'premium_request_form.html', context)
-    
-    # Forma ma'lumotlari
-    form_data = {}
-    
-    if request.method == 'POST':
-        # Forma ma'lumotlarini olish
-        full_name = request.POST.get('full_name', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        telegram_username = request.POST.get('telegram_username', '').strip()
-        email = request.POST.get('email', '').strip()
-        notes = request.POST.get('notes', '').strip()
-        
-        requested_days = int(request.POST.get('requested_days', 30))
-        requested_limit = int(request.POST.get('requested_limit', 5))
-        calculated_total = float(request.POST.get('calculated_total', 0))
-        
-        payment_method = request.POST.get('payment_method', '')
-        auto_approve = request.POST.get('auto_approve') == 'on'
-        
-        # Forma ma'lumotlarini saqlash (agar xato bo'lsa, qayta ko'rsatish uchun)
-        form_data = {
-            'full_name': full_name,
-            'phone': phone,
-            'telegram_username': telegram_username,
-            'email': email,
-            'notes': notes,
-            'requested_days': requested_days,
-            'requested_limit': requested_limit,
-            'calculated_total': calculated_total,
-            'payment_method': payment_method,
-            'auto_approve': auto_approve,
-        }
-        
-        # Validation
-        errors = []
-        
-        if not full_name:
-            errors.append("To'liq ism kiritilishi shart")
-        
-        if not phone:
-            errors.append("Telefon raqami kiritilishi shart")
-        elif len(phone) != 9 and len(phone) != 12:
-            errors.append("Telefon raqami noto'g'ri formatda")
-        
-        if requested_days < 1 or requested_days > 365:
-            errors.append("Premium kunlari 1 dan 365 gacha bo'lishi kerak")
-        
-        if requested_limit < 1 or requested_limit > 50:
-            errors.append("Mahsulot limiti 1 dan 50 gacha bo'lishi kerak")
-        
-        if not payment_method:
-            errors.append("To'lov usulini tanlash shart")
-        
-        # Agar xatolar bo'lsa
-        if errors:
-            for error in errors:
-                messages.error(request, error)
-        else:
-            try:
-                # PremiumRequest yaratish
-                premium_request = PremiumRequest.objects.create(
-                    user=request.user,
-                    full_name=full_name,
-                    phone=phone,
-                    telegram_username=telegram_username if telegram_username else None,
-                    email=email if email else None,
-                    notes=notes if notes else None,
-                    requested_days=requested_days,
-                    requested_limit=requested_limit,
-                    calculated_total=calculated_total,
-                    payment_amount=calculated_total,
-                    payment_method=payment_method,
-                    auto_approve=auto_approve,
-                    status='pending',
-                    payment_status='pending',
-                    ip_address=request.META.get('REMOTE_ADDR'),
-                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                )
-                
-                # Foydalanuvchiga bildirishnoma
-                PremiumNotification.objects.create(
-                    user=request.user,
-                    notification_type='new_request',
-                    title="Premium So'rovingiz Qabul Qilindi",
-                    message=f"#{premium_request.id} raqamli premium so'rovingiz qabul qilindi va tekshirish uchun yuborildi.",
-                    data={
-                        'request_id': premium_request.id,
-                        'days': requested_days,
-                        'limit': requested_limit,
-                        'amount': calculated_total,
-                    }
-                )
-                
-                # Adminlarga bildirishnoma (agar biron bir admin bor bo'lsa)
-                from django.contrib.auth.models import User
-                admin_users = User.objects.filter(is_staff=True, is_active=True)
-                for admin in admin_users:
-                    try:
-                        PremiumNotification.objects.create(
-                            user=admin,
-                            notification_type='admin_action',
-                            title="Yangi Premium So'rovi",
-                            message=f"{request.user.username} foydalanuvchidan yangi premium so'rovi keldi. ID: #{premium_request.id}",
-                            data={
-                                'request_id': premium_request.id,
-                                'user_id': request.user.id,
-                                'username': request.user.username,
-                            }
-                        )
-                    except:
-                        pass
-                
-                messages.success(
-                    request,
-                    f"Premium so'rovingiz muvaffaqiyatli yuborildi! So'rov raqami: #{premium_request.id}. "
-                    f"Adminlarimiz tez orada siz bilan bog'lanishadi."
-                )
-                
-                # So'rov tugagach, foydalanuvchini o'z so'rovlari sahifasiga yo'naltirish
-                return redirect('my_premium_requests')
-                
-            except Exception as e:
-                messages.error(
-                    request, 
-                    f"So'rovni yuborishda xatolik yuz berdi: {str(e)}"
-                )
-    
-    # User ma'lumotlarini olish
-    user = request.user
-    seller_profile = SellerProfile.objects.filter(user=user).first()
-    
-    # Agar form_data bo'sh bo'lsa, user ma'lumotlaridan to'ldirish
-    if not form_data.get('full_name'):
-        form_data['full_name'] = user.get_full_name() or user.username
-    
-    if not form_data.get('phone') and seller_profile:
-        form_data['phone'] = seller_profile.phone
-    
-    if not form_data.get('telegram_username') and seller_profile:
-        form_data['telegram_username'] = seller_profile.telegram
-    
-    if not form_data.get('email'):
-        form_data['email'] = user.email
-    
-    # Bank ma'lumotlari
-    bank_info = {
-        'card_number': settings.bank_card_number or '8600 1234 5678 9012',
-        'card_owner': settings.bank_card_owner or 'John Doe',
-        'bank_name': settings.bank_name or 'Turon Bank',
-    }
-    
-    # To'lov usullari
-    payment_methods = settings.get_payment_methods_list()
-    
-    context = {
-        'title': 'Premium So\'rov',
-        'requests_left': requests_left,
-        'max_requests': max_requests,
-        'form_data': form_data,
-        'settings': settings,
-        'bank_info': bank_info,
-        'payment_methods': payment_methods,
-        'user': user,
-    }
-    
-    return render(request, 'premium_request_form.html', context)
 
 
 # views.py ga qo'shimcha
@@ -3235,7 +3017,7 @@ def get_popular_searches(days=7, limit=10):
     popular = SearchLog.objects.filter(
         created_at__gte=start_date
     ).values('query').annotate(
-        count=models.Count('id')
+        count=Count('id')
     ).order_by('-count')[:limit]
     
     result = list(popular)
@@ -3338,68 +3120,6 @@ def normalize_text(text):
     return text
 
 
-def api_search(request):
-    """Real-time qidiruv API - so'z ildizlarini aniqlash bilan"""
-    query = request.GET.get('q', '').strip()
-    
-    if len(query) < 2:
-        return JsonResponse([], safe=False)
-    
-    try:
-        # Normalize qilingan query
-        normalized_query = normalize_text(query)
-        
-        # So'z ildizini olish (masalan: kitoblar -> kitob)
-        root_query = normalized_query
-        if normalized_query.endswith('lar'):
-            root_query = normalized_query[:-3]
-        elif normalized_query.endswith('ning'):
-            root_query = normalized_query[:-4]
-        elif normalized_query.endswith('ga') or normalized_query.endswith('ni'):
-            root_query = normalized_query[:-2]
-        
-        # Mahsulotlarni qidirish - bir nechta variantlar bilan
-        mahsulotlar = Mahsulot.objects.filter(
-            aktiv=True,
-            sotilgan=False
-        ).filter(
-            # To'g'ridan-to'g'ri moslik
-            Q(name__icontains=query) |
-            # Normalize qilingan moslik
-            Q(name__icontains=normalized_query) |
-            # So'z ildizi mosligi (kitoblar -> kitob)
-            Q(name__icontains=root_query) |
-            # Kategoriya bo'yicha
-            Q(category__icontains=normalized_query) |
-            Q(category__icontains=root_query) |
-            # Tavsifda qidirish
-            Q(tavsif__icontains=normalized_query) |
-            Q(tavsif__icontains=root_query) |
-            # Mahsulot turi
-            Q(mahsulotturi__icontains=normalized_query)
-        ).order_by('-is_premium', '-premium_priority', '-sana')[:20]
-        
-        results = []
-        for product in mahsulotlar:
-            results.append({
-                'id': product.id,
-                'name': product.name,
-                'price': product.narx_formatted(),
-                'category': product.get_category_display(),
-                'image': product.asosiyimg.url if product.asosiyimg else None,
-                'url': f"/mahsulot/{product.id}/",
-                'is_premium': product.is_premium,
-                'similarity': 100 if query.lower() in product.name.lower() else 85,
-            })
-        
-        return JsonResponse(results, safe=False)
-        
-    except Exception as e:
-        print(f"DEBUG api_search xatolik: {e}")
-        return JsonResponse([], safe=False)
-
-
-        
 def levenshtein_similarity(word1, word2):
     """Levenshtein masofasi asosida o'xshashlik foizini hisoblash"""
     if not word1 or not word2:
@@ -3709,5 +3429,71 @@ def api_search_popular(request):
     return JsonResponse(popular_searches, safe=False)
 
 
+@login_required
+def profile_search_view(request):
+    """Profil qidirish sahifasi (Instagram uslubida)"""
+    query = request.GET.get('q', '').strip()
+    results = []
+    
+    if query:
+        users = User.objects.filter(
+            Q(username__icontains=query) |
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query)
+        )[:20]
+        
+        for u in users:
+            product_count = Mahsulot.objects.filter(user=u, aktiv=True, sotilgan=False).count()
+            is_premium = False
+            profile_image = None
+            try:
+                is_premium = u.premium_profile.is_premium
+            except:
+                pass
+            try:
+                profile_image = u.seller_profile.profile_image.url if u.seller_profile.profile_image else None
+            except:
+                pass
+            results.append({
+                'user': u,
+                'product_count': product_count,
+                'is_premium': is_premium,
+                'profile_image': profile_image,
+            })
+    
+    return render(request, 'profile_search.html', {
+        'results': results,
+        'query': query,
+    })
 
+
+def api_profile_search(request):
+    """Profil qidirish API (AJAX uchun)"""
+    query = request.GET.get('q', '').strip()
+    results = []
+    
+    if query and len(query) >= 2:
+        users = User.objects.filter(
+            Q(username__icontains=query) |
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query)
+        )[:10]
+        
+        for u in users:
+            product_count = Mahsulot.objects.filter(user=u, aktiv=True, sotilgan=False).count()
+            profile_image = None
+            try:
+                profile_image = u.seller_profile.profile_image.url if u.seller_profile.profile_image else None
+            except:
+                pass
+            results.append({
+                'id': u.id,
+                'username': u.username,
+                'full_name': f"{u.first_name} {u.last_name}".strip(),
+                'product_count': product_count,
+                'profile_image': profile_image,
+                'url': reverse('user_profile', args=[u.username]),
+            })
+    
+    return JsonResponse({'results': results})
 

@@ -16,7 +16,7 @@ urlpatterns = [
     path('settings/', views.settings_view, name='settings'),
     
     # API URLs (AJAX uchun)
-    path('check-username/', views.check_username, name='check_username'),
+  
     path('check-email/', views.check_email, name='check_email'),
     path('check-phone/', views.check_phone, name='check_phone'),
     path('update-profile-settings/', views.update_profile_settings, name='update_profile_settings'),

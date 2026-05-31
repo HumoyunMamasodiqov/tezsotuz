@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahsulotni TOP qilish - TezSot</title>
+    <link rel="icon" type="image/png" href="{% static 'img/iconlogo.png' %}">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    {% include 'nav.html' %}
+    <div class="max-w-4xl mx-auto px-4 py-6">
+        <div class="flex items-center gap-3 mb-6">
+            <a href="{% url 'reklama' %}" class="text-gray-500 hover:text-gray-700"><i class="fas fa-arrow-left"></i></a>
+            <h1 class="text-2xl font-bold text-gray-800">Qaysi mahsulotni TOP qilmoqchisiz?</h1>
+        </div>
+        {% if not products %}
+        <div class="bg-white rounded-2xl shadow-md p-8 text-center">
+            <i class="fas fa-box-open text-5xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500">Sizda hali TOP qilish uchun mahsulotlar yo'q.</p>
+            <p class="text-gray-400 text-sm mt-1">O'zingizning e'lonlaringiz yoki sotib olgan mahsulotlaringizni TOP qilishingiz mumkin.</p>
+            <a href="{% url 'elon_qoshish' %}" class="inline-block mt-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-2 rounded-xl font-semibold">E'lon qo'shish</a>
+        </div>
+        {% endif %}
+        <div class="grid gap-4">
+            {% for p in products %}
+            <div class="bg-white rounded-xl shadow-sm border p-4 flex items-center gap-4 hover:shadow-md transition">
+                <div class="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                    {% if p.asosiyimg %}
+                    <img src="{{ p.asosiyimg.url }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-image text-2xl"></i></div>
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-gray-800 truncate">{{ p.name }}</h3>
+                    <p class="text-sm text-gray-500">{{ p.narx }} so'm | {{ p.viloyat }}</p>
+                    {% if p.is_featured %}
+                    <span class="text-xs text-amber-600"><i class="fas fa-fire"></i> TOP da</span>
+                    {% endif %}
+                    {% if p.user == request.user %}
+                    <span class="text-xs text-blue-500 ms-1"><i class="fas fa-user"></i> Sizning</span>
+                    {% else %}
+                    <span class="text-xs text-green-500 ms-1"><i class="fas fa-shopping-bag"></i> Sotib olingan</span>
+                    {% endif %}
+                </div>
+                <a href="{% url 'buy_featured' p.id %}" class="flex-shrink-0 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition">
+                    <i class="fas fa-fire"></i> TOP qilish
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

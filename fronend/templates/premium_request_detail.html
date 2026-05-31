@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    {% include 'nav.html' %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl font-bold">Premium So'rov #{{ premium_request.id }}</h1>
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold 
+                        {% if premium_request.status == 'pending' %}bg-yellow-100 text-yellow-800
+                        {% elif premium_request.status == 'approved' %}bg-green-100 text-green-800
+                        {% elif premium_request.status == 'rejected' %}bg-red-100 text-red-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ premium_request.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Shaxsiy ma'lumotlar</h3>
+                        <table class="w-full text-sm">
+                            <tr class="border-b"><td class="py-2 text-gray-600">To'liq ism:</td><td class="py-2 font-medium">{{ request.full_name }}</td></tr>
+                            <tr class="border-b"><td class="py-2 text-gray-600">Telefon:</td><td class="py-2 font-medium">{{ request.phone }}</td></tr>
+                            <tr class="border-b"><td class="py-2 text-gray-600">Telegram:</td><td class="py-2 font-medium">{{ request.telegram }}</td></tr>
+                            <tr class="border-b"><td class="py-2 text-gray-600">Email:</td><td class="py-2 font-medium">{{ request.email }}</td></tr>
+                        </table>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Premium ma'lumotlar</h3>
+                        <table class="w-full text-sm">
+                            <tr class="border-b"><td class="py-2 text-gray-600">Kunlar:</td><td class="py-2 font-medium">{{ request.days }} kun</td></tr>
+                            <tr class="border-b"><td class="py-2 text-gray-600">Mahsulot limiti:</td><td class="py-2 font-medium">{{ request.limit }} ta</td></tr>
+                            <tr class="border-b"><td class="py-2 text-gray-600">Jami summa:</td><td class="py-2 font-medium">{{ request.total }} so'm</td></tr>
+                            <tr class="border-b"><td class="py-2 text-gray-600">Yaratilgan:</td><td class="py-2 font-medium">{{ request.created_at }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                {% if premium_request.admin_notes %}
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold mb-2">Admin izohlari</h3>
+                    <p class="text-gray-700">{{ premium_request.admin_notes }}</p>
+                </div>
+                {% endif %}
+
+                {% if premium_request.notes %}
+                <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold mb-2">Sizning eslatmangiz</h3>
+                    <p class="text-gray-700">{{ premium_request.notes }}</p>
+                </div>
+                {% endif %}
+
+                <div class="mt-8 flex gap-4">
+                    <a href="{% url 'my_premium_requests' %}" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
+                        <i class="fas fa-arrow-left mr-2"></i>Orqaga
+                    </a>
+                    {% if premium_request.status == 'pending' %}
+                    <a href="{% url 'cancel_premium_request' premium_request.id %}" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition" onclick="return confirm('So\'rovni bekor qilishni xohlaysizmi?')">
+                        <i class="fas fa-times mr-2"></i>Bekor qilish
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include 'footer.html' %}
+</body>
+</html>

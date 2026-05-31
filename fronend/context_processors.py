@@ -1,6 +1,14 @@
 # fronend/context_processors.py
 from .models import AdminPremiumSettings
 
+def cart_context(request):
+    """Savat ma'lumotlarini barcha sahifalarga qo'shish"""
+    cart_count = 0
+    if request.user.is_authenticated:
+        cart = request.session.get('savat', {})
+        cart_count = len(cart)
+    return {'cart_count': cart_count}
+
 def premium_context(request):
     """Barcha sahifalarga premium ma'lumotlarni qo'shish"""
     context = {}

@@ -207,4 +207,4 @@ def decrease_premium_counter_on_delete(sender, instance, **kwargs):
             premium_profile.premium_used = actual_count
             premium_profile.save(update_fields=['premium_used'])
         except PremiumUser.DoesNotExist:
-            passz
+            pass

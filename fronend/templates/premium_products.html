@@ -489,8 +489,8 @@
                 {% endif %}
             {% else %}
             <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                <a href="{% url 'login' %}" class="btn">Kirish</a>
-                <a href="{% url 'register' %}" class="btn btn-outline">Ro'yxatdan o'tish</a>
+                <a href="{% url 'kirish' %}" class="btn">Kirish</a>
+                <a href="{% url 'signup' %}" class="btn btn-outline">Ro'yxatdan o'tish</a>
             </div>
             {% endif %}
         </div>
@@ -507,7 +507,7 @@
                 <a href="{% url 'submit_premium_request' %}" class="btn" style="margin-top: 14px;">Premium bo'lish</a>
                 {% endif %}
             {% else %}
-            <a href="{% url 'register' %}" class="btn" style="margin-top: 14px;">Ro'yxatdan o'tish</a>
+            <a href="{% url 'signup' %}" class="btn" style="margin-top: 14px;">Ro'yxatdan o'tish</a>
             {% endif %}
         </div>
     </div>

@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium sotib olish - TezSot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
+        .card-premium { background: white; border-radius: 16px; box-shadow: 0 2px 15px rgba(0,0,0,0.06); padding: 30px; max-width: 600px; margin: 0 auto; }
+        .price-card { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 20px; }
+        .price-card .amount { font-size: 36px; font-weight: 700; }
+        .price-card .label { font-size: 14px; opacity: 0.9; }
+        .form-control { border-radius: 10px; padding: 12px 16px; border: 1px solid #e2e8f0; }
+        .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.2); }
+        .btn-buy { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 18px; font-weight: 600; width: 100%; }
+        .btn-buy:hover { opacity: 0.9; color: white; }
+        .section-title { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px; }
+        .plan-card { border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .plan-card:hover, .plan-card.active { border-color: #667eea; background: #f8faff; }
+        .plan-card .price { font-size: 20px; font-weight: 700; color: #667eea; }
+        .plan-card .days { font-size: 13px; color: #64748b; }
+        .plan-card input { display: none; }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+    <div class="container-fluid px-3 py-4">
+        <div class="card-premium">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <a href="{% url 'my_profile' %}" class="text-decoration-none text-muted"><i class="fas fa-arrow-left"></i></a>
+                <h4 class="mb-0 fw-bold"><i class="fas fa-crown text-warning me-2"></i>Premium sotib olish</h4>
+            </div>
+            
+            <div class="price-card mb-4">
+                <div class="label">Premium obuna</div>
+                <div class="amount" id="totalPrice">{{ settings.premium_per_month_price|floatformat:0 }} so'm</div>
+                <div class="label" id="totalDays">30 kun</div>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="section-title">Muddatni tanlang</div>
+                <div class="row g-2 mb-4">
+                    <div class="col-4">
+                        <label class="plan-card" onclick="selectPlan(this, 7, {{ settings.premium_per_week_price|default:12000 }})">
+                            <input type="radio" name="requested_days" value="7">
+                            <div class="price">{{ settings.premium_per_week_price|floatformat:0 }}</div>
+                            <div class="days">7 kun</div>
+                        </label>
+                    </div>
+                    <div class="col-4">
+                        <label class="plan-card active" onclick="selectPlan(this, 30, {{ settings.premium_per_month_price|default:60000 }})">
+                            <input type="radio" name="requested_days" value="30" checked>
+                            <div class="price">{{ settings.premium_per_month_price|floatformat:0 }}</div>
+                            <div class="days">30 kun</div>
+                        </label>
+                    </div>
+                    <div class="col-4">
+                        <label class="plan-card" onclick="selectPlan(this, 90, {{ settings.premium_per_3months_price|default:150000 }})">
+                            <input type="radio" name="requested_days" value="90">
+                            <div class="price">{{ settings.premium_per_3months_price|floatformat:0 }}</div>
+                            <div class="days">90 kun</div>
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <label class="plan-card" onclick="selectPlan(this, 365, {{ settings.premium_per_year_price|default:500000 }})">
+                            <input type="radio" name="requested_days" value="365">
+                            <div class="price">{{ settings.premium_per_year_price|floatformat:0 }}</div>
+                            <div class="days">365 kun</div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw600">To'liq ismingiz</label>
+                    <input type="text" name="full_name" class="form-control" required placeholder="Aliyev Ali">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw600">Telefon raqam</label>
+                    <input type="tel" name="phone" class="form-control" required placeholder="+998901234567">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label fw600">To'lov usuli</label>
+                    <select name="payment_method" class="form-control">
+                        {% for pm in payment_methods %}
+                        <option value="{{ pm }}">{{ pm }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                {% if settings.bank_card_number %}
+                <div class="alert alert-info p-3 rounded-3 mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fas fa-credit-card text-primary fs-4"></i>
+                        <strong class="text-dark">Bank karta ma'lumotlari:</strong>
+                    </div>
+                    <div class="ms-4 small text-dark">
+                        <div><strong>Karta:</strong> {{ settings.bank_card_number }}</div>
+                        {% if settings.bank_name %}<div><strong>Bank:</strong> {{ settings.bank_name }}</div>{% endif %}
+                        {% if settings.bank_card_owner %}<div><strong>Egasi:</strong> {{ settings.bank_card_owner }}</div>{% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="mb-4">
+                    <label class="form-label fw600">To'lov cheki (majburiy)</label>
+                    <input type="file" name="payment_proof" class="form-control" required accept="image/*">
+                    <small class="text-muted">To'lovni amalga oshirgandan so'ng, chek yoki skrinshotni yuklang</small>
+                </div>
+                
+                <button type="submit" class="btn-buy"><i class="fas fa-crown me-2"></i>Premium sotib olish</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function selectPlan(el, days, price) {
+            document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            el.querySelector('input').checked = true;
+            document.getElementById('totalPrice').textContent = price.toLocaleString() + ' so\'m';
+            document.getElementById('totalDays').textContent = days + ' kun';
+        }
+    </script>
+</body>
+</html>

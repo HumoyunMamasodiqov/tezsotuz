@@ -554,6 +554,51 @@
   {% include 'kategoriya1.html' %}
   {% include 'yaxshi-mahsulotlar.html' %}
 
+  {% if featured_products %}
+  <div class="featured-section">
+    <div class="featured-header" style="display:flex;align-items:center;gap:12px;padding:16px 20px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;margin:20px auto;max-width:1200px;">
+      <div style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px;white-space:nowrap;"><i class="fas fa-crown"></i> TOP</div>
+      <div style="flex:1;font-weight:600;color:#92400e;font-size:15px;">Eng yaxshi takliflar</div>
+      <a href="?filter=featured" style="background:rgba(255,255,255,0.6);padding:6px 14px;border-radius:8px;font-size:13px;color:#92400e;text-decoration:none;font-weight:500;">Barchasi <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="products-grid" style="max-width:1200px;margin:0 auto;">
+      {% for product in featured_products %}
+      <div class="product-card premium" data-product-id="{{ product.id }}">
+        <div class="premium-badge-corner" style="background:linear-gradient(135deg,#f59e0b,#d97706) !important;">
+          <i class="fas fa-crown"></i> TOP
+        </div>
+        <a href="{% url 'mahsulot_detail' product.id %}" class="product-image" style="display:block;">
+          {% if product.asosiyimg %}
+          <img src="{{ product.asosiyimg.url }}" alt="{{ product.name }}" loading="lazy">
+          {% else %}
+          <div class="flex items-center justify-center h-full bg-gray-100 text-gray-400">
+            <i class="fas fa-image fa-3x"></i>
+          </div>
+          {% endif %}
+          {% if product.sotilgan %}
+          <div class="status-badge sold"><i class="fas fa-check-circle"></i> SOTILGAN</div>
+          {% else %}
+          <div class="status-badge new"><i class="fas fa-clock"></i> YANGI</div>
+          {% endif %}
+        </a>
+        {% if user.is_authenticated %}
+        <button class="heart-btn" onclick="addToFavorites(event, {{ product.id }})"><i class="far fa-heart"></i></button>
+        {% else %}
+        <a href="{% url 'kirish' %}" class="heart-btn" style="text-decoration:none;" onclick="event.stopPropagation();"><i class="far fa-heart"></i></a>
+        {% endif %}
+        <a href="{% url 'mahsulot_detail' product.id %}" class="product-content" style="text-decoration:none;color:inherit;">
+          <div class="product-price">{{ product.narx_formatted|default:product.narx }}</div>
+          <h3 class="product-name">{{ product.name|truncatechars:45 }}</h3>
+          <div class="product-category"><i class="fas fa-tag text-[9px]"></i> {{ product.mahsulotturi|default:"Mahsulot"|truncatechars:18 }}</div>
+          <div class="product-location"><i class="fas fa-map-marker-alt text-[9px]"></i> {{ product.shaxr|default:"Toshkent"|truncatechars:20 }}</div>
+          <div class="product-time"><i class="far fa-clock text-[9px]"></i> {{ product.date|default:"Yangi" }}</div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   <div class="products-container">
     <!-- Page Header -->
     <div class="page-title">

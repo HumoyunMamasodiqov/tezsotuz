@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil qidirish - TezSot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <style>
+        body { background: #f3f4f6; font-family: 'Segoe UI', sans-serif; }
+        .search-input { width: 100%; padding: 14px 20px; border-radius: 50px; border: 2px solid #e5e7eb; font-size: 16px; outline: none; transition: all 0.2s; background: white; padding-left: 48px; }
+        .search-input:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,0.15); }
+        .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+        .result-card { background: white; border-radius: 14px; padding: 14px 18px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px; transition: all 0.2s; border: 1px solid #f0f0f0; }
+        .result-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .avatar-lg { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 22px; flex-shrink: 0; object-fit: cover; }
+        .avatar-lg img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .premium-badge { background: linear-gradient(135deg, #FFD700, #FFA500); color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .no-results { text-align: center; padding: 60px 20px; }
+        .no-results i { font-size: 56px; color: #d1d5db; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+    <div class="max-w-2xl mx-auto px-4 py-6">
+        <div class="flex items-center gap-3 mb-6">
+            <i class="fas fa-search text-2xl text-indigo-600"></i>
+            <h1 class="text-2xl font-bold text-gray-800">Profil qidirish</h1>
+        </div>
+
+        <div class="relative mb-6">
+            <i class="fas fa-search search-icon"></i>
+            <form method="GET">
+                <input type="text" name="q" class="search-input" placeholder="Foydalanuvchi nomini yozing..." value="{{ query }}" autocomplete="off" autofocus>
+            </form>
+        </div>
+
+        {% if query and not results %}
+        <div class="no-results">
+            <i class="fas fa-user-slash"></i>
+            <h3 class="text-xl font-semibold text-gray-700">Hech narsa topilmadi</h3>
+            <p class="text-gray-500 mt-1">"{{ query }}" bo'yicha foydalanuvchi topilmadi</p>
+        </div>
+        {% endif %}
+
+        <div class="space-y-3" id="resultsContainer">
+            {% for r in results %}
+            <a href="{% url 'user_profile' r.user.username %}" class="text-decoration-none">
+                <div class="result-card">
+                    <div class="avatar-lg">
+                        {% if r.profile_image %}
+                        <img src="{{ r.profile_image }}" alt="">
+                        {% else %}
+                        {{ r.user.username|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-gray-900 text-lg">{{ r.user.username }}</span>
+                            {% if r.is_premium %}
+                            <span class="premium-badge"><i class="fas fa-crown"></i> Premium</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            {{ r.user.first_name }} {{ r.user.last_name }}
+                        </div>
+                        <div class="text-xs text-gray-400">{{ r.product_count }} ta mahsulot</div>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% include 'footer.html' %}
+</body>
+</html>

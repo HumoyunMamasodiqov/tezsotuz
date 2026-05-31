@@ -57,8 +57,6 @@ class Category(models.Model):
 
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.postgres.search import SearchVectorField, SearchVector
-from django.contrib.postgres.indexes import GinIndex
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from datetime import timedelta
@@ -254,11 +252,6 @@ class Mahsulot(models.Model):
     )
 
     # SEARCH SYSTEM
-    search_vector = SearchVectorField(
-        null=True,
-        blank=True
-    )
-
     search_keywords = models.TextField(
         blank=True,
         help_text="Qidiruv kalit so'zlari"
@@ -327,8 +320,6 @@ class Mahsulot(models.Model):
         ]
 
         indexes = [
-            GinIndex(fields=['search_vector']),
-
             models.Index(fields=['name']),
             models.Index(fields=['category']),
             models.Index(fields=['aktiv']),
@@ -358,14 +349,12 @@ class Mahsulot(models.Model):
         return f"{self.name}{premium_tag} - {self.user.username}"
 
     def save(self, *args, **kwargs):
-
         # Premium muddati tugaganini tekshirish
         if (
             self.is_premium and
             self.premium_expiry and
             self.premium_expiry < timezone.now()
         ):
-
             self.is_premium = False
             self.premium_since = None
             self.premium_expiry = None
@@ -373,24 +362,6 @@ class Mahsulot(models.Model):
             self.premium_priority = 0
 
         super().save(*args, **kwargs)
-
-        # Search vector update
-        self.update_search_vector()
-
-    def update_search_vector(self):
-        """Search vector yangilash"""
-
-        try:
-            Mahsulot.objects.filter(id=self.id).update(
-                search_vector=(
-                    SearchVector('name', weight='A') +
-                    SearchVector('tavsif', weight='B') +
-                    SearchVector('category', weight='C') +
-                    SearchVector('search_keywords', weight='B')
-                )
-            )
-        except Exception as e:
-            print("Search vector error:", e)
 
     def get_absolute_url(self):
 
@@ -753,15 +724,12 @@ class PremiumUser(models.Model):
         
         # Premium muddati tugaganmi tekshirish
         if self.is_premium and self.premium_end and self.premium_end < timezone.now():
-            print(f"[PremiumUser.save] Premium muddati tugagan: {self.user.username}")
             self.deactivate_premium()
     
     def deactivate_premium(self):
         """Premiumni deaktivlashtirish"""
         if not self.is_premium:
             return False
-        
-        print(f"[deactivate_premium] Premium deaktivlashtirilmoqda: {self.user.username}")
         
         try:
             # Foydalanuvchining barcha premium mahsulotlarini olish
@@ -796,18 +764,14 @@ class PremiumUser(models.Model):
                 seller_profile.save()
             except SellerProfile.DoesNotExist:
                 pass
-            
-            print(f"[deactivate_premium] Premium deaktivlashtirildi: {self.user.username}")
             return True
             
         except Exception as e:
-            print(f"[deactivate_premium] Error for {self.user.username}: {e}")
             return False
     
     def check_and_deactivate_expired(self):
         """Premium muddati tugaganmi tekshirish va deaktivlashtirish"""
         if self.is_premium and self.premium_end and self.premium_end < timezone.now():
-            print(f"[check_and_deactivate_expired] Premium muddati tugagan: {self.user.username}")
             return self.deactivate_premium()
         return False
     
@@ -831,7 +795,6 @@ class PremiumUser(models.Model):
         
         # Premium muddati tugaganmi?
         if self.premium_end and timezone.now() > self.premium_end:
-            print(f"[can_add_premium] Premium muddati tugagan: {self.user.username}")
             self.deactivate_premium()
             return False, "Premium muddati tugagan"
         
@@ -875,7 +838,6 @@ class PremiumUser(models.Model):
         """Ogohlantirish yuborish"""
         self.notified_before_expiry = True
         self.save(update_fields=['notified_before_expiry'])
-        print(f"[notify_expiry] Ogohlantirish yuborildi: {self.user.username}")
     
     def request_premium(self):
         """Premium huquq so'rash"""
@@ -916,8 +878,6 @@ class PremiumUser(models.Model):
             seller_profile.save()
         except SellerProfile.DoesNotExist:
             pass
-        
-        print(f"[activate_premium] Premium faollashtirildi: {self.user.username}, tugash sanasi: {self.premium_end}")
         return True
     
     def reject_premium(self, reason=""):
@@ -940,7 +900,6 @@ class PremiumUser(models.Model):
         
         self.premium_used = actual_count
         self.save(update_fields=['premium_used'])
-        print(f"[reset_premium_counter] Counter yangilandi: {self.user.username} - {self.premium_used}")
         return self.premium_used
     
     def auto_renew_premium(self):
@@ -954,8 +913,6 @@ class PremiumUser(models.Model):
         self.premium_end = now + timedelta(days=settings.auto_renew_days)
         self.premium_days += settings.auto_renew_days
         self.save()
-        
-        print(f"[auto_renew_premium] {self.user.username} premium {settings.auto_renew_days} kunga uzaytirildi")
         return True, f"Premium {settings.auto_renew_days} kunga uzaytirildi"
 
 
@@ -1438,11 +1395,9 @@ class PremiumRequest(models.Model):
     def approve(self, admin_user=None, approved_days=None, approved_limit=None):
         """So'rovni tasdiqlash"""
         try:
-            print(f"[PremiumRequest.approve] Boshlanmoqda: User={self.user.username}")
             
             # Agar allaqachon tasdiqlangan bo'lsa
             if self.status == 'approved':
-                print(f"[PremiumRequest.approve] So'rov allaqachon tasdiqlangan")
                 return True
             
             # Kun va limitni aniqlash
@@ -1483,53 +1438,45 @@ class PremiumRequest(models.Model):
                 premium_user.last_check = now
             
             premium_user.save()
-            print(f"[PremiumRequest.approve] PremiumUser saqlandi: is_premium={premium_user.is_premium}")
             
             # 2. SellerProfile ni yangilash
-            try:
-                seller_profile, seller_created = SellerProfile.objects.get_or_create(user=self.user)
-                seller_profile.is_premium_seller = True
-                seller_profile.premium_seller_since = now
-                seller_profile.save()
-                print(f"[PremiumRequest.approve] SellerProfile yangilandi")
-            except Exception as e:
-                print(f"[PremiumRequest.approve] SellerProfile xatosi: {e}")
-            
+            seller_profile, _ = SellerProfile.objects.get_or_create(user=self.user)
+            seller_profile.is_premium_seller = True
+            seller_profile.premium_seller_since = now
+            seller_profile.save()
+
             # 3. PremiumRequest ni yangilash
             self.status = 'approved'
             self.admin_user = admin_user
             self.approved_by = admin_user
             self.approved_at = now
             self.save()
-            print(f"[PremiumRequest.approve] PremiumRequest yangilandi: status={self.status}")
             
             # 4. Foydalanuvchiga bildirishnoma
             try:
                 PremiumNotification.objects.create(
                     user=self.user,
                     notification_type='admin_action',
-                    title="🎉 Premium So'rovingiz Tasdiqlandi!",
+                    title="Premium So'rovingiz Tasdiqlandi!",
                     message=f"""Tabriklaymiz! Sizning premium so'rovingiz tasdiqlandi.
                     
-                            📊 Premium ma'lumotlaringiz:
-                            • Muddati: {days} kun
-                            • Mahsulot limiti: {limit} ta
-                            • Premium boshlanishi: {now.strftime('%d.%m.%Y %H:%M')}
-                            • Premium tugashi: {(now + timedelta(days=days)).strftime('%d.%m.%Y %H:%M')}
-                            
-                            ✅ Endi siz premium mahsulotlar qo'shishingiz mumkin!""",
+                            Premium ma'lumotlaringiz:
+                            - Muddati: {days} kun
+                            - Mahsulot limiti: {limit} ta
+                            - Premium boshlanishi: {now.strftime('%d.%m.%Y %H:%M')}
+                            - Premium tugashi: {(now + timedelta(days=days)).strftime('%d.%m.%Y %H:%M')}
+                            """,
                     data={
-                        'request_id': self.id, 
-                        'days': days, 
+                        'request_id': self.id,
+                        'days': days,
                         'limit': limit,
                         'premium_start': now.isoformat(),
                         'premium_end': premium_user.premium_end.isoformat() if premium_user.premium_end else None
                     }
                 )
-                print(f"[PremiumRequest.approve] Bildirishnoma yaratildi")
-            except Exception as e:
-                print(f"[PremiumRequest.approve] Bildirishnoma xatosi: {e}")
-            
+            except Exception:
+                pass
+
             # 5. Adminlarga bildirishnoma (agar admin_user mavjud bo'lsa)
             if admin_user:
                 try:
@@ -1540,12 +1487,9 @@ class PremiumRequest(models.Model):
                     )
                 except:
                     pass
-            
-            print(f"[PremiumRequest.approve] Muvaffaqiyatli yakunlandi")
             return True
             
         except Exception as e:
-            print(f"[PremiumRequest.approve] Xatolik: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -1624,7 +1568,6 @@ class PremiumRequest(models.Model):
             self.save(update_fields=['notification_sent'])
             return True
         except Exception as e:
-            print(f"[PremiumRequest.send_notification] Xatolik: {e}")
             return False
     
     def get_formatted_phone(self):
@@ -1768,36 +1711,28 @@ class PremiumProduct(models.Model):
         return f"Premium: {self.mahsulot.name}"
     
     def save(self, *args, **kwargs):
-        """PremiumProduct saqlanganda"""
-        # Agar premium_until o'tgan bo'lsa
         if self.premium_until and self.premium_until < timezone.now():
-            print(f"[PremiumProduct.save] PremiumProduct muddati tugagan: {self.mahsulot.name}")
             self.is_active = False
-            self.mahsulot.deactivate_premium()
-            self.mahsulot.is_premium = False
-            self.mahsulot.save()
+            self.mahsulot.remove_premium()
         
         super().save(*args, **kwargs)
     
     def approve_premium(self, admin_user):
-        """Premium mahsulotni tasdiqlash"""
         self.admin_approved = True
         self.approval_date = timezone.now()
         self.approved_by = admin_user
         self.is_active = True
         self.save()
         
-        # Mahsulotni premium qilish
         self.mahsulot.is_premium = True
         self.mahsulot.premium_since = timezone.now()
         self.mahsulot.premium_admin_approved = True
         self.mahsulot.save()
     
     def mark_as_regular(self):
-        """Premium mahsulotni oddiy qilish"""
         self.is_active = False
         self.save()
-        self.mahsulot.deactivate_premium()
+        self.mahsulot.remove_premium()
 
 
 class PremiumNotification(models.Model):
@@ -1842,35 +1777,83 @@ class AdminAloqa(models.Model):
         return f"{self.manzil} - {self.email}"
 
 
+class SotibOlish(models.Model):
+    STATUS_CHOICES = [
+        ('yangi', 'Yangi buyurtma'),
+        ('qabul_qilindi', 'Sotuvchi qabul qildi'),
+        ('yuborildi', 'Jo\'natildi'),
+        ('yetkazildi', 'Yetkazildi'),
+        ('bajarildi', 'Bajarildi'),
+        ('bekor_qilindi', 'Bekor qilindi'),
+    ]
+
+    mahsulot = models.ForeignKey(Mahsulot, on_delete=models.CASCADE, verbose_name="Mahsulot", related_name='sotib_olishlar')
+    xaridor = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Xaridor", related_name='sotib_olganlarim')
+    sotuvchi = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Sotuvchi", related_name='sotilgan_mahsulotlarim')
+    miqdor = models.PositiveIntegerField(default=1, verbose_name="Miqdor")
+    narx = models.CharField(max_length=20, verbose_name="Narx")
+    jami_narx = models.CharField(max_length=20, verbose_name="Jami narx")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='yangi', verbose_name="Holati")
+    
+    xaridor_ism = models.CharField(max_length=255, verbose_name="Xaridor ismi", blank=True)
+    xaridor_telefon = models.CharField(max_length=20, verbose_name="Xaridor telefoni", blank=True)
+    xaridor_manzil = models.TextField(verbose_name="Yetkazib berish manzili", blank=True)
+    xaridor_izoh = models.TextField(verbose_name="Buyurtma izohi", blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan sana")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan sana")
+    read_by_seller = models.BooleanField(default=False, verbose_name="Sotuvchi ko'rganmi")
+    read_by_admin = models.BooleanField(default=False, verbose_name="Admin ko'rganmi")
+
+    class Meta:
+        verbose_name = "Sotib olish"
+        verbose_name_plural = "Sotib olishlar"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['xaridor', 'status']),
+            models.Index(fields=['sotuvchi', 'status']),
+            models.Index(fields=['status', 'created_at']),
+        ]
+
+    def __str__(self):
+        return f"#{self.id} {self.mahsulot.name} - {self.xaridor.username}"
+
+    def save(self, *args, **kwargs):
+        if not self.narx:
+            self.narx = self.mahsulot.narx
+        if not self.jami_narx:
+            try:
+                narx_int = int(float(re.sub(r'[^\d.]', '', str(self.mahsulot.narx)) or 0))
+                self.jami_narx = str(narx_int * self.miqdor)
+            except (ValueError, TypeError):
+                self.jami_narx = self.mahsulot.narx
+        if not self.xaridor_ism:
+            self.xaridor_ism = self.xaridor.get_full_name() or self.xaridor.username
+        if not self.xaridor_telefon:
+            try:
+                self.xaridor_telefon = self.xaridor.seller_profile.phone or ''
+            except AttributeError:
+                pass
+        super().save(*args, **kwargs)
+
+
 # SIGNALLAR
 @receiver(post_save, sender=PremiumRequest)
 def handle_premium_request_save(sender, instance, created, **kwargs):
-    """PremiumRequest saqlanganda ishlaydi"""
-    # Agar approved bo'lsa va allaqachon PremiumUser bo'lmasa
     if instance.status == 'approved':
-        print(f"[SIGNAL] PremiumRequest approved: {instance.id}")
-        
-        # PremiumUser ni tekshirish
-        try:
-            premium_user = PremiumUser.objects.get(user=instance.user)
-            # Agar PremiumUser bor lekin is_premium False bo'lsa
-            if not premium_user.is_premium:
-                print(f"[SIGNAL] PremiumUser bor lekin is_premium False, yangilanmoqda...")
-                premium_user.activate_premium(days=instance.requested_days)
-        except PremiumUser.DoesNotExist:
-            print(f"[SIGNAL] PremiumUser yo'q, yangi yaratilmoqda...")
-            # Yangi PremiumUser yaratish
-            PremiumUser.objects.create(
-                user=instance.user,
-                is_premium=True,
-                status='active',
-                admin_approved=True,
-                premium_start=timezone.now(),
-                premium_end=timezone.now() + timedelta(days=instance.requested_days),
-                premium_days=instance.requested_days,
-                premium_limit=instance.requested_limit,
-                premium_used=0
-            )
+        PremiumUser.objects.get_or_create(
+            user=instance.user,
+            defaults={
+                'is_premium': True,
+                'status': 'active',
+                'admin_approved': True,
+                'premium_start': timezone.now(),
+                'premium_end': timezone.now() + timedelta(days=instance.requested_days),
+                'premium_days': instance.requested_days,
+                'premium_limit': instance.requested_limit,
+                'premium_used': 0
+            }
+        )
 
 
 @receiver(post_save, sender=User)
@@ -1878,7 +1861,6 @@ def create_user_profile(sender, instance, created, **kwargs):
     """Yangi foydalanuvchi yaratilganda profil yaratish"""
     if created:
         SellerProfile.objects.create(user=instance)
-        print(f"[SIGNAL] SellerProfile yaratildi: {instance.username}")
 
 
 @receiver(post_save, sender=User)
@@ -1886,7 +1868,7 @@ def save_user_profile(sender, instance, **kwargs):
     """Foydalanuvchi saqlanganda profilni saqlash"""
     try:
         instance.seller_profile.save()
-    except:
+    except SellerProfile.DoesNotExist:
         SellerProfile.objects.create(user=instance)
 
 
@@ -2074,6 +2056,19 @@ class AdminPremiumSettings(models.Model):
         help_text="Karta egasining ismi"
     )
     
+    # 6a. Banner va Featured narxlari
+    banner_price_per_day = models.DecimalField(
+        max_digits=10, decimal_places=2, default=5000.00,
+        verbose_name="Banner narxi (1 kun)",
+        help_text="Banner reklama uchun 1 kunlik narx"
+    )
+    
+    featured_price_per_day = models.DecimalField(
+        max_digits=10, decimal_places=2, default=3000.00,
+        verbose_name="Top mahsulot narxi (1 kun)",
+        help_text="Top/Featured mahsulot uchun 1 kunlik narx"
+    )
+    
     # 6. Vaqt
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -2081,6 +2076,9 @@ class AdminPremiumSettings(models.Model):
     class Meta:
         verbose_name = "Premium Sozlamalar"
         verbose_name_plural = "Premium Sozlamalar"
+        constraints = [
+            models.CheckConstraint(check=models.Q(id=1), name='single_admin_premium_settings')
+        ]
     
     def __str__(self):
         return f"Premium Sozlamalar"
@@ -2139,5 +2137,131 @@ class AdminPremiumSettings(models.Model):
         return ["Bank karta", "Click", "Payme", "Uzumbank"]
 
 
+class BannerPurchase(models.Model):
+    """Foydalanuvchi tomonidan banner sotib olish"""
+    STATUS_CHOICES = [
+        ('kutilmoqda', "Kutilmoqda"),
+        ('tasdiqlandi', "Tasdiqlangan"),
+        ('aktiv', 'Aktiv'),
+        ('tugadi', 'Tugagan'),
+        ('bekor_qilindi', 'Bekor qilindi'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Foydalanuvchi")
+    title = models.CharField(max_length=255, verbose_name="Banner sarlavhasi")
+    image = models.ImageField(upload_to='banner_purchases/', verbose_name="Banner rasmi")
+    link = models.URLField(blank=True, null=True, verbose_name="Havola")
+    device_type = models.CharField(max_length=10, choices=Banner.DEVICE_CHOICES, default='desktop', verbose_name="Qurilma turi")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='kutilmoqda', verbose_name="Holati")
+    days = models.PositiveIntegerField(default=30, verbose_name="Necha kun")
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=50000.00, verbose_name="Narxi")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan")
+    approved_at = models.DateTimeField(null=True, blank=True, verbose_name="Tasdiqlangan sana")
+    expires_at = models.DateTimeField(null=True, blank=True, verbose_name="Tugash sanasi")
+    payment_proof = models.ImageField(upload_to='payment_proofs/', blank=True, null=True, verbose_name="To'lov cheki")
+    payment_status = models.CharField(max_length=20, default='pending', verbose_name="To'lov holati")
+    
+    class Meta:
+        verbose_name = "Banner xaridi"
+        verbose_name_plural = "Banner xaridlari"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} - {self.user.username}"
+    
+    def approve(self):
+        if self.status in ['aktiv', 'tugadi', 'bekor_qilindi']:
+            return
+        self.status = 'aktiv'
+        self.approved_at = timezone.now()
+        self.expires_at = timezone.now() + timedelta(days=self.days)
+        self.save()
 
 
+class FeaturedPurchase(models.Model):
+    """Mahsulotni featured/top qilish uchun xarid"""
+    STATUS_CHOICES = [
+        ('kutilmoqda', "Kutilmoqda"),
+        ('tasdiqlandi', "Tasdiqlangan"),
+        ('aktiv', 'Aktiv'),
+        ('tugadi', 'Tugagan'),
+        ('bekor_qilindi', 'Bekor qilindi'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Foydalanuvchi")
+    mahsulot = models.ForeignKey(Mahsulot, on_delete=models.CASCADE, verbose_name="Mahsulot", related_name='featured_purchases')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='kutilmoqda', verbose_name="Holati")
+    days = models.PositiveIntegerField(default=7, verbose_name="Necha kun")
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=20000.00, verbose_name="Narxi")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan")
+    approved_at = models.DateTimeField(null=True, blank=True, verbose_name="Tasdiqlangan sana")
+    expires_at = models.DateTimeField(null=True, blank=True, verbose_name="Tugash sanasi")
+    admin_notes = models.TextField(blank=True, null=True, verbose_name="Admin izohi")
+    payment_proof = models.ImageField(upload_to='payment_proofs/', blank=True, null=True, verbose_name="To'lov cheki")
+    payment_status = models.CharField(max_length=20, default='pending', verbose_name="To'lov holati")
+    
+    class Meta:
+        verbose_name = "Featured xarid"
+        verbose_name_plural = "Featured xaridlari"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.mahsulot.name} - {self.user.username}"
+    
+    def approve(self):
+        if self.status in ['aktiv', 'tugadi', 'bekor_qilindi']:
+            return
+        self.status = 'aktiv'
+        self.approved_at = timezone.now()
+        self.expires_at = timezone.now() + timedelta(days=self.days)
+        self.mahsulot.is_featured = True
+        self.mahsulot.featured_until = self.expires_at
+        self.mahsulot.save()
+        self.save()
+    
+    def deactivate(self):
+        self.status = 'tugadi'
+        self.mahsulot.is_featured = False
+        self.mahsulot.featured_until = None
+        self.mahsulot.save()
+        self.save()
+
+
+class Chat(models.Model):
+    mahsulot = models.ForeignKey(Mahsulot, on_delete=models.CASCADE, verbose_name="Mahsulot", related_name='chats')
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Xaridor", related_name='chats_as_buyer')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Sotuvchi", related_name='chats_as_seller')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan")
+
+    class Meta:
+        verbose_name = "Chat"
+        verbose_name_plural = "Chatlar"
+        ordering = ['-updated_at']
+        unique_together = ['mahsulot', 'buyer']
+
+    def __str__(self):
+        return f"{self.buyer.username} - {self.seller.username} | {self.mahsulot.name}"
+
+    def last_message(self):
+        return self.messages.order_by('-created_at').first()
+
+    def unread_count(self, user):
+        return self.messages.filter(is_read=False).exclude(sender=user).count()
+
+
+class Message(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, verbose_name="Chat", related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Yuboruvchi", related_name='sent_messages')
+    text = models.TextField(verbose_name="Xabar matni")
+    image = models.ImageField(upload_to='chat_images/', blank=True, null=True, verbose_name="Rasm")
+    is_read = models.BooleanField(default=False, verbose_name="O'qilganmi")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yuborilgan")
+
+    class Meta:
+        verbose_name = "Xabar"
+        verbose_name_plural = "Xabarlar"
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.sender.username}: {self.text[:50]}"

@@ -15,32 +15,6 @@ from .models import Profile
 import re
 import json
 
-# ==================== AUTH VIEWS ====================
-
-# authentication/views.py
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from django.utils.dateparse import parse_date
-from django.views.decorators.cache import never_cache
-from django.utils import timezone
-from django.http import JsonResponse
-from .models import Profile
-import re
-
-# authentication/views.py
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from django.utils.dateparse import parse_date
-from django.views.decorators.cache import never_cache
-from django.utils import timezone
-from django.http import JsonResponse
-from .models import Profile
-import re
-
 # ==================== SIGNUP VIEW ====================
 @never_cache
 def signup_view(request):
@@ -225,13 +199,6 @@ def home_view(request):
 
 
 # ==================== CHECK USERNAME API ====================
-def check_username(request):
-    """Username bandligini tekshirish (AJAX)"""
-    username = request.GET.get('username', '').strip()
-    if username:
-        exists = User.objects.filter(username__iexact=username).exists()
-        return JsonResponse({'exists': exists})
-    return JsonResponse({'exists': False})
 # ==================== PROFILE VIEWS ====================
 
 @never_cache
@@ -418,17 +385,6 @@ def update_notifications(request):
         })
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-
-# ==================== CHECK USERNAME API ====================
-
-def check_username(request):
-    """Username bandligini tekshirish (AJAX)"""
-    username = request.GET.get('username', '').strip()
-    if username:
-        exists = User.objects.filter(username__iexact=username).exists()
-        return JsonResponse({'exists': exists})
-    return JsonResponse({'exists': False})
 
 
 def check_email(request):

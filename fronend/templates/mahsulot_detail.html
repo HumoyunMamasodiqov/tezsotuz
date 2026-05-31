@@ -490,6 +490,11 @@
                 </div>
 
                 <div class="action-buttons">
+                    {% if user.is_authenticated and user != mahsulot.user and not mahsulot.sotilgan %}
+                    <a href="{% url 'add_to_cart' mahsulot.id %}?next=mahsulot_detail" class="action-btn" style="background:#10B981;color:white;text-decoration:none">
+                        <i class="fas fa-shopping-cart"></i> Savatga
+                    </a>
+                    {% endif %}
                     <button class="action-btn btn-telegram" onclick="window.open('{{ mahsulot.telegram_link }}', '_blank')"><i class="fab fa-telegram"></i> Telegram</button>
                     <button class="action-btn btn-call" onclick="window.location.href='{{ mahsulot.telefon_link }}'"><i class="fas fa-phone"></i> Qo'ng'iroq</button>
                     <button class="action-btn btn-share" onclick="shareProduct()"><i class="fas fa-share-alt"></i> Ulashish</button>
@@ -557,6 +562,16 @@
                     {% csrf_token %}
                     <button type="submit" class="favorite-btn {% if mahsulot.is_premium %}fav-premium{% else %}fav-regular{% endif %}"><i class="far fa-heart"></i> Sevimlilarga qo'shish</button>
                 </form>
+                {% if user != mahsulot.user %}
+                <a href="{% url 'start_chat' mahsulot.id mahsulot.user.id %}" class="btn btn-sm w-100 mt-2" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;padding:10px;border-radius:12px;display:block;text-align:center;font-weight:600;">
+                    <i class="fas fa-comment"></i> Sotuvchi bilan bog'lanish
+                </a>
+                {% endif %}
+                {% if has_purchased %}
+                <a href="{% url 'buy_featured' mahsulot.id %}" class="btn btn-sm w-100 mt-2" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:10px;border-radius:12px;display:block;text-align:center;font-weight:600;">
+                    <i class="fas fa-fire"></i> TOP mahsulot qilish
+                </a>
+                {% endif %}
                 {% else %}
                 <button onclick="window.location.href='{% url 'kirish' %}'" class="favorite-btn {% if mahsulot.is_premium %}fav-premium{% else %}fav-regular{% endif %}"><i class="far fa-heart"></i> Sevimlilarga qo'shish</button>
                 {% endif %}
